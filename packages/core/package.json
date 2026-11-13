@@ -1,0 +1,13 @@
+{
+  "name": "@cms-medisay/core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./parse/source": "./src/parse/source.ts",
+    "./parse/variant-map": "./src/parse/variant-map.ts"
+  },
+  "dependencies": {
+    "parse5": "^8.0.0"
+  }
+}
+

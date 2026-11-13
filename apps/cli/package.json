@@ -1,0 +1,14 @@
+{
+  "name": "cms-migrate",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "cms-migrate": "./bin/cms-migrate.js"
+  },
+  "dependencies": {
+    "@cms-medisay/core": "*",
+    "tsx": "^4.20.6"
+  }
+}
+
+

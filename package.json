@@ -1,0 +1,25 @@
+{
+  "name": "cms-medisay-migration",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint .",
+    "css-check": "tsx apps/cli/src/cli.ts css-check",
+    "inventory": "tsx apps/cli/src/cli.ts inventory"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^4.0.9"
+  }
+}
+
