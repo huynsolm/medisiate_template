@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -102,6 +102,27 @@ describe('convert', () => {
     const report = JSON.parse(await readFile(path.join(root, 'output/reports/report.json'), 'utf8'));
     expect(report.summary.total).toBe(3);
     expect(await readFile(path.join(root, 'keep-me.html'), 'utf8')).toBe('x');
+  });
+
+  it('never deletes through a linked output directory, even with zero sources (C-1)', async () => {
+    // 변환 대상 HTML 0개: 원본 폴더에는 대상 외 파일만 남긴다
+    for (const rel of ['01/botox.html', '01/filler.html', '02/laser.html', 'include/menu.html']) await rm(path.join(root, 'cms/contents', rel));
+    await put('cms/contents/01/notes.txt', 'keep');
+    // output/contents -> cms/contents 처럼 원본을 가리키는 링크
+    await mkdir(path.join(root, 'output'), { recursive: true });
+    await symlink(path.join(root, 'cms/contents'), path.join(root, 'output/contents'), 'junction');
+    const before = await hashTree(path.join(root, 'cms/contents'));
+    expect(await runConvert(root, ['--all'])).not.toBe(0);
+    expect(await hashTree(path.join(root, 'cms/contents'))).toEqual(before);
+  });
+
+  it('does not delete stale outputs through a nested directory link (C-1)', async () => {
+    const victim = path.join(root, 'victim');
+    await put('victim/01/important.json', 'keep');
+    await mkdir(path.join(root, 'output/data'), { recursive: true });
+    await symlink(victim, path.join(root, 'output/data/linked'), 'junction');
+    await runConvert(root, ['--all']);
+    expect(await readFile(path.join(victim, '01/important.json'), 'utf8')).toBe('keep');
   });
 
   it('converts a single file', async () => {

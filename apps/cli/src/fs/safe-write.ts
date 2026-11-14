@@ -24,6 +24,22 @@ async function nearestExistingAncestor(target: string): Promise<string> {
   }
 }
 
+/**
+ * output 폴더의 실제 경로를 돌려준다. output 자체가 링크(심볼릭 링크·junction)이거나
+ * 실제 위치가 cms와 겹치면 거부한다.
+ */
+async function verifiedOutputRoot(resolvedRoot: string): Promise<string> {
+  const outputRoot = path.join(resolvedRoot, 'output');
+  await mkdir(outputRoot, { recursive: true });
+  if ((await lstat(outputRoot)).isSymbolicLink()) throw new Error(`output must not be a link: ${outputRoot}`);
+  const realOutput = await realpath(outputRoot);
+  const realCms = await realpath(path.join(resolvedRoot, 'cms')).catch(() => undefined);
+  if (realCms && (isWithin(realCms, realOutput) || isWithin(realOutput, realCms))) {
+    throw new Error(`output overlaps cms: ${realOutput}`);
+  }
+  return realOutput;
+}
+
 export async function safeWrite(root: string, target: string, data: string): Promise<void> {
   const resolvedRoot = path.resolve(root);
   const resolvedTarget = path.resolve(target);
@@ -35,8 +51,7 @@ export async function safeWrite(root: string, target: string, data: string): Pro
     throw new Error(`generated files must be written below output: ${resolvedTarget}`);
   }
 
-  await mkdir(outputRoot, { recursive: true });
-  const realOutputRoot = await realpath(outputRoot);
+  const realOutputRoot = await verifiedOutputRoot(resolvedRoot);
   const resolvedAncestor = await nearestExistingAncestor(path.dirname(resolvedTarget));
   if (!isResolvedWithinOutput(realOutputRoot, resolvedAncestor)) {
     throw new Error(`output link escapes the generated output directory: ${resolvedTarget}`);
@@ -53,13 +68,25 @@ export async function safeWrite(root: string, target: string, data: string): Pro
   await writeFile(resolvedTarget, data, { encoding: 'utf8', flag: existing ? 'w' : 'wx' });
 }
 
-/** output 아래 생성물만 지운다. 링크면 링크 자체만 지우고 대상은 건드리지 않는다. */
+/**
+ * output 아래 생성물만 지운다. 대상이 링크면 링크 자체만 지우고 대상은 건드리지 않는다.
+ * 부모 경로 중간에 output 밖으로 나가는 링크·junction이 있으면 거부한다 (C-1).
+ */
 export async function safeRemove(root: string, target: string): Promise<void> {
   const resolvedRoot = path.resolve(root);
   const resolvedTarget = path.resolve(target);
   const outputRoot = path.join(resolvedRoot, 'output');
   if (!isWithin(outputRoot, resolvedTarget) || resolvedTarget === outputRoot) {
     throw new Error(`only generated files below output can be removed: ${resolvedTarget}`);
+  }
+  const realOutputRoot = await verifiedOutputRoot(resolvedRoot);
+  const realParent = await realpath(path.dirname(resolvedTarget)).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === 'ENOENT') return undefined;
+    throw error;
+  });
+  if (!realParent) return;
+  if (!isResolvedWithinOutput(realOutputRoot, realParent)) {
+    throw new Error(`refusing to remove through a link that leaves output: ${resolvedTarget}`);
   }
   const stat = await lstat(resolvedTarget).catch(() => undefined);
   if (!stat) return;

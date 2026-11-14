@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { isResolvedWithinOutput, safeWrite } from '../src/fs/safe-write.js';
+import { isResolvedWithinOutput, safeRemove, safeWrite } from '../src/fs/safe-write.js';
 
 let tempRoot: string | undefined;
 
@@ -76,5 +76,31 @@ describe('safeRemove', () => {
     await symlink(victim, link);
     await safeRemove(tempRoot, link);
     expect(await readFile(victim, 'utf8')).toBe('keep');
+  });
+});
+
+describe('safeRemove through linked directories (C-1)', () => {
+  it('refuses a target whose parent directory is a link out of output', async () => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-remove-'));
+    const victim = path.join(tempRoot, 'victim');
+    await mkdir(victim, { recursive: true });
+    await writeFile(path.join(victim, 'important.html'), 'keep');
+    await mkdir(path.join(tempRoot, 'output'), { recursive: true });
+    await symlink(victim, path.join(tempRoot, 'output', 'contents'), 'junction');
+    await expect(safeRemove(tempRoot, path.join(tempRoot, 'output', 'contents', 'important.html'))).rejects.toThrow(/link/iu);
+    expect(await readFile(path.join(victim, 'important.html'), 'utf8')).toBe('keep');
+  });
+});
+
+describe('output root that is a link (C-1)', () => {
+  it('refuses to write or remove when output itself links into cms', async () => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-output-'));
+    const cmsContents = path.join(tempRoot, 'cms', 'contents');
+    await mkdir(cmsContents, { recursive: true });
+    await writeFile(path.join(cmsContents, 'a.html'), 'original');
+    await symlink(cmsContents, path.join(tempRoot, 'output'), 'junction');
+    await expect(safeWrite(tempRoot, path.join(tempRoot, 'output', 'a.html'), 'overwritten')).rejects.toThrow(/link/iu);
+    await expect(safeRemove(tempRoot, path.join(tempRoot, 'output', 'a.html'))).rejects.toThrow(/link/iu);
+    expect(await readFile(path.join(cmsContents, 'a.html'), 'utf8')).toBe('original');
   });
 });

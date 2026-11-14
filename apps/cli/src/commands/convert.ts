@@ -1,4 +1,4 @@
-import { readdir, readFile } from 'node:fs/promises';
+import { lstat, readdir, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -81,6 +81,11 @@ export async function runConvert(root: string, argv: string[]): Promise<number> 
   let worst = -1;
 
   const htmlFiles = targets.filter((f) => f.endsWith('.html')).sort();
+  if (values.all && htmlFiles.length === 0) {
+    // 원본 경로가 비었거나 잘못됐을 때 이전 생성물을 전부 지우지 않도록 멈춘다
+    console.error(`${SRC} 아래에 변환할 .html이 없습니다. 이전 생성물은 지우지 않았습니다.`);
+    return 1;
+  }
   for (const full of htmlFiles) {
     const rel = posix(path.relative(contents, full));
     const result = convertDocument(await readFile(full, 'utf8'), rel, {
@@ -118,7 +123,12 @@ export async function runConvert(root: string, argv: string[]): Promise<number> 
     ];
     let removed = 0;
     for (const [dir, ext] of generated) {
-      if (!existsSync(dir)) continue;
+      const stat = await lstat(dir).catch(() => undefined);
+      if (!stat) continue;
+      if (stat.isSymbolicLink() || !stat.isDirectory()) {
+        console.error(`생성물 폴더가 링크이거나 폴더가 아니라서 정리하지 않았습니다: ${dir}`);
+        return 1;
+      }
       for (const file of await walk(dir)) {
         const base = posix(path.relative(dir, file));
         if (base.endsWith(ext) && current.has(base.slice(0, -ext.length))) continue;
