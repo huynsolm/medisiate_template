@@ -12,7 +12,9 @@
     "css-check": "tsx apps/cli/src/cli.ts css-check",
     "inventory": "tsx apps/cli/src/cli.ts inventory",
     "convert": "tsx apps/cli/src/cli.ts convert",
-    "typecheck": "tsc --noEmit -p packages/core && tsc --noEmit -p apps/cli"
+    "typecheck": "tsc --noEmit -p packages/core && tsc --noEmit -p apps/cli && tsc --noEmit -p apps/web && tsc --noEmit -p .",
+    "web": "npm run dev -w @cms-medisay/web",
+    "web:build": "npm run build -w @cms-medisay/web"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
