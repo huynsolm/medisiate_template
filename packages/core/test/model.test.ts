@@ -30,6 +30,13 @@ describe('PageModel schema', () => {
     expect(safeParsePageModel({ ...minimal, theme: { primary: 'red;x', source: 'default' } }).success).toBe(false);
   });
 
+  it('rejects unsafe full-bleed padding (I-4)', () => {
+    const s = { ...minimal.sections[0]!, modifiers: { fullBleed: { paddingY: '0; color: red' } } };
+    expect(safeParsePageModel({ ...minimal, sections: [s] }).success).toBe(false);
+    const ok = { ...minimal.sections[0]!, modifiers: { fullBleed: { paddingY: '70px' } } };
+    expect(safeParsePageModel({ ...minimal, sections: [ok] }).success).toBe(true);
+  });
+
   it('rejects an unknown diagnostic level', () => {
     const bad = { ...minimal, diagnostics: [{ level: 'fatal', code: 'UNSUPPORTED_TYPE', message: 'x' }] };
     expect(safeParsePageModel(bad).success).toBe(false);

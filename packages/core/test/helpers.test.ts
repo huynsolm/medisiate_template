@@ -94,6 +94,12 @@ describe('backgrounds', () => {
     const style = sectionBoxStyle({ background: { kind: 'image', value: 'http://x/bg.jpg', overlay: 'rgba(0,0,0,0.5)' } });
     expect(style?.backgroundImage).toBe("linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('http://x/bg.jpg')");
   });
+  it('rejects padding values that would inject extra declarations (I-4)', () => {
+    expect(() => sectionBoxStyle({ fullBleed: { paddingY: '0; background-image: url(https://x/t)' } })).toThrow();
+    expect(sectionBoxStyle({ fullBleed: { paddingY: '4.5em' } })?.padding).toBe('4.5em 0');
+    expect(sectionBoxStyle({ fullBleed: { paddingY: '0' } })?.padding).toBe('0 0');
+  });
+
   it('rejects urls that could break out of the style attribute', () => {
     expect(() => sectionBoxStyle({ background: { kind: 'image', value: "x');color:red" } })).toThrow();
   });

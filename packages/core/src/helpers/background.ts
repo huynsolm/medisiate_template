@@ -1,10 +1,15 @@
 import type { SectionModifiers } from '../model/index.ts';
-import { CSS_COLOR } from '../schema/page.ts';
+import { CSS_COLOR, CSS_LENGTH } from '../schema/page.ts';
 import type { StyleObject } from '../html/h.ts';
 
 export function cssUrl(value: string): string {
   if (/['"\\\n\r]/u.test(value)) throw new Error(`unsafe url in style: ${value}`);
   return `url('${value}')`;
+}
+
+export function cssLength(value: string): string {
+  if (!CSS_LENGTH.test(value.trim())) throw new Error(`unsafe length in style: ${value}`);
+  return value.trim();
 }
 
 export function cssColor(value: string): string {
@@ -25,7 +30,7 @@ export function sectionBoxStyle(modifiers: SectionModifiers): StyleObject | unde
   const style: StyleObject = { ...backgroundStyle(modifiers) };
   if (modifiers.fullBleed) {
     Object.assign(style, { width: '100vw', position: 'relative', left: '50%', transform: 'translateX(-50%)' });
-    if (modifiers.fullBleed.paddingY) style.padding = `${modifiers.fullBleed.paddingY} 0`;
+    if (modifiers.fullBleed.paddingY) style.padding = `${cssLength(modifiers.fullBleed.paddingY)} 0`;
   }
   return Object.keys(style).length ? style : undefined;
 }

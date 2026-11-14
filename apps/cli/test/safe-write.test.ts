@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdir, mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { isResolvedWithinOutput, safeWrite } from '../src/fs/safe-write.js';
@@ -24,6 +24,18 @@ describe('safeWrite', () => {
     const target = path.join(tempRoot, 'output', 'reports', 'ok.txt');
     await safeWrite(tempRoot, target, 'ok');
     expect(await readFile(target, 'utf8')).toBe('ok');
+  });
+
+  it('refuses to write through a target file that is a symlink (I-6)', async () => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-write-'));
+    const victim = path.join(tempRoot, 'cms', 'contents', 'a.html');
+    await mkdir(path.dirname(victim), { recursive: true });
+    await writeFile(victim, 'original');
+    const link = path.join(tempRoot, 'output', 'reports', 'x.json');
+    await mkdir(path.dirname(link), { recursive: true });
+    await symlink(victim, link);
+    await expect(safeWrite(tempRoot, link, 'overwritten')).rejects.toThrow(/symlink/iu);
+    expect(await readFile(victim, 'utf8')).toBe('original');
   });
 
   it('recognizes a resolved link target outside output', () => {

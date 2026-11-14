@@ -4,6 +4,10 @@ import { DIAGNOSTIC_CODES, type PageModel } from '../model/index.ts';
 /** style 속성에 그대로 들어가는 색 값. 세미콜론·따옴표 같은 주입 문자를 막는다. */
 export const CSS_COLOR = /^(#[0-9a-f]{3,8}|(rgb|rgba|hsl|hsla)\([0-9.,%\s/deg]+\)|[a-z]+)$/iu;
 
+/** 단일 CSS 길이 값. style 속성에 그대로 들어가므로 선언을 추가할 수 없는 형식만 허용한다. */
+export const CSS_LENGTH = /^(0|\d+(\.\d+)?(px|em|rem|%|vh|vw))$/u;
+export const lengthSchema = z.string().trim().regex(CSS_LENGTH, '길이 값은 0 또는 숫자+단위(px, em, rem, %, vh, vw)여야 합니다');
+
 export const colorSchema = z.string().trim().regex(CSS_COLOR, '색 값은 #hex, rgb(), hsl() 또는 색 이름이어야 합니다');
 
 export const imageKindSchema = z.enum(['https', 'http', 'relative', 'protocol-relative', 'data', 'other']);
@@ -37,7 +41,7 @@ export const modifiersSchema = z.object({
     })
     .optional(),
   textWhite: z.boolean().optional(),
-  fullBleed: z.object({ paddingY: z.string().optional() }).optional(),
+  fullBleed: z.object({ paddingY: lengthSchema.optional() }).optional(),
 });
 
 export const sectionSchema = z.object({

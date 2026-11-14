@@ -1,4 +1,4 @@
-import { mkdir, realpath, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, realpath, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 function isWithin(parent: string, candidate: string): boolean {
@@ -43,5 +43,12 @@ export async function safeWrite(root: string, target: string, data: string): Pro
   }
 
   await mkdir(path.dirname(resolvedTarget), { recursive: true });
-  await writeFile(resolvedTarget, data, 'utf8');
+  // 대상 파일 자체가 링크면 writeFile이 링크를 따라가므로 거부한다
+  const existing = await lstat(resolvedTarget).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === 'ENOENT') return undefined;
+    throw error;
+  });
+  if (existing?.isSymbolicLink()) throw new Error(`refusing to write through a symlink: ${resolvedTarget}`);
+  if (existing && !existing.isFile()) throw new Error(`target is not a regular file: ${resolvedTarget}`);
+  await writeFile(resolvedTarget, data, { encoding: 'utf8', flag: existing ? 'w' : 'wx' });
 }
