@@ -150,3 +150,35 @@
 3. 이미지가 3장 이상인 원본 섹션은 fallback으로 보존할 것인가, type01 데이터 모델을 확장할 것인가?
 4. bg-image-1/2 모바일 전용 배경 URL을 호스트 DOM에 실제 PC/MO 배경 노드 두 개로 출력해도 되는가?
 5. 1단계 완료 판정용 CI에 Playwright와 Chromium을 고정 의존성으로 두어도 되는가?
+
+## 8. 처리 결과 (구현 측, 2026-11-14)
+
+사용자가 7장 확인 질문에 아래처럼 답했고, 그에 맞춰 수정했다.
+
+| 질문 | 답 |
+|---|---|
+| 1. type00 숨김 | 숨김 유지 (제목은 PageModel.title에 보존) |
+| 2. http·상대경로 이미지 | warn으로 올려 파일을 partial로 분류 (계획서 5.2와 일치) |
+| 3. 이미지 3장 이상 | 지금은 fallback으로 보존. 실데이터 빈도를 보고 모델 확장 결정 |
+| 4. bg-image-1/2 모바일 배경 | PC/MO 배경 요소 2개로 출력 |
+| 5. Playwright 필수 | `npm run test:browser`에서만 필수, `npm test`는 기존처럼 skip 허용 |
+
+| 항목 | 결과 | 커밋 | 확인 테스트 |
+|---|---|---|---|
+| I-1 inline style | 수정. 서식 태그의 `color`·`background-color`·`font-weight`는 이관, 나머지 선언은 루트 section 포함 `INLINE_STYLE_DROPPED`(warn). 루트의 `on*` 속성도 진단 | `43b5a65` | `packages/core/test/review-fixes.test.ts` "I-1 inline styles" |
+| I-2 type01 변형 | 수정. 원본 클래스 → 변형 표(`TYPE01_SOURCE_VARIANTS`, highlight는 **추정** 클래스명)로 판정, 둘 이상이면 `UNKNOWN_VARIANT` | `43b5a65` | "I-2 type01 variants" |
+| I-3 이미지 누락 | 수정. 담을 자리가 없는 이미지·텍스트가 있으면 `LOSSY_PARSE`(warn) + 섹션 전체 fallback. fallback이 원본 이미지를 화면에 출력. type00도 같은 검사 적용. 입력·출력 img[src] 다중집합 비교 테스트 추가 | `43b5a65` | "I-3 lossless parsing" |
+| I-4 paddingY 주입 | 수정. schema(`lengthSchema`)와 렌더 직전(`cssLength`) 모두 단일 길이 값만 허용 | `5efad68` | `helpers.test.ts`, `model.test.ts` "I-4" |
+| I-5 오래된 출력 | 수정. `--all`에서 현재 원본에 없는 contents/data/reports/files 항목 삭제(`safeRemove`, output 밖·디렉터리 거부, 링크는 링크만 삭제) | `7f29b45` | `apps/cli/test/convert.test.ts` "I-5", `safe-write.test.ts` "safeRemove" |
+| I-6 symlink 쓰기 | 수정. 대상이 링크·비정규 파일이면 거부, 새 파일은 `wx`로 생성 | `5efad68` | `safe-write.test.ts` "I-6" |
+| M-1 이미지 진단 수준 | 수정 (질문 2 답) | `43b5a65` | "decision 2" |
+| M-2 정규화가 주석 무시 | 유지. 샘플의 유일한 주석은 설명용이고 출력 대상이 아니다. 보존이 필요한 주석이 생기면 별도 assertion 추가 | — | — |
+| M-3 복구 판정 휴리스틱 | 유지. info 진단으로만 쓰며 상태 판정에 영향 없음 | — | — |
+| M-4 Playwright skip | 수정. `npm run test:browser`는 Playwright가 없으면 실패 | `b47fffb` | 환경에서 playwright를 숨기고 실행해 실패 확인 |
+| Ruling 8 배경 매핑 | 부분 수정. bg-image-1/2 모바일 이미지·배경색을 cms.css 값으로 반영. 이미지 기준 URL(`http://fxfile.drline.net/cms/public/images/common/`)은 여전히 샘플 1건 근거의 **추정** | `b47fffb` | `tests/visual/background.test.ts` (PC/MO/에디터 × 일반/프리셋) |
+
+추가 발견: 호스트의 `data-bg-scope="desktop"`은 인라인 배경과 함께 쓸 수 없다(`docs/host-dom-contract.md` 4장 주의). PC 배경은 `common-display-pc` 레이어로 출력한다.
+
+검증: `npm test` 128 통과·1 skip(inventory, `cms/` 필요), `npm run test:browser` 통과, `npm run typecheck`·`npm run lint` 통과.
+
+여전히 남은 것: `cms/` 원본으로 type00·type01 parse 규칙과 fixture 교체, `convert --dir cms/contents/01` 실행(5장).
