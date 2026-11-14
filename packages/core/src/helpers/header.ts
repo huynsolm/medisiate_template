@@ -4,16 +4,16 @@ import type { RenderContext } from '../render/context.ts';
 import { emptyDeco, isBlank, rich } from './misc.ts';
 
 export interface HeaderData {
-  eyebrow?: RichText;
-  title?: RichText;
-  desc?: RichText;
+  eyebrow?: RichText | undefined;
+  title?: RichText | undefined;
+  desc?: RichText | undefined;
 }
 
 export interface GeneralHeaderOptions {
-  white?: boolean;
-  titleSize?: [number, number];
-  titleWeight?: string;
-  align?: 'center' | 'left';
+  white?: boolean | undefined;
+  titleSize?: [number, number] | undefined;
+  titleWeight?: string | undefined;
+  align?: 'center' | 'left' | undefined;
 }
 
 /** 일반 모드 섹션 머리: 짧은 막대 + 작은 제목 + 큰 제목 (샘플 구조) */

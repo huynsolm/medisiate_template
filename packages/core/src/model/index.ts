@@ -4,7 +4,7 @@ export type Strategy = 'preset' | 'general';
 
 export interface Theme {
   primary: string;
-  preset?: 'blue' | 'gold' | 'green';
+  preset?: 'blue' | 'gold' | 'green' | undefined;
   source: 'file' | 'hospital' | 'default';
 }
 
@@ -15,14 +15,14 @@ export interface ImageRef {
   src: string;
   /** 장식 이미지면 '' */
   alt: string;
-  width?: number;
-  height?: number;
+  width?: number | undefined;
+  height?: number | undefined;
   kind: ImageKind;
 }
 
 export interface ImagePair {
-  pc?: ImageRef;
-  mo?: ImageRef;
+  pc?: ImageRef | undefined;
+  mo?: ImageRef | undefined;
 }
 
 /** allowlist(em, strong, b, i, br, span)를 통과한 HTML 문자열 */
@@ -31,15 +31,15 @@ export type RichText = string;
 export interface SectionBackground {
   kind: 'color' | 'image';
   value: string;
-  overlay?: string;
+  overlay?: string | undefined;
   /** 원본 변형 이름 (예: 'bg-color-2') */
-  token?: string;
+  token?: string | undefined;
 }
 
 export interface SectionModifiers {
-  background?: SectionBackground;
-  textWhite?: boolean;
-  fullBleed?: { paddingY?: string };
+  background?: SectionBackground | undefined;
+  textWhite?: boolean | undefined;
+  fullBleed?: { paddingY?: string } | undefined;
 }
 
 export interface SectionSource {
@@ -54,7 +54,7 @@ export interface SectionModel<T = unknown> {
   variant: string;
   modifiers: SectionModifiers;
   data: T;
-  source?: SectionSource;
+  source?: SectionSource | undefined;
 }
 
 export const DIAGNOSTIC_CODES = [
@@ -82,9 +82,9 @@ export interface Diagnostic {
   level: DiagnosticLevel;
   code: DiagnosticCode;
   message: string;
-  sectionIndex?: number;
+  sectionIndex?: number | undefined;
   location?: { line: number; col: number };
-  detail?: Record<string, unknown>;
+  detail?: Record<string, unknown> | undefined;
 }
 
 export interface PageMeta {
@@ -94,8 +94,8 @@ export interface PageMeta {
 
 export interface PageModel {
   version: 1;
-  source?: string;
-  title?: string;
+  source?: string | undefined;
+  title?: string | undefined;
   theme: Theme;
   sections: SectionModel[];
   diagnostics: Diagnostic[];

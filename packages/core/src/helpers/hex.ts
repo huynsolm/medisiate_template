@@ -16,13 +16,13 @@ export function hexClipUrl(ctx: RenderContext): string {
 }
 
 export interface HexItem {
-  top?: string;
+  top?: string | undefined;
   label: RichText;
 }
 
 export interface HexOptions {
-  ringColor?: string;
-  fillColor?: string;
+  ringColor?: string | undefined;
+  fillColor?: string | undefined;
 }
 
 export function hexBox(item: HexItem, ctx: RenderContext, options: HexOptions = {}): ElementNode {

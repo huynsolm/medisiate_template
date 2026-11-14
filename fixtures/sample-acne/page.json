@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "source": "reference/sample-inline-acne.html",
+  "title": "여드름",
+  "theme": {
+    "primary": "#c7b195",
+    "source": "file"
+  },
+  "sections": [
+    {
+      "id": "s1",
+      "type": "text-visual",
+      "variant": "default",
+      "modifiers": {},
+      "data": {
+        "title": "울긋불긋 여드름<br class=\"br-migration is-visible\">건드리지 말고 치료받자",
+        "titleSize": [
+          23,
+          45
+        ],
+        "titleWeight": "300",
+        "contentAlign": "center",
+        "image": {
+          "pc": {
+            "src": "/api/file/dabdd28f-e30a-481e-a3fa-1a26f364f35e",
+            "alt": "",
+            "kind": "relative",
+            "width": 1200,
+            "height": 600
+          },
+          "mo": {
+            "src": "/api/file/2f64cd38-4bab-4cfc-a0df-f086f0fa7c6b",
+            "alt": "",
+            "kind": "relative",
+            "width": 860,
+            "height": 492
+          }
+        },
+        "desc": "여드름은 모낭 피지선에 발생하는 염증성 질환입니다.<br class=\"br-migration is-visible\">모공, 즉 모낭 피지선 의 지름은 대략 0.02~0.05mm정도이지만, 사춘기 이후 피지분비가<br>많아지면서 넓어지게 됩니다. 여드름을 치료하지 않고 방치하는 경우 염증으로 인한 진피손상으로<br>모공이 늘어나고 세균감염이 될 수 있으며 증상이 더욱 악화되면 후유증으로 함몰흉터나 비대흉터가 <br>남을 수 있습니다. 따라서 여드름/여드름 흉터는 초기에 치료하는 것이 중요합니다."
+      }
+    },
+    {
+      "id": "s2",
+      "type": "text-visual",
+      "variant": "default",
+      "modifiers": {
+        "background": {
+          "kind": "color",
+          "value": "rgb(249, 233, 227)"
+        },
+        "fullBleed": {
+          "paddingY": "70px"
+        }
+      },
+      "data": {
+        "eyebrow": "여드름 발생과정",
+        "title": "왜 생길까요?",
+        "image": {
+          "pc": {
+            "src": "/api/file/935044c0-c7ad-4eb9-b0e1-e0563949f0a2",
+            "alt": "",
+            "kind": "relative",
+            "width": 1200,
+            "height": 390
+          },
+          "mo": {
+            "src": "/api/file/20fe01ef-308f-4f46-915b-85c046daf15e",
+            "alt": "",
+            "kind": "relative",
+            "width": 861,
+            "height": 970
+          }
+        }
+      }
+    },
+    {
+      "id": "s3",
+      "type": "text-zigzag",
+      "variant": "default",
+      "modifiers": {},
+      "data": {
+        "startSide": "left",
+        "items": [
+          {
+            "num": "01",
+            "title": "사춘기",
+            "desc": "호르몬의 불균형 등 여러가지 요인으로 인해 표피의 각질이 두꺼워지면서 각질이 모공 속으로 들어가게 됩니다. 이<br class=\"br-migration\">때문에 모공의 출구가 좁아지고, 안에서 분비된 피지가 표면으로 빠져나오지 못한 채 굳어져 밖으로 돌출되어 나타납니다.",
+            "image": {
+              "pc": {
+                "src": "/api/file/07616c80-6ba3-4225-ad11-382be9ebd1cc",
+                "alt": "",
+                "kind": "relative",
+                "width": 580,
+                "height": 400
+              },
+              "mo": {
+                "src": "/api/file/6beb6d6c-3cdd-4cb0-a646-6c9dc9385b27",
+                "alt": "",
+                "kind": "relative",
+                "width": 730,
+                "height": 500
+              }
+            }
+          },
+          {
+            "num": "02",
+            "title": "스트레스",
+            "desc": "과도한 스트레스를 받게되면 코르티솔이라는 호르몬을 분비하는데 이 때 안드로겐도 같이 분비되어 피지선의 왕성한<br class=\"br-migration\">생성 및 표피의 각질화를 시켜 피지가 모공을 빠져나가지 못하고 여드름이 발생할 수 있습니다.",
+            "image": {
+              "pc": {
+                "src": "/api/file/7d2ebc9e-f505-453e-8f9d-a8080ba30ff6",
+                "alt": "",
+                "kind": "relative",
+                "width": 580,
+                "height": 400
+              },
+              "mo": {
+                "src": "/api/file/2b5cfda6-d658-4745-b43a-9d5e6b577b60",
+                "alt": "",
+                "kind": "relative",
+                "width": 730,
+                "height": 500
+              }
+            }
+          },
+          {
+            "num": "03",
+            "title": "월경, 임신",
+            "desc": "월경을 할 때 분비되는 여성호르몬인 프로게스테론은 피지 분비를 촉진시키는 원인 중 하나입니다. 임산 중에는<br class=\"br-migration\">월경 중일때와 마찬가지로 임신 상태를 유지하게 위해 프로게스테론이 많이 분비되는데 이는 여드름이 유발될 수 있고 피임약을 먹는 여성도 이와 같은 위험이<br class=\"br-migration\">있습니다.",
+            "image": {
+              "pc": {
+                "src": "/api/file/9fb093ba-3b87-44f8-b5d6-967e717cf791",
+                "alt": "",
+                "kind": "relative",
+                "width": 580,
+                "height": 400
+              },
+              "mo": {
+                "src": "/api/file/4c7d8875-1429-43d3-b456-1d356deaddbe",
+                "alt": "",
+                "kind": "relative",
+                "width": 730,
+                "height": 500
+              }
+            }
+          },
+          {
+            "num": "04",
+            "title": "피부균 감염, 잘못된 화장품의 사용",
+            "desc": "여드름균이 발생시키는 지방산은 피부에 심한 자극을 주어 염증을 일으키게 만듭니다. 이 때문에 각질이 두꺼워지고<br class=\"br-migration\">모공 둘레가 부어 모공을 막아 여드름 발생의 원인이 됩니다. 또한 과도한 화장품의 사용은 모공을 막아 피지가 빠져나가지 못해 여드름을 유발하는 원인이<br class=\"br-migration\">될 수 있습니다.",
+            "image": {
+              "pc": {
+                "src": "/api/file/2abf2b9a-472c-48ca-9bf4-0860d56944c9",
+                "alt": "",
+                "kind": "relative",
+                "width": 580,
+                "height": 400
+              },
+              "mo": {
+                "src": "/api/file/fe74093b-65d1-45f8-8db0-a0af05b76438",
+                "alt": "",
+                "kind": "relative",
+                "width": 730,
+                "height": 500
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "s4",
+      "type": "text-steps",
+      "variant": "default",
+      "modifiers": {},
+      "data": {
+        "eyebrow": "여드름이 심해지는 과정",
+        "title": "여드름 발생부터 흉터까지",
+        "itemBg": "rgb(250, 248, 246)",
+        "items": [
+          {
+            "label": "1단계",
+            "desc": "다양한 원인으로 인한 피지의 원할한 배출 어려움 및 여드름 균 증식, 2차 세균 감염으로 인해 농포형성되어 여드름 발생"
+          },
+          {
+            "label": "2단계",
+            "desc": "여드름 발생 이후 잘못된 관리 방법으로 늘어진 모공 방치"
+          },
+          {
+            "label": "3단계",
+            "desc": "여드름 회복과정에서 생긴 흔적 , 염증이 심한 피부 내 공간이 여드름 흉터 조직으로 남게됨"
+          },
+          {
+            "label": "4단계",
+            "desc": "저절로 치유되지 않으며 여드름 유형에 따라 크게 튀어나온 흉터, 들어간 여드름 흉터로 심화됨"
+          }
+        ]
+      }
+    },
+    {
+      "id": "s5",
+      "type": "text-hex",
+      "variant": "default",
+      "modifiers": {},
+      "data": {
+        "eyebrow": "여드름 치료의",
+        "title": "핵심특징",
+        "columns": 3,
+        "ringColor": "rgb(236, 228, 218)",
+        "items": [
+          {
+            "top": "01",
+            "label": "다각적인<br class=\"br-migration is-visible\">접근",
+            "desc": "개인에 따라 여드름 발생 원인이 다르기에 다각적으로 분석하여 치료에 대가갑니다."
+          },
+          {
+            "top": "02",
+            "label": "자극<br class=\"br-migration is-visible\">최소화",
+            "desc": "최소한의 자극으로 치료속도는 빠르게 진행합니다."
+          },
+          {
+            "top": "03",
+            "label": "재발<br class=\"br-migration is-visible\">최소화",
+            "desc": "여드름의 재발을 최소화하고자 노력합니다."
+          }
+        ]
+      }
+    },
+    {
+      "id": "s6",
+      "type": "text-icon-grid",
+      "variant": "default",
+      "modifiers": {
+        "background": {
+          "kind": "image",
+          "value": "http://fxfile.drline.net/cms/public/images/common/cms_bg_1.jpg",
+          "overlay": "rgba(30,34,52,0.72)"
+        },
+        "fullBleed": {
+          "paddingY": "210px"
+        },
+        "textWhite": true
+      },
+      "data": {
+        "title": "생활 속 예방 TIP",
+        "columns": 4,
+        "itemPadding": "50px",
+        "items": [
+          {
+            "icon": {
+              "src": "/api/file/6c5bae80-0176-48b8-a6c8-77756c0b5cef",
+              "alt": "",
+              "kind": "relative",
+              "width": 91
+            },
+            "desc": "스트레스를 줄이고 충분한 수면을 통해 피부가 휴식을 취하고 재생이 이루어지도록 합니다."
+          },
+          {
+            "icon": {
+              "src": "/api/file/155cc811-7bd1-4196-9dd5-4403aca929e3",
+              "alt": "",
+              "kind": "relative",
+              "width": 91
+            },
+            "desc": "오일 성분이 많은 화장품, 지속적인 피부 자극은 피하는 것이 좋습니다."
+          },
+          {
+            "icon": {
+              "src": "/api/file/58ec6cef-79fb-47b2-9e2a-b2bf3812c2f0",
+              "alt": "",
+              "kind": "relative",
+              "width": 107
+            },
+            "desc": "계면활성제가 함유된 세안제는 쓰지 않도록 하며, 세안은 하루 2회 정도로 제한합니다."
+          },
+          {
+            "icon": {
+              "src": "/api/file/8711c2eb-d798-4d53-96b0-93f64f59fc8a",
+              "alt": "",
+              "kind": "relative",
+              "width": 91
+            },
+            "desc": "압출 시 소독되지 않은 기구를 이용하거나 깨끗하지 않은 손으로 한다면 2차 감염을 유발할 수 있습니다."
+          }
+        ]
+      }
+    }
+  ],
+  "diagnostics": [],
+  "meta": {
+    "coreVersion": "0.1.0",
+    "hostCss": {
+      "sha256": "00657D8091192C5C8BC7AF7C3F43F51FB3CA762694ABEDAC35C195B56FE3B16F",
+      "savedAt": "2026-11-13"
+    }
+  }
+}
