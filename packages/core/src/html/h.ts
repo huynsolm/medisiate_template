@@ -109,7 +109,9 @@ export function serialize(node: HNode | HNode[]): string {
     case 'comment':
       return `<!-- ${escapeComment(node.value)} -->`;
     case 'fragment':
-      return serializeChildren(node.children);
+      return node.children.some(isBlock)
+        ? node.children.map((c) => serialize(c)).join('\n')
+        : serializeChildren(node.children);
     case 'element': {
       if (!SAFE_NAME.test(node.tag)) throw new Error(`unsafe tag name: ${node.tag}`);
       const attrs = node.attrs
@@ -128,6 +130,7 @@ function serializeChildren(children: HNode[]): string {
   if (!children.some(isBlock)) return children.map((c) => serialize(c)).join('');
   let out = '\n';
   for (const child of children) {
+    if (isBlock(child) && !out.endsWith('\n')) out += '\n';
     out += serialize(child);
     if (isBlock(child) || child.kind === 'comment') out += '\n';
   }
