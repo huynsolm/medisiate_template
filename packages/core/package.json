@@ -7,7 +7,7 @@
     "./parse/variant-map": "./src/parse/variant-map.ts"
   },
   "dependencies": {
-    "parse5": "^8.0.0"
+    "parse5": "^8.0.0",
+    "zod": "^4.6.7"
   }
 }
-

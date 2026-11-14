@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { buildInventory, writeInventory } from '../src/commands/inventory.js';
 
-describe('inventory', () => {
+const root = path.resolve(import.meta.dirname, '../../..');
+const hasContents = existsSync(path.join(root, 'cms/contents'));
+
+// cms/는 SVN 원본이라 저장소에 없다. 원본이 있는 환경에서만 실행한다.
+describe.skipIf(!hasContents)('inventory', () => {
   it('parses the complete contents tree and writes both reports', async () => {
-    const root = path.resolve(import.meta.dirname, '../../..');
     const inventory = await buildInventory(root);
 
     expect(inventory.summary.htmlFileCount).toBe(703);
