@@ -1,6 +1,6 @@
 import type { Diagnostic, ImagePair, ImageRef } from '../model/index.ts';
 import { imageRef } from '../helpers/image-ref.ts';
-import { filterInlineStyle, richTextToPlain, sanitizeRichText } from '../html/rich-text.ts';
+import { blockStyleSpan, filterInlineStyle, richTextToPlain, sanitizeRichText } from '../html/rich-text.ts';
 import { ancestors, attr, classesOf, descendants, innerHtml, plainText, type DomElement, type SourceSection } from './dom.ts';
 import { modifiersFromClasses } from './modifiers.ts';
 
@@ -126,7 +126,9 @@ export function variantFromClasses(src: SourceSection, sourceVariants: Record<st
 
 /** 요소 안 HTML을 서식 allowlist에 통과시킨다. */
 export function richFrom(el: DomElement): string {
-  return sanitizeRichText(innerHtml(el)).replace(/\s+/gu, ' ').replace(/\s*<br>\s*/gu, '<br>').trim();
+  const inner = sanitizeRichText(innerHtml(el)).replace(/\s+/gu, ' ').replace(/\s*<br>\s*/gu, '<br>').trim();
+  // 단락·제목 자신의 허용 style(정렬·색·폭 등)은 블록 span으로 보존한다 (review I-8)
+  return blockStyleSpan(el.tagName, attr(el, 'style'), inner);
 }
 
 export const HEADING = /^h[1-6]$/u;

@@ -6,6 +6,7 @@ import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { descendants } from '../parse/dom.ts';
 import { isHeading, pairImages, richFrom, scanSection, uncoveredText, variantFromClasses } from '../parse/common.ts';
+import { joinParagraphs } from '../html/rich-text.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 
@@ -49,7 +50,7 @@ export const type01: TypeDefinition<Type01Data> = {
     const { pair: image, extra } = pairImages(descendants(src.element, (el) => el.tagName === 'img'), src, diagnostics);
     const heading = descendants(src.element, isHeading)[0];
     const paragraphs = descendants(src.element, (el) => el.tagName === 'p' && !(heading && descendants(heading).includes(el)));
-    const desc = paragraphs.map(richFrom).filter(Boolean).join('<br>');
+    const desc = joinParagraphs(paragraphs.map(richFrom).filter(Boolean));
     const data: Type01Data = { image };
     const title = heading ? richFrom(heading) : '';
     if (title) data.title = title;

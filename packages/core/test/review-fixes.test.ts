@@ -66,7 +66,8 @@ describe('I-1 inline styles', () => {
   it('reports dropped declarations, including on the section itself', () => {
     const r = convert('<section class="cms type01" style="padding-top:30px" onclick="x()"><p style="text-align:center">설명 <span style="color:#c00">강조</span></p></section>');
     const dropped = r.page.diagnostics.filter((d) => d.code === 'INLINE_STYLE_DROPPED');
-    expect(dropped.map((d) => d.detail?.declarations)).toEqual([['padding-top:30px'], ['text-align:center']]);
+    // 단락의 text-align은 계획서 허용 목록이라 이관된다 (review I-8). 루트 section의 padding은 옮길 자리가 없다.
+    expect(dropped.map((d) => d.detail?.declarations)).toEqual([['padding-top:30px']]);
     expect(dropped.every((d) => d.level === 'warn')).toBe(true);
     expect(r.page.diagnostics.some((d) => d.code === 'EVENT_ATTRIBUTE_REMOVED')).toBe(true);
     expect(r.html).toContain('<span style="color: #c00;">강조</span>');
@@ -80,5 +81,33 @@ describe('decision 2: image url warnings', () => {
     expect(r.page.diagnostics.find((d) => d.code === 'IMAGE_HTTP')?.level).toBe('warn');
     expect(r.status).toBe('partial');
     expect(convert('<section class="cms type01"><img src="https://x/a.jpg"><p>a</p></section>').status).toBe('success');
+  });
+});
+
+describe('I-8 block-level inline styles (plan 5.2 allowlist)', () => {
+  it('lets a display:block span carry alignment and width, nothing else', () => {
+    expect(sanitizeRichText('<span style="display:block;text-align:center;width:50%;position:fixed">t</span>')).toBe(
+      '<span style="display: block; text-align: center; width: 50%;">t</span>',
+    );
+    expect(sanitizeRichText('<span style="display:flex;text-align:expression(x);max-width:calc(1px);width:10px !important">t</span>')).toBe('<span>t</span>');
+    expect(sanitizeRichText('<b style="text-align:center;width:10px">t</b>')).toBe('<b>t</b>');
+  });
+
+  it('migrates allowlisted paragraph styles without a dropped-style diagnostic', () => {
+    const r = convert('<section class="cms type01"><p style="text-align:center;color:#c00;max-width:600px;margin:0">설명</p></section>');
+    expect(r.html).toContain('<span style="display: block; text-align: center; color: #c00; max-width: 600px;">설명</span>');
+    const dropped = r.page.diagnostics.filter((d) => d.code === 'INLINE_STYLE_DROPPED');
+    expect(dropped.map((d) => d.detail?.declarations)).toEqual([['margin:0']]);
+  });
+
+  it('does not add a line break next to a block paragraph', () => {
+    const r = convert('<section class="cms type01"><p style="text-align:center">가</p><p>나</p></section>');
+    expect(r.html).toContain('<span style="display: block; text-align: center;">가</span>나');
+  });
+
+  it('still drops and reports styles on elements whose style has nowhere to go', () => {
+    const r = convert('<section class="cms type01"><div style="text-align:center"><p>설명</p></div></section>');
+    const dropped = r.page.diagnostics.filter((d) => d.code === 'INLINE_STYLE_DROPPED');
+    expect(dropped.map((d) => d.detail?.declarations)).toEqual([['text-align:center']]);
   });
 });
