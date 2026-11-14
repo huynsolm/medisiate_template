@@ -206,3 +206,22 @@ npm run test:browser
 3. Windows 호환 `test:browser` 명령으로 바꾸고 실제 Playwright 결과를 남긴다.
 4. inline style 허용 범위를 계획과 맞추거나 계획을 명시적으로 수정한다.
 5. 실제 `cms/` 표본으로 type01 변형, 텍스트 lossless 판정, PC/MO 배경을 확인한다.
+
+## 9. 처리 결과 (구현 측, 2026-11-14)
+
+사용자 결정: I-8은 **구현을 계획서 5.2에 맞춘다.** 브랜치는 `claude/fervent-volta-ilc7hk`로 옮겨 이어서 작업한다 (`f912c1c` 위에 커밋).
+
+| 항목 | 결과 | 커밋 | 확인 테스트 (수정 전 실패 확인) |
+|---|---|---|---|
+| C-1 링크 너머 삭제 | 수정. ① `safeRemove`가 부모의 실제 경로(realpath)가 output 안인지 확인 ② `output` 자체가 링크이거나 실제 위치가 `cms`와 겹치면 쓰기·삭제 모두 거부 ③ `--all` 정리 시작 폴더가 링크면 정리하지 않고 종료 코드 1 ④ `--all`인데 원본 `.html`이 0개면 정리하지 않고 종료 코드 1 | `39422cc` | `apps/cli/test/convert.test.ts` "C-1" 2건, `safe-write.test.ts` "C-1" 2건 |
+| 추가 발견 | **`output` 자체가 `cms`를 가리키는 링크면 이전 `safeWrite`가 원본을 덮어쓸 수 있었다** (부모 realpath 검사가 링크된 output 기준으로 통과). 위 ②로 함께 막음 | `39422cc` | `safe-write.test.ts` "refuses to write or remove when output itself links into cms" |
+| I-9 Windows test:browser | 수정. `node scripts/test-browser.mjs`가 `REQUIRE_BROWSER=1`을 넣고 vitest를 실행. npm script에 POSIX 환경변수 문법이 없는지 테스트 | `70a1df7`, `8d90b20` | `tests/scripts/package-scripts.test.ts`. Linux에서 Playwright 있음 → 12 통과·종료 0, 없음 → 종료 1 확인. **Windows 실행은 미확인** |
+| I-7 TOCTOU | 부분 수정. 같은 폴더의 새 임시 파일(`wx`)에 쓰고 부모 경로를 다시 확인한 뒤 `rename`. 검사 뒤 대상이 링크로 바뀌어도 링크를 따라가지 않고 링크 자체를 교체 | `91f46d5` | `safe-write.test.ts` "I-7" (검사 훅에서 대상을 링크로 바꿔 재현) |
+| I-7 남은 한계 | 마지막 부모 확인과 `rename` 사이에 부모 폴더가 링크로 바뀌는 경우는 Node 경로 API로 막을 수 없음. 변환 중 output을 다른 프로세스가 바꾸지 않는다고 가정하고 코드 주석에 명시 | — | — |
+| I-8 inline style 범위 | 수정. `p`, `h1~h6` 자신의 `color`·`background-color`·`font-weight`·`text-align`·`width`·`max-width`를 `<span style="display: block; …">`로 서식 텍스트 안에 보존. 블록 span 옆에는 `<br>`를 넣지 않음. 그 밖의 요소(`div`, `li`, 루트 `section` 등)는 옮길 자리가 없어 계속 `INLINE_STYLE_DROPPED` | `e711430` | `packages/core/test/review-fixes.test.ts` "I-8" |
+| M-2 type01 변형명, M-3 uncoveredText 오탐 | 미처리. 실제 `cms/` 표본이 있어야 확인 가능 | — | — |
+| bg-image PC/MO 실행 확인 | 이 환경(Linux)에서 `npm run test:browser` 12 통과. 991~1024px 구간 차이는 계획서대로 허용 차이 | — | `tests/visual/background.test.ts` |
+
+알려진 한계: I-8의 블록 span은 `isHeading`이 클래스로 찾은 `div.tit` 같은 제목에는 적용되지 않는다. 그 style은 계속 버리고 진단을 남긴다.
+
+검증 (Linux): `npm test` 139 통과·1 건너뜀(inventory, `cms/` 필요), `npm run test:browser` 12 통과, `npm run typecheck`·`npm run lint` 오류 없음.
