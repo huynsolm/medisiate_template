@@ -83,7 +83,7 @@ export const comment = (value: string): CommentNode => ({ kind: 'comment', value
 export const fragment = (...children: Child[]): FragmentNode => ({ kind: 'fragment', children: flatten(children) });
 
 export function escapeText(value: string): string {
-  return value.replace(/&/gu, '&amp;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;').replace(/ /gu, '&nbsp;');
+  return value.replace(/&/gu, '&amp;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;').replace(/\u00a0/gu, '&nbsp;');
 }
 
 export function escapeAttr(value: string): string {

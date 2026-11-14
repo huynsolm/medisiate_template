@@ -16,7 +16,8 @@ describe('PageModel schema', () => {
   });
 
   it('fills modifiers with an empty object when omitted', () => {
-    const { modifiers: _omit, ...section } = minimal.sections[0]!;
+    const section: Record<string, unknown> = { ...minimal.sections[0]! };
+    delete section.modifiers;
     const page = parsePageModel({ ...minimal, sections: [section] });
     expect(page.sections[0]?.modifiers).toEqual({});
   });

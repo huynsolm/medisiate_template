@@ -109,7 +109,7 @@ export function innerHtml(element: DomElement): string {
 }
 
 function escapeForHtml(value: string): string {
-  return value.replace(/&/gu, '&amp;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;').replace(/ /gu, '&nbsp;');
+  return value.replace(/&/gu, '&amp;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;').replace(/\u00a0/gu, '&nbsp;');
 }
 
 export interface SourceSection {
