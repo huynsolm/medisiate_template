@@ -92,7 +92,12 @@ export function escapeAttr(value: string): string {
 
 /** 주석 안에서 주석이 끝나거나 다시 열리지 않게 한다. */
 export function escapeComment(value: string): string {
-  return value.replace(/--/gu, '- -').replace(/^>/u, ' >').replace(/-$/u, '- ');
+  return value
+    .replace(/&/gu, '&amp;')
+    .replace(/</gu, '&lt;')
+    .replace(/>/gu, '&gt;')
+    .replace(/--/gu, '- -')
+    .replace(/-$/u, '- ');
 }
 
 function isBlock(node: HNode): boolean {

@@ -78,6 +78,25 @@ export function plainText(node: DomNode): string {
   return textContent(node).replace(/\s+/gu, ' ').trim();
 }
 
+const BLOCK_TEXT = new Set(['p', 'div', 'li', 'section', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'tr', 'dt', 'dd', 'ul', 'ol', 'table']);
+
+/** 블록 요소 경계를 줄바꿈으로 남긴 텍스트 (fallback 표시용) */
+export function blockText(node: DomNode): string {
+  const parts: string[] = [];
+  const visit = (n: DomNode) => {
+    if (n.nodeName === '#text') parts.push((n as DefaultTreeAdapterMap['textNode']).value.replace(/[ \t\r\n]+/gu, ' '));
+    else if (isElement(n)) {
+      if (n.tagName === 'script' || n.tagName === 'style') return;
+      const block = BLOCK_TEXT.has(n.tagName);
+      if (block) parts.push('\n');
+      childNodes(n).forEach(visit);
+      if (block) parts.push('\n');
+    } else childNodes(n).forEach(visit);
+  };
+  visit(node);
+  return parts.join('').split('\n').map((l) => l.trim()).filter(Boolean).join('\n');
+}
+
 export function outerHtml(element: DomElement): string {
   return serializeOuter(element);
 }
