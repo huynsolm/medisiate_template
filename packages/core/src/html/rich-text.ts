@@ -1,10 +1,34 @@
 import { parseFragment } from 'parse5';
 import { escapeAttr, escapeText } from './h.ts';
+import { CSS_COLOR } from '../schema/page.ts';
 
 /** 제목·설명 같은 짧은 서식 텍스트에 허용하는 태그 */
 export const RICH_TEXT_TAGS = new Set(['em', 'strong', 'b', 'i', 'br', 'span', 'u', 'sup', 'sub']);
 const DROP_WITH_CONTENT = new Set(['script', 'style', 'template', 'iframe', 'object', 'noscript']);
 const CLASS_TOKEN = /^[a-zA-Z0-9_-]+$/u;
+
+/** 서식 태그에만 남기는 inline style 속성과 값 검사 */
+const INLINE_STYLE_ALLOW: Record<string, (value: string) => boolean> = {
+  color: (v) => CSS_COLOR.test(v),
+  'background-color': (v) => CSS_COLOR.test(v),
+  'font-weight': (v) => /^(normal|bold|bolder|lighter|[1-9]00)$/u.test(v),
+};
+
+/** style 속성을 선언 단위로 나눠 허용 목록을 통과한 것(kept)과 버린 것(dropped)으로 가른다. */
+export function filterInlineStyle(tag: string, style: string): { kept: string[]; dropped: string[] } {
+  const kept: string[] = [];
+  const dropped: string[] = [];
+  const allowedTag = RICH_TEXT_TAGS.has(tag) && tag !== 'br';
+  for (const raw of style.split(';').map((d) => d.trim()).filter(Boolean)) {
+    const i = raw.indexOf(':');
+    const prop = raw.slice(0, i).trim().toLowerCase();
+    const value = raw.slice(i + 1).trim();
+    const check = INLINE_STYLE_ALLOW[prop];
+    if (allowedTag && i > 0 && check?.(value)) kept.push(`${prop}: ${value};`);
+    else dropped.push(raw);
+  }
+  return { kept, dropped };
+}
 
 interface P5Node {
   nodeName: string;
@@ -32,7 +56,8 @@ function walk(nodes: P5Node[] | undefined): string {
     const classes = (node.attrs?.find((a) => a.name === 'class')?.value ?? '')
       .split(/\s+/u)
       .filter((token) => CLASS_TOKEN.test(token));
-    const attr = classes.length ? ` class="${escapeAttr(classes.join(' '))}"` : '';
+    const style = filterInlineStyle(tag, node.attrs?.find((a) => a.name === 'style')?.value ?? '').kept.join(' ');
+    const attr = `${classes.length ? ` class="${escapeAttr(classes.join(' '))}"` : ''}${style ? ` style="${escapeAttr(style)}"` : ''}`;
     out += tag === 'br' ? `<br${attr}>` : `<${tag}${attr}>${inner}</${tag}>`;
   }
   return out;

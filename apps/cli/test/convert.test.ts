@@ -55,7 +55,8 @@ describe('convert', () => {
     expect(laser).toContain('--mig-primary-color: #c7b195;');
 
     const report = JSON.parse(await readFile(path.join(root, 'output/reports/report.json'), 'utf8'));
-    expect(report.summary).toMatchObject({ total: 4, success: 2, partial: 1, failed: 1 });
+    // http·상대경로 이미지는 warn이라 botox·laser도 partial (리뷰 결정 2)
+    expect(report.summary).toMatchObject({ total: 4, success: 0, partial: 3, failed: 1 });
     expect(report.nonTargetFiles).toEqual(['01/old.html.bak']);
     expect(report.hostCss.sha256).toMatch(/^00657D80/u);
 
@@ -71,7 +72,7 @@ describe('convert', () => {
     expect(unsupported).toContain('01/filler.html,2,type26');
 
     const summary = await readFile(path.join(root, 'output/reports/summary.md'), 'utf8');
-    expect(summary).toContain('| partial | 1 |');
+    expect(summary).toContain('| partial | 3 |');
     expect(summary).toContain('type26');
 
     expect(await hashTree(path.join(root, 'cms'))).toEqual(before);

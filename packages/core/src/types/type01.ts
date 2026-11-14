@@ -5,7 +5,7 @@ import { presetHeader } from '../helpers/header.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { descendants } from '../parse/dom.ts';
-import { isHeading, pairImages, richFrom, scanSection } from '../parse/common.ts';
+import { isHeading, pairImages, richFrom, scanSection, uncoveredText, variantFromClasses } from '../parse/common.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 
@@ -22,6 +22,12 @@ export type Type01Data = z.infer<typeof schema>;
  * PC/MO 와이드 이미지 + 큰 설명. 호스트 계약:
  * section.type-01 > [header.mig-header] + div.mig-body > div.mig-content > .mig-visual + [.mig-highlight-box >] .mig-text-wrap
  */
+/**
+ * 원본 클래스 → 변형. highlight는 제안서의 '강조 텍스트' 설명을 근거로 한 **추정** 클래스명이다.
+ * 실제 원본 클래스를 확인한 뒤 바꾼다.
+ */
+export const TYPE01_SOURCE_VARIANTS: Record<string, string> = { highlight: 'highlight' };
+
 export const type01: TypeDefinition<Type01Data> = {
   id: 'type01',
   label: 'type01 와이드 이미지 + 설명',
@@ -38,8 +44,9 @@ export const type01: TypeDefinition<Type01Data> = {
   ],
   defaults: { image: {}, title: '제목', desc: '설명' },
   parse(src) {
-    const { modifiers, diagnostics } = scanSection(src, this.variants);
-    const image = pairImages(descendants(src.element, (el) => el.tagName === 'img'), src, diagnostics);
+    const { modifiers, diagnostics } = scanSection(src, Object.keys(TYPE01_SOURCE_VARIANTS));
+    const variant = variantFromClasses(src, TYPE01_SOURCE_VARIANTS, diagnostics);
+    const { pair: image, extra } = pairImages(descendants(src.element, (el) => el.tagName === 'img'), src, diagnostics);
     const heading = descendants(src.element, isHeading)[0];
     const paragraphs = descendants(src.element, (el) => el.tagName === 'p' && !(heading && descendants(heading).includes(el)));
     const desc = paragraphs.map(richFrom).filter(Boolean).join('<br>');
@@ -47,7 +54,13 @@ export const type01: TypeDefinition<Type01Data> = {
     const title = heading ? richFrom(heading) : '';
     if (title) data.title = title;
     if (desc) data.desc = desc;
-    return { data, variant: 'default', modifiers, diagnostics, lossless: !diagnostics.some((d) => d.level !== 'info') };
+    const lostText = uncoveredText(src.element, [title, ...paragraphs.map(richFrom)]);
+    const fallbackReason = extra.length
+      ? `이미지 ${extra.length + (image.pc ? 1 : 0) + (image.mo ? 1 : 0)}장 중 ${extra.length}장을 담을 자리가 없음`
+      : lostText
+        ? `제목·문단 밖 텍스트를 담을 자리가 없음: ${lostText.slice(0, 40)}`
+        : undefined;
+    return { data, variant, modifiers, diagnostics, lossless: !fallbackReason && !diagnostics.some((d) => d.level !== 'info'), fallbackReason };
   },
   render(section) {
     const d = section.data;

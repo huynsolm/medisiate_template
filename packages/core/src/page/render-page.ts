@@ -1,6 +1,7 @@
 import { h, serialize, type HNode } from '../html/h.ts';
 import { cssColor } from '../helpers/background.ts';
-import type { Diagnostic, PageModel, SectionModel, Strategy } from '../model/index.ts';
+import type { Diagnostic, ImageRef, PageModel, SectionModel, Strategy } from '../model/index.ts';
+import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { createRenderContext, DefsCollector, type RenderContext } from '../render/context.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
 import type { StyleObject } from '../html/h.ts';
@@ -37,7 +38,19 @@ interface Prepared {
 
 function toFallback(section: SectionModel, reason: string): SectionModel<FallbackData> {
   const text = section.data && typeof section.data === 'object' ? collectText(section.data) : '';
-  return { ...section, type: FALLBACK_ID, data: { reason, originalType: section.type, text } };
+  const images = collectImages(section.data);
+  return { ...section, type: FALLBACK_ID, data: { reason, originalType: section.type, text, ...(images.length ? { images } : {}) } };
+}
+
+/** 검증에 실패한 데이터에서도 이미지는 잃지 않는다 */
+function collectImages(value: unknown, out: ImageRef[] = []): ImageRef[] {
+  if (Array.isArray(value)) value.forEach((v) => collectImages(v, out));
+  else if (value && typeof value === 'object') {
+    const v = value as Record<string, unknown>;
+    if (typeof v.src === 'string' && v.src) out.push({ src: v.src, alt: typeof v.alt === 'string' ? v.alt : '', kind: classifyImageSrc(v.src) });
+    else Object.values(v).forEach((child) => collectImages(child, out));
+  }
+  return out;
 }
 
 function collectText(value: unknown): string {

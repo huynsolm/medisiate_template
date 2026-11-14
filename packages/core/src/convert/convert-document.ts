@@ -128,6 +128,11 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
     }
     const result = def.parse(src, { diagnostics });
     diagnostics.push(...result.diagnostics);
+    if (result.fallbackReason) {
+      diagnostics.push({ level: 'warn', code: 'LOSSY_PARSE', message: `${def.id}: ${result.fallbackReason} → 원본을 fallback으로 보존`, sectionIndex: src.index });
+      sections.push(fallbackFromSource(src, id, result.fallbackReason));
+      continue;
+    }
     sections.push({
       id,
       type: def.id,

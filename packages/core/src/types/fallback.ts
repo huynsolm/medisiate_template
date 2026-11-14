@@ -1,8 +1,12 @@
 import { z } from 'zod';
 import { comment, h } from '../html/h.ts';
+import { renderImage } from '../helpers/image.ts';
+import { imageRefSchema } from '../schema/page.ts';
+import { imageFromElement } from '../parse/common.ts';
+import type { ImageRef } from '../model/index.ts';
 import type { TypeDefinition } from './definition.ts';
 import type { SectionModel } from '../model/index.ts';
-import { blockText, outerHtml, type SourceSection } from '../parse/dom.ts';
+import { blockText, descendants, outerHtml, type SourceSection } from '../parse/dom.ts';
 
 export interface FallbackData {
   /** 사람이 읽는 사유 */
@@ -11,7 +15,9 @@ export interface FallbackData {
   /** 원본에서 뽑은 텍스트 (화면에 보임) */
   text: string;
   /** 원본 HTML. 출력에는 escape한 주석으로만 들어간다 */
-  html?: string;
+  html?: string | undefined;
+  /** 원본 이미지. src를 잃지 않도록 화면에 그대로 출력한다 */
+  images?: ImageRef[] | undefined;
 }
 
 export const fallbackSchema = z.object({
@@ -19,6 +25,7 @@ export const fallbackSchema = z.object({
   originalType: z.string().optional(),
   text: z.string(),
   html: z.string().optional(),
+  images: z.array(imageRefSchema).optional(),
 });
 
 export const FALLBACK_ID = 'fallback';
@@ -37,7 +44,7 @@ export const fallbackType: TypeDefinition<FallbackData> = {
   ],
   defaults: { reason: '', text: '' },
   render(section) {
-    const { reason, originalType, text, html } = section.data;
+    const { reason, originalType, text, html, images } = section.data;
     const label = `[변환 미지원]${originalType ? ` ${originalType}` : ''} ${reason}`.trim();
     return h(
       'section',
@@ -49,6 +56,12 @@ export const fallbackType: TypeDefinition<FallbackData> = {
       [
         h('p', { style: { margin: '0 0 8px', color: '#8a6d00', fontWeight: 'bold' } }, [label]),
         text && h('p', { style: { margin: '0', whiteSpace: 'pre-line' } }, [text]),
+        images?.length &&
+          h(
+            'div',
+            { style: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' } },
+            images.map((img) => renderImage(img, { style: { maxWidth: '100%', height: 'auto' } })),
+          ),
         html && comment(`original: ${html}`),
       ],
     );
@@ -62,7 +75,13 @@ export function fallbackFromSource(src: SourceSection, id: string, reason: strin
     type: FALLBACK_ID,
     variant: 'default',
     modifiers: {},
-    data: { reason, originalType: src.typeId ?? src.classList.join(' '), text: blockText(src.element), html: outerHtml(src.element) },
+    data: {
+      reason,
+      originalType: src.typeId ?? src.classList.join(' '),
+      text: blockText(src.element),
+      html: outerHtml(src.element),
+      images: descendants(src.element, (el) => el.tagName === 'img').map(imageFromElement),
+    },
     source: { file: src.file, index: src.index, classList: src.classList },
   };
 }

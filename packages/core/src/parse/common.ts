@@ -1,7 +1,7 @@
 import type { Diagnostic, ImagePair, ImageRef } from '../model/index.ts';
 import { imageRef } from '../helpers/image-ref.ts';
-import { sanitizeRichText } from '../html/rich-text.ts';
-import { ancestors, attr, classesOf, descendants, innerHtml, type DomElement, type SourceSection } from './dom.ts';
+import { filterInlineStyle, richTextToPlain, sanitizeRichText } from '../html/rich-text.ts';
+import { ancestors, attr, classesOf, descendants, innerHtml, plainText, type DomElement, type SourceSection } from './dom.ts';
 import { modifiersFromClasses } from './modifiers.ts';
 
 /** script, on* 속성, 이미지 URL, 미등록 클래스를 진단으로 남긴다. */
@@ -11,7 +11,14 @@ export function scanSection(src: SourceSection, typeVariants: Iterable<string> =
     const loc = el.sourceCodeLocation;
     return loc ? { location: { line: loc.startLine, col: loc.startCol } } : {};
   };
-  for (const el of descendants(src.element)) {
+  for (const el of [src.element, ...descendants(src.element)]) {
+    const style = attr(el, 'style');
+    if (style) {
+      const { dropped } = filterInlineStyle(el.tagName, style);
+      if (dropped.length) {
+        diagnostics.push({ level: 'warn', code: 'INLINE_STYLE_DROPPED', message: `${el.tagName}의 inline style 일부 제거: ${dropped.join('; ')}`, sectionIndex: src.index, ...at(el), detail: { tag: el.tagName, declarations: dropped } });
+      }
+    }
     if (el.tagName === 'script') {
       diagnostics.push({ level: 'warn', code: 'SCRIPT_REMOVED', message: 'script 제거', sectionIndex: src.index, ...at(el), detail: { source: innerHtml(el) } });
     }
@@ -24,7 +31,7 @@ export function scanSection(src: SourceSection, typeVariants: Iterable<string> =
       const kind = imageRef(attr(el, 'src') ?? '').kind;
       if (kind === 'http' || kind === 'relative') {
         diagnostics.push({
-          level: 'info',
+          level: 'warn',
           code: kind === 'http' ? 'IMAGE_HTTP' : 'IMAGE_RELATIVE',
           message: `이미지 주소가 ${kind === 'http' ? 'http://' : '상대경로'}임 (주소는 그대로 둠)`,
           sectionIndex: src.index,
@@ -68,11 +75,12 @@ export function deviceOf(el: DomElement): 'pc' | 'mo' | undefined {
 
 /**
  * 이미지 목록을 PC/MO 쌍으로 묶는다. 표시가 없으면 첫 장 PC, 둘째 장 MO로 추정하고 진단을 남긴다.
- * 원본 구조를 확인하지 못한 상태의 **추정 규칙**이다.
+ * 원본 구조를 확인하지 못한 상태의 **추정 규칙**이다. 쌍에 들어가지 못한 이미지는 extra로 돌려준다.
  */
-export function pairImages(images: DomElement[], src: SourceSection, diagnostics: Diagnostic[]): ImagePair {
+export function pairImages(images: DomElement[], src: SourceSection, diagnostics: Diagnostic[]): { pair: ImagePair; extra: DomElement[] } {
   const pair: ImagePair = {};
   const unmarked: DomElement[] = [];
+  const extra: DomElement[] = [];
   for (const el of images) {
     const device = deviceOf(el);
     if (device && !pair[device]) pair[device] = imageFromElement(el);
@@ -81,7 +89,7 @@ export function pairImages(images: DomElement[], src: SourceSection, diagnostics
   for (const el of unmarked) {
     const slot = !pair.pc ? 'pc' : !pair.mo ? 'mo' : undefined;
     if (!slot) {
-      diagnostics.push({ level: 'warn', code: 'PARSE_HEURISTIC', message: '세 번째 이후 이미지는 버림', sectionIndex: src.index, detail: { src: attr(el, 'src') } });
+      extra.push(el);
       continue;
     }
     pair[slot] = imageFromElement(el);
@@ -89,7 +97,31 @@ export function pairImages(images: DomElement[], src: SourceSection, diagnostics
       diagnostics.push({ level: 'info', code: 'PARSE_HEURISTIC', message: `PC/MO 표시가 없어 순서로 ${slot.toUpperCase()} 이미지로 판단`, sectionIndex: src.index, detail: { src: attr(el, 'src') } });
     }
   }
-  return pair;
+  return { pair, extra };
+}
+
+const squash = (value: string) => value.replace(/\s+/gu, '');
+
+/**
+ * 원본 섹션의 텍스트 중 추출한 서식 텍스트에 들어가지 못한 부분을 돌려준다.
+ * 비어 있지 않으면 parse가 텍스트를 잃는다는 뜻이다.
+ */
+export function uncoveredText(element: DomElement, extracted: string[]): string {
+  let rest = squash(plainText(element));
+  for (const part of extracted.map((html) => squash(richTextToPlain(html))).filter(Boolean)) {
+    const i = rest.indexOf(part);
+    if (i >= 0) rest = rest.slice(0, i) + rest.slice(i + part.length);
+  }
+  return rest;
+}
+
+/** 원본 클래스에서 타입 변형을 고른다. 둘 이상이면 첫 번째를 쓰고 UNKNOWN_VARIANT를 남긴다. */
+export function variantFromClasses(src: SourceSection, sourceVariants: Record<string, string>, diagnostics: Diagnostic[]): string {
+  const found = src.classList.filter((c) => c in sourceVariants);
+  if (found.length > 1) {
+    diagnostics.push({ level: 'warn', code: 'UNKNOWN_VARIANT', message: `변형 클래스가 여러 개: ${found.join(', ')} (첫 번째 사용)`, sectionIndex: src.index, detail: { classes: found } });
+  }
+  return found.length ? sourceVariants[found[0]!]! : 'default';
 }
 
 /** 요소 안 HTML을 서식 allowlist에 통과시킨다. */

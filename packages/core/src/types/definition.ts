@@ -31,6 +31,8 @@ export interface ParseResult<T> {
   diagnostics: Diagnostic[];
   /** 원본 정보를 하나도 버리지 않았으면 true */
   lossless: boolean;
+  /** 값이 있으면 원본 정보를 잃는다는 뜻이다. 변환기는 이 섹션을 fallback으로 보존한다 */
+  fallbackReason?: string | undefined;
 }
 
 export interface TypeDefinition<T = unknown> {

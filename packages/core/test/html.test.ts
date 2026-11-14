@@ -62,7 +62,7 @@ describe('sanitizeRichText', () => {
   });
 
   it('drops non-class attributes and event handlers', () => {
-    expect(sanitizeRichText('<span class="em" onclick="x" style="color:red">t</span>')).toBe('<span class="em">t</span>');
+    expect(sanitizeRichText('<span class="em" onclick="x" style="color:red;position:fixed">t</span>')).toBe('<span class="em" style="color: red;">t</span>');
   });
 
   it('drops class tokens with unsafe characters', () => {
