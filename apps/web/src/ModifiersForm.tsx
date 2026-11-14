@@ -44,6 +44,19 @@ export function ModifiersForm({ value, onChange }: { value: SectionModifiers; on
           />
         </label>
       )}
+      {bg?.kind === 'image' && (
+        <label>
+          모바일 전용 배경 이미지 (비우면 PC와 같음)
+          <input
+            value={bg.mobile?.value ?? ''}
+            onChange={(e) => {
+              const { mobile: _old, ...rest } = bg;
+              void _old;
+              set({ background: e.target.value ? { ...rest, mobile: { value: e.target.value } } : rest });
+            }}
+          />
+        </label>
+      )}
       <label className="check">
         <input type="checkbox" checked={Boolean(value.fullBleed)} onChange={(e) => set({ fullBleed: e.target.checked ? { paddingY: '70px' } : undefined })} />
         화면 전체 폭 (일반 모드)

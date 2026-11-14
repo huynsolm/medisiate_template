@@ -73,6 +73,7 @@ export const type01: TypeDefinition<Type01Data> = {
           ])
         : null;
     return h('section', { class: ['mig-section', 'type-01', ...bg.classes].join(' '), ...bg.attrs, style: bg.style }, [
+      bg.layer,
       presetHeader({ eyebrow: d.eyebrow, title: d.heading }),
       h('div', { class: 'mig-body' }, [
         h('div', { class: 'mig-content' }, [

@@ -32,6 +32,8 @@ export interface SectionBackground {
   kind: 'color' | 'image';
   value: string;
   overlay?: string | undefined;
+  /** 모바일 전용 배경 이미지. 있으면 value는 PC(1024px 이상 공개 화면) 전용이 된다 */
+  mobile?: { value: string; color?: string | undefined } | undefined;
   /** 원본 변형 이름 (예: 'bg-color-2') */
   token?: string | undefined;
 }

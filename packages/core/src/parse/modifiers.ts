@@ -33,7 +33,13 @@ export function modifiersFromClasses(classList: string[], typeVariants: Iterable
     else if (cls.startsWith('bg-image-')) image = cls as CmsVariantName;
     else if (cls === 'text-white') modifiers.textWhite = true;
   }
-  if (image) modifiers.background = { kind: 'image', value: imageUrl(image), token: image };
+  if (image) {
+    modifiers.background = { kind: 'image', value: imageUrl(image), token: image };
+    // bg-image-1/2는 모바일(≤991px) 전용 이미지와 배경색이 따로 있다 (cms.css 116~124행)
+    const mobile = (CMS_VARIANT_MAP[image] as { mobile?: Record<string, string> }).mobile;
+    const mobileFile = /cms_bg_\d+_m\.jpg/u.exec(mobile?.backgroundImage ?? '')?.[0];
+    if (mobileFile) modifiers.background.mobile = { value: `${CMS_COMMON_IMAGE_BASE}${mobileFile}`, ...(mobile?.backgroundColor ? { color: mobile.backgroundColor } : {}) };
+  }
   else if (color) modifiers.background = { kind: 'color', value: (CMS_VARIANT_MAP[color].base as Record<string, string>).background ?? '', token: color };
   else if (classList.includes('type-bg')) modifiers.background = { kind: 'color', value: CMS_VARIANT_MAP['type-bg'].base.background, token: 'type-bg' };
   return { modifiers, unknown };

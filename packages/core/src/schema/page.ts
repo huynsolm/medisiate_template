@@ -37,6 +37,7 @@ export const modifiersSchema = z.object({
       kind: z.enum(['color', 'image']),
       value: z.string(),
       overlay: colorSchema.optional(),
+      mobile: z.object({ value: z.string(), color: colorSchema.optional() }).optional(),
       token: z.string().optional(),
     })
     .optional(),

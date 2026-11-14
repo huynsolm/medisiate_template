@@ -15,6 +15,15 @@ export interface PlaywrightLike {
  * 프로젝트 의존성으로 넣지 않고, 있으면 쓰고 없으면 시각 테스트를 건너뛴다.
  */
 export async function loadPlaywright(): Promise<PlaywrightLike | undefined> {
+  const found = await findPlaywright();
+  // npm run test:browser는 브라우저 검증이 완료 조건이므로 건너뛰지 않고 실패한다
+  if (!found && process.env.REQUIRE_BROWSER) {
+    throw new Error('REQUIRE_BROWSER=1인데 playwright를 찾지 못했습니다. playwright를 설치하거나 PLAYWRIGHT_NODE_MODULES를 지정하세요.');
+  }
+  return found;
+}
+
+async function findPlaywright(): Promise<PlaywrightLike | undefined> {
   try {
     const name = 'playwright';
     return (await import(/* @vite-ignore */ name)) as PlaywrightLike;

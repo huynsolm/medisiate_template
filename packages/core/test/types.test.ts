@@ -117,6 +117,16 @@ describe('type01', () => {
   });
 });
 
+describe('pc/mobile backgrounds', () => {
+  it('puts the mobile image on the section and the pc image on a pc-only layer', () => {
+    const { modifiers } = modifiersFromClasses(['cms', 'type01', 'type-bg', 'bg-image-1']);
+    const out = serialize(type01.render({ id: 's1', type: 'type01', variant: 'default', modifiers, data: { image: {}, desc: 'x' } }, ctx()));
+    expect(out).toContain('data-migration-bg="true" data-bg-scope="mobile"');
+    expect(out).toContain("background-image: url('http://fxfile.drline.net/cms/public/images/common/cms_bg_1_m.jpg');");
+    expect(out).toMatch(/<div class="common-display-pc" aria-hidden="true" style="position: absolute; inset: 0; z-index: -1; background-image: url\('[^']+cms_bg_1\.jpg'\)/u);
+  });
+});
+
 describe('modifiersFromClasses', () => {
   it('maps shared background classes', () => {
     expect(modifiersFromClasses(['cms', 'type01', 'type-bg']).modifiers).toEqual({ background: { kind: 'color', value: '#f9f3ec', token: 'type-bg' } });
@@ -124,8 +134,10 @@ describe('modifiersFromClasses', () => {
     expect(img.modifiers.background).toEqual({
       kind: 'image',
       value: 'http://fxfile.drline.net/cms/public/images/common/cms_bg_1.jpg',
+      mobile: { value: 'http://fxfile.drline.net/cms/public/images/common/cms_bg_1_m.jpg', color: '#38405e' },
       token: 'bg-image-1',
     });
+    expect(modifiersFromClasses(['cms', 'type05', 'bg-image-3']).modifiers.background?.mobile).toBeUndefined();
     expect(img.modifiers.textWhite).toBe(true);
     expect(img.unknown).toEqual([]);
   });
