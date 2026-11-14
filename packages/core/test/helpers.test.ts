@@ -72,7 +72,7 @@ describe('headers', () => {
     expect(out).toContain('class="mig-title" style="color: #fff;');
   });
   it('renders the preset header with host classes', () => {
-    expect(serialize(presetHeader({ eyebrow: 'e', title: 't', desc: 'd' }))).toBe(
+    expect(serialize(presetHeader({ eyebrow: 'e', title: 't', desc: 'd' })!)).toBe(
       '<header class="mig-header">\n<span class="mig-eyebrow">e</span><strong class="mig-title">t</strong>\n<p class="mig-desc">d</p>\n</header>',
     );
   });
