@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { isResolvedWithinOutput, safeRemove, safeWrite } from '../src/fs/safe-write.js';
@@ -102,5 +102,36 @@ describe('output root that is a link (C-1)', () => {
     await expect(safeWrite(tempRoot, path.join(tempRoot, 'output', 'a.html'), 'overwritten')).rejects.toThrow(/link/iu);
     await expect(safeRemove(tempRoot, path.join(tempRoot, 'output', 'a.html'))).rejects.toThrow(/link/iu);
     expect(await readFile(path.join(cmsContents, 'a.html'), 'utf8')).toBe('original');
+  });
+});
+
+describe('safeWrite atomic replace (I-7)', () => {
+  it('writes through a temporary file and leaves no temporary files behind', async () => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-atomic-'));
+    const target = path.join(tempRoot, 'output', 'data', 'a.json');
+    await safeWrite(tempRoot, target, 'one');
+    await safeWrite(tempRoot, target, 'two');
+    expect(await readFile(target, 'utf8')).toBe('two');
+    expect(await readdir(path.dirname(target))).toEqual(['a.json']);
+  });
+
+  it('replaces a target that became a link instead of writing through it', async () => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-atomic-'));
+    const victim = path.join(tempRoot, 'victim.txt');
+    await writeFile(victim, 'keep');
+    const target = path.join(tempRoot, 'output', 'a.txt');
+    await safeWrite(tempRoot, target, 'old');
+    // 검사 직후 대상이 링크로 바뀌는 상황을 흉내 낸다: 검사 훅에서 링크로 교체
+    let swapped = false;
+    await safeWrite(tempRoot, target, 'first', {
+      afterCheck: async () => {
+        await rm(target, { force: true });
+        await symlink(victim, target);
+        swapped = true;
+      },
+    });
+    expect(swapped).toBe(true);
+    expect(await readFile(victim, 'utf8')).toBe('keep');
+    expect(await readFile(target, 'utf8')).toBe('first');
   });
 });
