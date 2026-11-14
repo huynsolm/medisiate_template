@@ -1,4 +1,4 @@
-import { lstat, mkdir, realpath, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 function isWithin(parent: string, candidate: string): boolean {
@@ -51,4 +51,18 @@ export async function safeWrite(root: string, target: string, data: string): Pro
   if (existing?.isSymbolicLink()) throw new Error(`refusing to write through a symlink: ${resolvedTarget}`);
   if (existing && !existing.isFile()) throw new Error(`target is not a regular file: ${resolvedTarget}`);
   await writeFile(resolvedTarget, data, { encoding: 'utf8', flag: existing ? 'w' : 'wx' });
+}
+
+/** output 아래 생성물만 지운다. 링크면 링크 자체만 지우고 대상은 건드리지 않는다. */
+export async function safeRemove(root: string, target: string): Promise<void> {
+  const resolvedRoot = path.resolve(root);
+  const resolvedTarget = path.resolve(target);
+  const outputRoot = path.join(resolvedRoot, 'output');
+  if (!isWithin(outputRoot, resolvedTarget) || resolvedTarget === outputRoot) {
+    throw new Error(`only generated files below output can be removed: ${resolvedTarget}`);
+  }
+  const stat = await lstat(resolvedTarget).catch(() => undefined);
+  if (!stat) return;
+  if (stat.isDirectory()) throw new Error(`refusing to remove a directory: ${resolvedTarget}`);
+  await rm(resolvedTarget);
 }

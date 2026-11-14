@@ -62,3 +62,19 @@ describe('safeWrite', () => {
     await expect(safeWrite(tempRoot, path.join(output, 'linked-cms', 'bad.html'), 'no')).rejects.toThrow(/link|escape|read-only/i);
   });
 });
+
+describe('safeRemove', () => {
+  it('only removes files below output and never follows links', async () => {
+    const { safeRemove } = await import('../src/fs/safe-write.js');
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-rm-'));
+    const victim = path.join(tempRoot, 'cms', 'a.html');
+    await mkdir(path.dirname(victim), { recursive: true });
+    await writeFile(victim, 'keep');
+    await expect(safeRemove(tempRoot, victim)).rejects.toThrow(/output/u);
+    const link = path.join(tempRoot, 'output', 'link.html');
+    await mkdir(path.dirname(link), { recursive: true });
+    await symlink(victim, link);
+    await safeRemove(tempRoot, link);
+    expect(await readFile(victim, 'utf8')).toBe('keep');
+  });
+});

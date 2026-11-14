@@ -11,7 +11,7 @@ import {
   type DiagnosticLevel,
   type ThemeInput,
 } from '@cms-medisay/core';
-import { safeWrite } from '../fs/safe-write.ts';
+import { safeRemove, safeWrite } from '../fs/safe-write.ts';
 import { buildReport, imagesCsv, reportCsv, summaryMarkdown, unsupportedCsv, type FileRecord } from '../report/build.ts';
 
 const SRC = 'cms/contents';
@@ -106,6 +106,27 @@ export async function runConvert(root: string, argv: string[]): Promise<number> 
     await safeWrite(root, path.join(out, 'data', `${base}.json`), `${JSON.stringify(result.page, null, 2)}\n`);
     await safeWrite(root, path.join(out, 'reports/files', `${base}.json`), `${JSON.stringify(record, null, 2)}\n`);
     for (const d of result.page.diagnostics) worst = Math.max(worst, LEVELS.indexOf(d.level));
+  }
+
+  if (values.all) {
+    // 지금 원본 목록에 없는 이전 생성물(삭제·이름 변경된 원본)을 지운다
+    const current = new Set(htmlFiles.map((f) => posix(path.relative(contents, f)).replace(/\.html$/u, '')));
+    const generated: Array<[string, string]> = [
+      [path.join(out, 'contents'), '.html'],
+      [path.join(out, 'data'), '.json'],
+      [path.join(out, 'reports/files'), '.json'],
+    ];
+    let removed = 0;
+    for (const [dir, ext] of generated) {
+      if (!existsSync(dir)) continue;
+      for (const file of await walk(dir)) {
+        const base = posix(path.relative(dir, file));
+        if (base.endsWith(ext) && current.has(base.slice(0, -ext.length))) continue;
+        await safeRemove(root, file);
+        removed += 1;
+      }
+    }
+    if (removed) console.log(`이전 생성물 ${removed}개 삭제 (원본에 없는 파일)`);
   }
 
   const nonTargetPath = path.join(out, 'reports/non-target.json');

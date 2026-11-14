@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { cp, mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -86,6 +86,22 @@ describe('convert', () => {
     const report = JSON.parse(await readFile(path.join(root, 'output/reports/report.json'), 'utf8'));
     expect(report.summary.total).toBe(4);
     expect(report.files.find((f: { file: string }) => f.file === '02/laser.html').status).toBe('failed');
+  });
+
+  it('removes outputs of deleted sources when re-running --all (I-5)', async () => {
+    await runConvert(root, ['--all']);
+    const stray = path.join(root, 'output/contents/02/laser.html');
+    await readFile(stray, 'utf8');
+    await rm(path.join(root, 'cms/contents/02/laser.html'));
+    // output 밖 파일은 건드리지 않아야 한다
+    await put('keep-me.html', 'x');
+    expect(await runConvert(root, ['--all'])).toBe(0);
+    for (const rel of ['output/contents/02/laser.html', 'output/data/02/laser.json', 'output/reports/files/02/laser.json']) {
+      await expect(readFile(path.join(root, rel), 'utf8')).rejects.toThrow();
+    }
+    const report = JSON.parse(await readFile(path.join(root, 'output/reports/report.json'), 'utf8'));
+    expect(report.summary.total).toBe(3);
+    expect(await readFile(path.join(root, 'keep-me.html'), 'utf8')).toBe('x');
   });
 
   it('converts a single file', async () => {
