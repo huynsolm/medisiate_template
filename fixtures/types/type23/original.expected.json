@@ -1,0 +1,31 @@
+{
+  "id": "s1",
+  "type": "type23",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "desc": "가운데에 놓을 설명을 입력해 보세요.",
+    "image": {
+      "pc": {
+        "src": "/images/cms-sample.svg",
+        "alt": "",
+        "kind": "relative"
+      },
+      "mo": {
+        "src": "/images/cms-sample-m.svg",
+        "alt": "",
+        "kind": "relative"
+      }
+    }
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type23"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "s1",
+  "type": "type19",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "items": [
+      {
+        "num": "01",
+        "text": "1단계"
+      },
+      {
+        "num": "02",
+        "text": "2단계"
+      },
+      {
+        "num": "03",
+        "text": "3단계"
+      },
+      {
+        "num": "04",
+        "text": "4단계"
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type19"
+    ]
+  }
+}

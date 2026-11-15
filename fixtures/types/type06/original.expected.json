@@ -1,0 +1,109 @@
+{
+  "id": "s1",
+  "type": "type06",
+  "variant": "default",
+  "modifiers": {
+    "textWhite": true,
+    "background": {
+      "kind": "image",
+      "value": "http://fxfile.drline.net/cms/public/images/common/cms_bg_1.jpg",
+      "token": "bg-image-1",
+      "mobile": {
+        "value": "http://fxfile.drline.net/cms/public/images/common/cms_bg_1_m.jpg",
+        "color": "#38405e"
+      }
+    }
+  },
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "items": [
+      {
+        "text": "<strong>칸 1</strong>",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": [
+          {
+            "text": "세부 내용 1"
+          },
+          {
+            "text": "세부 내용 2"
+          }
+        ]
+      },
+      {
+        "text": "칸 2",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": []
+      },
+      {
+        "text": "<strong>칸 3</strong>",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": [
+          {
+            "text": "세부 내용 1"
+          }
+        ]
+      },
+      {
+        "text": "칸 4",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": []
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type06",
+      "type-bg",
+      "bg-image-1",
+      "text-white"
+    ]
+  }
+}

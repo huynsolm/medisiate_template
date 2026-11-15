@@ -37,7 +37,9 @@ export function presetSection(
   return h('section', { class: ['mig-section', typeClass, ...bg.classes].join(' '), ...bg.attrs, style: bg.style }, [
     bg.layer,
     presetHeader({ eyebrow: section.data.eyebrow, title: section.data.heading }),
-    h('div', { class: 'mig-body' }, body),
+    // 이미지 배경 섹션(data-migration-bg)은 호스트가 가운데 정렬 flex로 만들어 본문이 내용 폭으로 줄어든다.
+    // 카드 목록이 찌그러지지 않도록 본문만 섹션 폭을 다 쓰게 한다(머리글의 가운데 정렬은 그대로).
+    h('div', { class: 'mig-body', style: bg.attrs['data-migration-bg'] ? { alignSelf: 'stretch' } : undefined }, body),
   ]);
 }
 

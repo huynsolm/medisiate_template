@@ -1,0 +1,40 @@
+{
+  "id": "s1",
+  "type": "type13",
+  "variant": "default",
+  "modifiers": {
+    "background": {
+      "kind": "color",
+      "value": "#f9f3ec",
+      "token": "type-bg"
+    }
+  },
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "items": [
+      {
+        "num": "01",
+        "text": "1번째 내용을 입력해 보세요."
+      },
+      {
+        "num": "02",
+        "text": "2번째 내용을 입력해 보세요."
+      },
+      {
+        "num": "03",
+        "text": "3번째 내용을 입력해 보세요."
+      }
+    ],
+    "bottom": "마무리 문구를 입력해 보세요."
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type13",
+      "type-bg"
+    ]
+  }
+}
