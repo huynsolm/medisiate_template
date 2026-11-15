@@ -3,7 +3,7 @@ import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { richFrom, scanSection } from '../parse/common.ts';
-import { byClass, finish, imagesIn, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { byClass, childText, finish, imagesIn, listItems, optional, originalHeader } from '../parse/original.ts';
 import { children, descendants, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
@@ -50,7 +50,8 @@ export const type22: TypeDefinition<Type22Data> = {
       const text = children(li).find(byClass('cms-visual-text'));
       const short = text ? children(text).find((el) => el.tagName === 'ul') : undefined;
       const item = {
-        ...optional('title', textOf(text, 'cms-title')), image: pair,
+        // 제목은 글 묶음의 직접 자식만 읽는다. 짧은 목록 안의 같은 클래스까지 집으면 글이 두 번 나온다 (P5 검수 I-1)
+        ...optional('title', childText(text, 'cms-title')), image: pair,
         subitems: (short ? children(short).filter((el) => el.tagName === 'li') : []).map((s) => ({ text: richFrom(s) })),
       };
       used.push(item.title ?? '', ...item.subitems.map((s) => s.text));

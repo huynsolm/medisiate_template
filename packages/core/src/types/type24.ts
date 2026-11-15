@@ -3,7 +3,7 @@ import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, finish, imagesIn, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { byClass, childText, finish, imagesIn, listItems, optional, originalHeader } from '../parse/original.ts';
 import { children, descendants } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
@@ -40,9 +40,11 @@ export const type24: TypeDefinition<Type24Data> = {
     const header = originalHeader(src.element);
     const inner = children(src.element).find(byClass('cms-inner')) ?? src.element;
     const { pair, extra } = imagesIn(children(inner).find(byClass('cms-visual')), src, diagnostics);
-    const items = listItems(descendants(src.element, byClass('cms-ordered-list'))[0]).map((li) => ({
-      ...optional('title', textOf(li, 'cms-title')), ...optional('desc', textOf(li, 'cms-description')),
-    }));
+    // 제목·설명은 설명 상자의 직접 자식만 읽는다. 설명 안의 같은 클래스까지 집으면 글이 두 번 나온다 (P5 검수 I-1)
+    const items = listItems(descendants(src.element, byClass('cms-ordered-list'))[0]).map((li) => {
+      const box = children(li).find(byClass('cms-description-box'));
+      return { ...optional('title', childText(box, 'cms-title')), ...optional('desc', childText(box, 'cms-description')) };
+    });
     const data: Type24Data = { ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}), image: pair, items };
     return finish(src, data, [...header.used, ...items.flatMap((i) => [i.title ?? '', i.desc ?? ''])], extra, { modifiers, diagnostics });
   },

@@ -1,6 +1,6 @@
 import type { Diagnostic, ImagePair, SectionModifiers } from '../model/index.ts';
 import type { ParseResult } from '../types/definition.ts';
-import { pairImages, richFrom, textStructureProblems, uncoveredText } from './common.ts';
+import { duplicateReads, pairImages, richFrom, textStructureProblems, uncoveredText } from './common.ts';
 import { children, classesOf, descendants, hasClass, type DomElement, type SourceSection } from './dom.ts';
 
 /*
@@ -76,13 +76,17 @@ export function finish<T>(
   const missing = descendants(src.element, (el) => el.tagName === 'img').length - countImages(data);
   // 글 요소 안의 목록·표 등은 글(rich)로 옮기면 경계가 사라진다 (4단계 검수 I-2)
   const structure = textStructureProblems(src.element);
+  // 한 원본 글을 두 필드로 읽으면 출력에 두 번 나온다 (4단계 P5 검수 I-1)
+  const duplicates = duplicateReads(src.element);
   const fallbackReason = extraImages.length || missing > 0
     ? `이미지 ${Math.max(extraImages.length, missing)}장을 담을 자리가 없음`
     : lost
       ? `담을 자리가 없는 텍스트: ${lost.slice(0, 40)}`
       : structure.length
         ? `글 안의 구조를 그대로 옮길 수 없음: ${structure.slice(0, 3).join(', ')}`
-        : undefined;
+        : duplicates.length
+          ? `같은 글을 두 칸으로 읽음: ${duplicates.slice(0, 3).join(', ')}`
+          : undefined;
   return {
     data,
     variant: base.variant ?? 'default',

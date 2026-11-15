@@ -302,3 +302,34 @@ describe('stage 3/4 parsers read text only through richFrom (so the structure ch
     expect(source).not.toMatch(/\b(plainText|textContent|innerHtml|blockText|nodesHtml)\b/u);
   });
 });
+
+// ---- 4단계 P5 검수 (d3ae49f) 지적 I-1: 한 원본 글을 두 필드로 읽어 두 번 출력 ----
+
+describe('one original text is never output twice (stage 4 P5 review I-1)', () => {
+  const count = (html: string, text: string) => html.split(text).length - 1;
+
+  it('A: type22 title only inside the short list', () => {
+    const result = convert('<section class="cms type22"><div class="cms-inner"><ul class="cms-img-list"><li class="cms-list-item"><div class="cms-visual-text"><ul class="list-unstyled"><li><p class="cms-title">FIRST</p></li></ul></div></li></ul></div></section>');
+    expect(result.page.sections[0]!.type).toBe('type22');
+    expect(count(result.html, 'FIRST')).toBe(1);
+  });
+
+  it('B: type24 title class inside the description', () => {
+    const result = convert('<section class="cms type24"><div class="cms-inner"><ol class="cms-ordered-list"><li class="cms-list-item"><div class="cms-description-box"><div class="cms-description"><span class="cms-title">FIRST</span></div></div></li></ol></div></section>');
+    expect(result.page.sections[0]!.type).toBe('type24');
+    expect(count(result.html, 'FIRST')).toBe(1);
+  });
+
+  const first = /<p class="cms-description">([^<]*)<\/p>/u;
+  it.each(STAGE3.filter((id) => first.test(original(id))).flatMap((id) => ['cms-title', 'cms-eyebrow', 'cms-description'].map((cls) => [id, cls])))(
+    '%s: a %s nested inside a description is output at most once',
+    (id, cls) => {
+      // 머리글 뒤 첫 항목의 자기 제목·작은 글을 지워, "첫 번째 해당 클래스"가 설명 안의 것을 집게 만든다
+      const body = original(id);
+      const after = body.indexOf('</div>', body.indexOf('cms-header'));
+      const rest = body.slice(after).replace(/<p class="cms-(title|eyebrow)">[^<]*<\/p>/u, '').replace(first, `<div class="cms-description"><span class="${cls}">DUPCHK</span></div>`);
+      const result = convert(body.slice(0, after) + rest);
+      if (result.page.sections[0]!.type !== 'fallback') expect(count(result.html, 'DUPCHK')).toBeLessThanOrEqual(1);
+    },
+  );
+});

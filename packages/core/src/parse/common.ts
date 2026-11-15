@@ -143,9 +143,32 @@ const cleanRich = (html: string) => sanitizeRichText(html).replace(/\s+/gu, ' ')
  * WeakSet이라 원본 DOM이 사라지면 함께 사라진다.
  */
 const readAsText = new WeakSet<DomElement>();
+/** 요소마다 richFrom으로 읽은 횟수(바깥 호출만). 같은 원본 글을 두 필드로 읽었는지 finish()가 확인한다. */
+const readCount = new WeakMap<DomElement, number>();
 
 export function richFrom(el: DomElement): string {
   readAsText.add(el);
+  readCount.set(el, (readCount.get(el) ?? 0) + 1);
+  return richInner(el);
+}
+
+/**
+ * 섹션 안에서 같은 원본 글을 두 번 읽은 곳을 찾는다(4단계 P5 검수 I-1).
+ * - 같은 요소를 두 번 읽음, 또는 읽은 요소 안에 또 읽은 요소가 있음 → 그 글이 두 필드에 들어가 두 번 출력된다.
+ * 확인한 요소의 읽은 횟수는 지워, 같은 DOM을 다시 parse해도 이전 횟수가 남지 않게 한다.
+ */
+export function duplicateReads(root: DomElement): string[] {
+  const read = [root, ...descendants(root)].filter((el) => readCount.has(el));
+  const problems: string[] = [];
+  for (const el of read) {
+    if ((readCount.get(el) ?? 0) > 1) problems.push(`<${el.tagName}> 글을 두 번 읽음`);
+    else if (ancestors(el).some((a) => readCount.has(a) && (a === root || descendants(root).includes(a)))) problems.push(`<${el.tagName}> 글이 다른 칸의 글 안에 있음`);
+  }
+  for (const el of read) readCount.delete(el);
+  return [...new Set(problems)];
+}
+
+function richInner(el: DomElement): string {
   const nodes = childNodes(el);
   let inner: string;
   if (!nodes.some((n) => isElement(n) && TEXT_BLOCKS.has(n.tagName))) {
@@ -161,7 +184,7 @@ export function richFrom(el: DomElement): string {
     for (const n of nodes) {
       if (isElement(n) && TEXT_BLOCKS.has(n.tagName)) {
         flush();
-        const line = richFrom(n);
+        const line = richInner(n);
         if (line) lines.push(line);
       } else {
         run.push(n);

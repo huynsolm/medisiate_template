@@ -58,3 +58,9 @@ npm run test:browser  # Playwright 필요. 기대: 156 passed
 ## 6. 판정 기준과 보고 형식
 
 이전 단계와 같다(Critical / Important / Minor, 위치·재현 입력·실제/기대 결과, 직접 실행과 정적 판독 구분, 마지막에 판정).
+
+## 7. 재검수 (지적 반영 후)
+
+- 반영 기록: `docs/review-stage4-p5-fixes.md`. 재검수 범위는 `5240b60..` 이후 커밋이다.
+- 공통 도우미(`richFrom`의 읽기 횟수 기록, `finish`의 중복 읽기 검사)를 바꿔 P2~P4 타입에도 영향이 있다. 정상 원본이 잘못 fallback 되는 경우가 없는지도 봐 주세요.
+- 결과는 `docs/review-stage4-p5.md`를 갱신해 같은 브랜치에 커밋·푸시해 주세요.
