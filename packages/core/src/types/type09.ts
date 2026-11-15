@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { toNumberInput } from '../schema/page.ts';
 import { h, raw } from '../html/h.ts';
 import { rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
@@ -11,7 +12,7 @@ const schema = z.object({
   ...headerShape,
   /** 원본 선택(한 줄 1~3개). 호스트 프리셋은 PC 3열 고정이라 화면에는 반영하지 않고 값만 보존한다. */
   // 편집기 선택 상자는 '1'~'3' 문자열을 넘기므로 숫자로 바꿔 받는다
-  perRow: z.coerce.number().pipe(z.union([z.literal(1), z.literal(2), z.literal(3)])).default(3),
+  perRow: z.preprocess(toNumberInput, z.union([z.literal(1), z.literal(2), z.literal(3)])).default(3),
   items: z.array(z.object({ text: z.string().default('') })).default([]),
 });
 export type Type09Data = z.infer<typeof schema>;

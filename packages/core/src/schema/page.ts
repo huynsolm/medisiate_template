@@ -5,6 +5,16 @@ import { DIAGNOSTIC_CODES, type PageModel } from '../model/index.ts';
 export const CSS_COLOR = /^(#[0-9a-f]{3,8}|(rgb|rgba|hsl|hsla)\([0-9.,%\s/deg]+\)|[a-z]+)$/iu;
 
 /** 단일 CSS 길이 값. style 속성에 그대로 들어가므로 선언을 추가할 수 없는 형식만 허용한다. */
+/**
+ * 편집기·외부 JSON의 숫자 칸. 숫자와 숫자 문자열('3', ' 3 ')만 숫자로 바꾸고, 그 밖의 값(boolean, 배열, 객체, '0x10' 등)은
+ * 그대로 넘겨 다음 검증에서 거부되게 한다. Number()/z.coerce는 false → 0, [3] → 3처럼 뜻을 바꾸거나 객체에서 예외를 던진다.
+ */
+export function toNumberInput(value: unknown): unknown {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string' && /^\s*\d+\s*$/u.test(value)) return Number(value);
+  return value;
+}
+
 export const CSS_LENGTH = /^(0|\d+(\.\d+)?(px|em|rem|%|vh|vw))$/u;
 export const lengthSchema = z.string().trim().regex(CSS_LENGTH, '길이 값은 0 또는 숫자+단위(px, em, rem, %, vh, vw)여야 합니다');
 

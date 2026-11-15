@@ -74,12 +74,21 @@ function prepare(page: PageModel, registry: TypeRegistry, diagnostics: Diagnosti
       diagnostics.push({ level: 'warn', code: 'UNSUPPORTED_TYPE', message: `등록되지 않은 타입: ${section.type}`, sectionIndex });
       return { section: toFallback(section, '등록되지 않은 타입'), def: fallbackType as TypeDefinition<unknown>, strategy: 'any' };
     }
-    const parsed = def.schema.safeParse(section.data);
+    // 스키마의 전처리가 예외를 던져도 이 섹션만 fallback으로 격리한다 (re-review R-I-2)
+    let parsed: ReturnType<typeof def.schema.safeParse>;
+    let failure: string | undefined;
+    try {
+      parsed = def.schema.safeParse(section.data);
+      if (!parsed.success) failure = parsed.error.issues.map((issue) => `${issue.path.join('.')} ${issue.message}`).join('; ');
+    } catch (error) {
+      parsed = { success: false } as typeof parsed;
+      failure = `검증 중 오류: ${error instanceof Error ? error.message : String(error)}`;
+    }
     if (!parsed.success) {
       diagnostics.push({
         level: 'error',
         code: 'INVALID_DATA',
-        message: `${section.type} 데이터 검증 실패: ${parsed.error.issues.map((issue) => `${issue.path.join('.')} ${issue.message}`).join('; ')}`,
+        message: `${section.type} 데이터 검증 실패: ${failure}`,
         sectionIndex,
       });
       return { section: toFallback(section, '데이터 검증 실패'), def: fallbackType as TypeDefinition<unknown>, strategy: 'any' };

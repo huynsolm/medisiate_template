@@ -129,3 +129,72 @@ describe('editor: clearing a field never breaks the section (review: 빈 문자�
     expect(parsed.success, JSON.stringify(parsed.error?.issues)).toBe(true);
   });
 });
+
+// ---- 재검수 (86e0cec) 지적: R-I-1, R-I-2 ----
+
+describe('type26 cells inside other block wrappers (re-review R-I-1)', () => {
+  const t26 = (cell: string) => original('type26').replace('<td>내용 1</td>', cell);
+
+  it.each(['section', 'article', 'aside', 'header', 'footer', 'main', 'nav', 'address'])('keeps paragraphs inside <%s> as line breaks', (tag) => {
+    const { result, data } = check('type26', t26(`<td><${tag}><p>FIRST</p><p>SECOND</p></${tag}></td>`));
+    expect((data.body as Array<{ cells: Array<{ text: string }> }>)[0]!.cells[1]!.text).toBe('FIRST<br>SECOND');
+    expect(result.html).toContain('<td>FIRST<br>SECOND</td>');
+  });
+
+  it.each([
+    '<td><span><p>FIRST</p><p>SECOND</p></span></td>',
+    '<td><details><summary>S</summary><p>D</p></details></td>',
+    '<td><p>FIRST</p><hr><p>SECOND</p></td>',
+    '<td><fieldset><p>FIRST</p></fieldset></td>',
+  ])('falls back when the boundary cannot be kept: %s', (cell) => {
+    const result = convert(t26(cell));
+    expect(result.page.sections[0]!.type).toBe('fallback');
+  });
+});
+
+describe('number fields accept only numbers and digit strings (re-review R-I-2)', () => {
+  const page = (type: string, data: unknown) => ({
+    version: 1 as const,
+    theme: { primary: '#164aa0', source: 'default' as const },
+    sections: [
+      { id: 'good', type: 'type11', variant: 'default', modifiers: {}, data: { heading: 'KEEP_VISIBLE', items: [{ text: 'GOOD' }] } },
+      { id: 'bad', type, variant: 'default', modifiers: {}, data },
+    ],
+    diagnostics: [],
+    meta: { coreVersion: 'x', hostCss: { sha256: 'x', savedAt: 'y' } },
+  });
+  const bad: Array<[string, unknown]> = [
+    ['type26', { body: [{ cells: [{ text: 'X', rowspan: { toString: 'x' } }] }] }],
+    ['type26', { body: [{ cells: [{ text: 'X', rowspan: false }] }] }],
+    ['type26', { body: [{ cells: [{ text: 'X', colspan: [2] }] }] }],
+    ['type26', { body: [{ cells: [{ text: 'X', colspan: true }] }] }],
+    ['type26', { body: [{ cells: [{ text: 'X', colspan: '0x10' }] }] }],
+    ['type26', { colWidths: [{ width: 30 }] }],
+    ['type09', { perRow: [2] }],
+    ['type09', { perRow: { toString: 'x' } }],
+    ['type25', { perRow: [3] }],
+    ['type25', { perRow: true }],
+  ];
+
+  it.each(bad)('%s %j is rejected as INVALID_DATA and the other sections still render', async (type, data) => {
+    const { renderPage } = await import('../src/page/render-page.ts');
+    const out = renderPage(page(type, data), { registry: defaultRegistry });
+    expect(out.diagnostics.map((d) => d.code)).toContain('INVALID_DATA');
+    expect(out.html).toContain('KEEP_VISIBLE');
+  });
+
+  it.each([2, '2', ' 2 '])('type09 perRow %j is accepted', (value) => {
+    expect(defaultRegistry.get('type09')!.schema.safeParse({ perRow: value }).success).toBe(true);
+  });
+
+  it('a schema that throws only breaks its own section', async () => {
+    const { renderPage } = await import('../src/page/render-page.ts');
+    const { TypeRegistry } = await import('../src/types/definition.ts');
+    const { z } = await import('zod');
+    const registry = new TypeRegistry(defaultRegistry.list());
+    registry.register({ ...defaultRegistry.get('type11')!, id: 'boom', schema: z.preprocess(() => { throw new Error('boom'); }, z.object({})) });
+    const out = renderPage(page('boom', {}), { registry });
+    expect(out.diagnostics.map((d) => d.code)).toContain('INVALID_DATA');
+    expect(out.html).toContain('KEEP_VISIBLE');
+  });
+});

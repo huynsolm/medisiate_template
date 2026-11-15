@@ -5,7 +5,7 @@ import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
 import { byClass, finish, imagesIn, layoutFixed, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
 import { children, classesOf, descendants, type DomElement } from '../parse/dom.ts';
-import { imagePairSchema } from '../schema/page.ts';
+import { imagePairSchema, toNumberInput } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, LIST_RESET, presetSection } from './preset.ts';
 
@@ -13,7 +13,7 @@ const itemSchema = z.object({ title: z.string().optional(), desc: z.string().opt
 const schema = z.object({
   ...headerShape,
   /** 원본 선택(한 줄 3칸 col-lg-4 / 4칸 col-lg-3). 호스트 프리셋은 PC 3열 고정이라 값만 보존한다. */
-  perRow: z.coerce.number().pipe(z.union([z.literal(3), z.literal(4)])).default(3),
+  perRow: z.preprocess(toNumberInput, z.union([z.literal(3), z.literal(4)])).default(3),
   items: z.array(itemSchema).default([]),
 });
 export type Type25Data = z.infer<typeof schema>;
