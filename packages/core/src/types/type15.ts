@@ -14,7 +14,7 @@ const itemSchema = z.object({
   /** 원본은 글머리가 없을 때만 이 문단을 보여 준다 */
   desc: z.string().optional(),
   image: imagePairSchema.default({}),
-  subitems: z.array(z.object({ text: z.string() })).default([]),
+  subitems: z.array(z.object({ text: z.string().default('') })).default([]),
 });
 const schema = z.object({ ...headerShape, items: z.array(itemSchema).default([]) });
 export type Type15Data = z.infer<typeof schema>;
@@ -39,7 +39,7 @@ export const type15: TypeDefinition<Type15Data> = {
         { key: 'title', label: '제목', kind: 'text' },
         { key: 'image', label: '이미지 (PC/MO)', kind: 'imagePair' },
         { key: 'subitems', label: '글머리', kind: 'repeat', min: 0, max: 8, fields: [{ key: 'text', label: '글', kind: 'text' }] },
-        { key: 'desc', label: '문단 (글머리가 없을 때)', kind: 'richText' },
+        { key: 'desc', label: '문단 (글머리 아래)', kind: 'richText' },
       ],
     },
   ],
@@ -73,9 +73,9 @@ export const type15: TypeDefinition<Type15Data> = {
           h('li', { class: 'mig-item' }, [
             visualPcMo(item.image),
             !isBlank(item.title) && h('strong', { class: 'mig-title' }, [rich(item.title)]),
-            item.subitems.length > 0
-              ? h('ul', { class: 'mig-list type-dot', style: LIST_RESET }, item.subitems.map((s) => h('li', { class: 'mig-item' }, [h('span', { class: 'mig-desc' }, [rich(s.text)])])))
-              : !isBlank(item.desc) && h('p', { class: 'mig-desc' }, [rich(item.desc)]),
+            // 원본 도구는 글머리와 문단 중 하나만 만들지만, 손으로 고친 페이지는 둘 다 있을 수 있다. 둘 다 보여 준다(review: 문단 출력 누락).
+            item.subitems.length > 0 && h('ul', { class: 'mig-list type-dot', style: LIST_RESET }, item.subitems.map((s) => h('li', { class: 'mig-item' }, [h('span', { class: 'mig-desc' }, [rich(s.text)])]))),
+            !isBlank(item.desc) && h('p', { class: 'mig-desc' }, [rich(item.desc)]),
           ])),
         ),
       ]),

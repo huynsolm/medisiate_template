@@ -3,15 +3,28 @@ import { h } from '../html/h.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { richFrom, scanSection } from '../parse/common.ts';
 import { byClass, childText, finish, firstByClass, originalHeader } from '../parse/original.ts';
-import { attr, children, descendants, type DomElement } from '../parse/dom.ts';
+import { attr, childNodes, children, descendants, isElement, textContent, type DomElement } from '../parse/dom.ts';
 import { CSS_LENGTH } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, presetSection } from './preset.ts';
 
-const span = z.number().int().min(2).max(20).optional();
-const cellSchema = z.object({ text: z.string(), th: z.boolean().default(false), colspan: span, rowspan: span });
-const rowSchema = z.object({ cells: z.array(cellSchema) });
-const widthSchema = z.string().refine((v) => v === 'auto' || CSS_LENGTH.test(v), '열 너비는 auto 또는 길이 값이어야 합니다');
+/*
+ * 병합 값은 HTML 규격 범위를 그대로 따른다: colspan 1~1000, rowspan 0~65534 (0은 "그룹 끝까지").
+ * 1은 기본값이라 데이터에 넣지 않는다. 편집기에서 비운 칸('' / undefined)과 1도 "병합 없음"으로 받는다.
+ */
+const COLSPAN = { min: 1, max: 1000 } as const;
+const ROWSPAN = { min: 0, max: 65534 } as const;
+const spanSchema = (range: { min: number; max: number }) => z.preprocess(
+  (v) => (v === '' || v === undefined || v === null || Number(v) === 1 ? undefined : Number(v)),
+  z.number().int().min(range.min).max(range.max).optional(),
+);
+const cellSchema = z.object({ text: z.string().default(''), th: z.boolean().default(false), colspan: spanSchema(COLSPAN), rowspan: spanSchema(ROWSPAN) });
+const rowSchema = z.object({ cells: z.array(cellSchema).default([]) });
+// 편집기에서 비운 열 너비는 auto로 본다
+const widthSchema = z.preprocess(
+  (v) => (v === undefined || v === null || (typeof v === 'string' && v.trim() === '') ? 'auto' : typeof v === 'string' ? v.trim() : v),
+  z.string().refine((v) => v === 'auto' || CSS_LENGTH.test(v), '열 너비는 auto 또는 길이 값이어야 합니다'),
+);
 const schema = z.object({
   ...headerShape,
   desc: z.string().optional(),
@@ -24,18 +37,51 @@ type Cell = z.infer<typeof cellSchema>;
 
 const WIDTH = /^\s*width\s*:\s*([^;]+?)\s*;?\s*$/iu;
 
-function spanOf(el: DomElement, name: 'colspan' | 'rowspan'): number | undefined {
-  const n = Number(attr(el, name));
-  return Number.isInteger(n) && n >= 2 && n <= 20 ? n : undefined;
+/**
+ * 병합 값. 속성이 없거나 1이면 undefined(병합 없음).
+ * 규격 범위 밖이거나 숫자가 아니면 브라우저가 값을 바꿔 해석하므로(예: 2000 → 1000, "2x" → 2) 옮기지 않고 problem에 기록한다.
+ */
+function spanOf(el: DomElement, name: 'colspan' | 'rowspan', range: { min: number; max: number }, problems: string[]): number | undefined {
+  const raw = attr(el, name);
+  if (raw === undefined) return undefined;
+  const n = /^\s*\d+\s*$/u.test(raw) ? Number(raw) : Number.NaN;
+  if (!Number.isInteger(n) || n < range.min || n > range.max) {
+    problems.push(`${name}="${raw}"`);
+    return undefined;
+  }
+  return n === 1 ? undefined : n;
 }
 
-function rowsOf(group: DomElement | undefined): Array<{ cells: Cell[] }> {
+const CELL_BLOCK = new Set(['p', 'div']);
+const CELL_UNSUPPORTED = /^(ul|ol|dl|table|h[1-6]|blockquote|pre|figure)$/u;
+
+/**
+ * 칸 글. 칸 안의 문단(p·div)은 줄바꿈(<br>)으로 이어 경계를 지킨다.
+ * 목록·표·제목처럼 줄바꿈으로 나타낼 수 없는 구조나, 문단 밖 글과 문단이 섞인 칸은 옮기지 않고 problem에 기록한다.
+ */
+function cellText(el: DomElement, problems: string[]): string {
+  const unsupported = descendants(el, (d) => CELL_UNSUPPORTED.test(d.tagName))[0];
+  if (unsupported) {
+    problems.push(`칸 안의 <${unsupported.tagName}>`);
+    return '';
+  }
+  const blocks = children(el).filter((c) => CELL_BLOCK.has(c.tagName));
+  if (blocks.length === 0) return richFrom(el);
+  const loose = childNodes(el).some((n) => (isElement(n) ? !CELL_BLOCK.has(n.tagName) : textContent(n).trim() !== ''));
+  if (loose) {
+    problems.push('칸 안에서 문단과 문단 밖 글이 섞임');
+    return '';
+  }
+  return blocks.map((b) => cellText(b, problems)).filter(Boolean).join('<br>');
+}
+
+function rowsOf(group: DomElement | undefined, problems: string[]): Array<{ cells: Cell[] }> {
   if (!group) return [];
   return children(group).filter((tr) => tr.tagName === 'tr').map((tr) => ({
     cells: children(tr).filter((c) => c.tagName === 'th' || c.tagName === 'td').map((c) => {
-      const colspan = spanOf(c, 'colspan');
-      const rowspan = spanOf(c, 'rowspan');
-      return { text: richFrom(c), th: c.tagName === 'th', ...(colspan ? { colspan } : {}), ...(rowspan ? { rowspan } : {}) };
+      const colspan = spanOf(c, 'colspan', COLSPAN, problems);
+      const rowspan = spanOf(c, 'rowspan', ROWSPAN, problems);
+      return { text: cellText(c, problems), th: c.tagName === 'th', ...(colspan !== undefined ? { colspan } : {}), ...(rowspan !== undefined ? { rowspan } : {}) };
     }),
   }));
 }
@@ -55,7 +101,7 @@ export const type26: TypeDefinition<Type26Data> = {
   fields: [
     ...headerFields,
     { key: 'desc', label: '표 위 설명', kind: 'richText' },
-    { key: 'colWidths', label: '열 너비', kind: 'repeat', min: 0, max: 10, fields: [{ key: 'width', label: 'auto 또는 30% 같은 값', kind: 'text' }] },
+    { key: 'colWidths', label: '열 너비', kind: 'repeat', min: 0, max: 10, fields: [{ key: 'width', label: 'auto 또는 30% 같은 값 (비우면 auto)', kind: 'text' }] },
     ...(['head', 'body'] as const).map((key) => ({
       key, label: key === 'head' ? '머리글 행' : '본문 행', kind: 'repeat' as const, min: 0, max: 20,
       fields: [{
@@ -63,8 +109,8 @@ export const type26: TypeDefinition<Type26Data> = {
         fields: [
           { key: 'text', label: '글', kind: 'richText' as const },
           { key: 'th', label: '제목 칸(th)', kind: 'checkbox' as const },
-          { key: 'colspan', label: '가로 병합', kind: 'number' as const },
-          { key: 'rowspan', label: '세로 병합', kind: 'number' as const },
+          { key: 'colspan', label: '가로 병합 (1~1000)', kind: 'number' as const, min: COLSPAN.min, max: COLSPAN.max },
+          { key: 'rowspan', label: '세로 병합 (0은 끝까지, ~65534)', kind: 'number' as const, min: ROWSPAN.min, max: ROWSPAN.max },
         ],
       }],
     })),
@@ -81,14 +127,19 @@ export const type26: TypeDefinition<Type26Data> = {
     const header = originalHeader(src.element);
     const wrap = firstByClass(src.element, 'cms-table-wrap');
     const desc = childText(wrap ? children(wrap).find(byClass('cms-description-box')) : undefined, 'cms-description');
-    const head = rowsOf(table ? children(table).find((el) => el.tagName === 'thead') : undefined);
-    const body = rowsOf(table ? children(table).find((el) => el.tagName === 'tbody') : undefined);
+    const problems: string[] = [];
+    const head = rowsOf(table ? children(table).find((el) => el.tagName === 'thead') : undefined, problems);
+    const body = rowsOf(table ? children(table).find((el) => el.tagName === 'tbody') : undefined, problems);
     const data: Type26Data = {
       ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}),
       ...(desc ? { desc } : {}), colWidths, head, body,
     };
     const used = [...header.used, desc, ...[...head, ...body].flatMap((r) => r.cells.map((c) => c.text))];
-    return finish(src, data, used, [], { modifiers: scan.modifiers, diagnostics });
+    const result = finish(src, data, used, [], { modifiers: scan.modifiers, diagnostics });
+    // 표 구조를 바꾸지 않고는 옮길 수 없는 칸이 있으면 섹션 전체를 원본 그대로 보존한다
+    return problems.length > 0 && !result.fallbackReason
+      ? { ...result, lossless: false, fallbackReason: `표를 그대로 옮길 수 없음: ${[...new Set(problems)].slice(0, 3).join(', ')}` }
+      : result;
   },
   render(section) {
     const d = section.data;

@@ -19,7 +19,7 @@
 ## 2. 구현 중 결정과 발견
 
 1. **표 열 너비(type26)**: 원본은 `<col style="width: 30%">`로 너비를 준다. 이것은 데이터(`colWidths`)로 옮기므로 `INLINE_STYLE_DROPPED` 진단을 남기지 않는다. 값은 `auto` 또는 CSS 길이만 허용해 CSS 주입(`30%; position: fixed`)을 막는다. 편집기에서 고칠 수 있게 `{ width }` 객체 목록으로 둔다.
-2. **표 병합 셀**: `colspan`·`rowspan`이 2 이상일 때만 보존한다(1은 기본값이라 생략).
+2. **표 병합 셀**: HTML 규격 범위(colspan 1~1000, rowspan 0~65534)를 그대로 보존하고, 범위 밖 값은 fallback으로 보존한다(1은 기본값이라 생략). 검수 반영: `docs/review-stage3-fixes.md`.
 3. **표 모바일 배치**: 호스트 프리셋 표(`.mig-table`)는 `min-width: 0`으로 화면 폭에 맞춘다(일반 모드 표처럼 가로 스크롤하지 않음). 이 동작을 그대로 따르고, 화면 밖으로 나가지 않는지 검사한다.
 4. **호스트가 고정한 배치**: type25 "한 줄 4개"(호스트 PC 3열 고정)와 type17 "넓은 제목 칸"(col-2)은 화면에 반영하지 않고 값만 데이터에 보존하며 `PRESET_LAYOUT_FIXED`(info)를 남긴다. 호스트와 같은 선택(3개, auto)이면 진단 없음.
 5. **type15 하위 글머리**: 하위 목록에 `type-dot`을 붙인다. 호스트의 3열 격자 규칙(`.mig-list:first-of-type:not(.type-dot)`)이 하위 목록에 걸리지 않게 하기 위함이다.

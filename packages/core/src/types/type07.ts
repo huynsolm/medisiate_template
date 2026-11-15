@@ -12,7 +12,7 @@ import { headerFields, headerShape, LIST_RESET, presetSection } from './preset.t
 const schema = z.object({
   ...headerShape,
   image: imagePairSchema.default({}),
-  items: z.array(z.object({ text: z.string() })).default([]),
+  items: z.array(z.object({ text: z.string().default('') })).default([]),
 });
 export type Type07Data = z.infer<typeof schema>;
 

@@ -7,7 +7,7 @@ import { descendants } from '../parse/dom.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, LIST_RESET, presetSection } from './preset.ts';
 
-const schema = z.object({ ...headerShape, items: z.array(z.object({ text: z.string() })).default([]) });
+const schema = z.object({ ...headerShape, items: z.array(z.object({ text: z.string().default('') })).default([]) });
 export type Type11Data = z.infer<typeof schema>;
 
 /**

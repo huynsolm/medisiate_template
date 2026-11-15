@@ -14,7 +14,7 @@ const itemSchema = z.object({
   title: z.string().optional(),
   subtitle: z.string().optional(),
   desc: z.string().optional(),
-  subitems: z.array(z.object({ text: z.string() })).default([]),
+  subitems: z.array(z.object({ text: z.string().default('') })).default([]),
 });
 const schema = z.object({ ...headerShape, image: imagePairSchema.default({}), items: z.array(itemSchema).default([]) });
 export type Type10Data = z.infer<typeof schema>;

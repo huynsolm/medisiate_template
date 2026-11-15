@@ -43,6 +43,17 @@ describe('editor reducer', () => {
     expect(s.page.sections[0]!.data).not.toHaveProperty('title');
   });
 
+  it('clearing a table width, merge number or cell text keeps the section editable (review stage 3)', () => {
+    let s = reducer(start(), { type: 'add', typeId: 'type26' });
+    s = reducer(s, { type: 'setData', id: 's1', path: ['colWidths'], value: [{ width: '30%' }, { width: '120px' }] });
+    s = reducer(s, { type: 'setData', id: 's1', path: ['colWidths', 0, 'width'], value: undefined });
+    s = reducer(s, { type: 'setData', id: 's1', path: ['body', 0, 'cells', 1, 'colspan'], value: 1 });
+    s = reducer(s, { type: 'setData', id: 's1', path: ['body', 0, 'cells', 1, 'text'], value: undefined });
+    const out = renderForWeb(s.page);
+    expect(out.diagnostics.filter((d) => d.code === 'INVALID_DATA')).toEqual([]);
+    expect(out.html).toContain('<col style="width: auto;"><col style="width: 120px;">');
+  });
+
   it('setIn does not mutate the input', () => {
     const input = { a: [{ b: 1 }] };
     const out = setIn(input, ['a', 0, 'b'], 2);
