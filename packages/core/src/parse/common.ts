@@ -167,27 +167,33 @@ export function richFrom(el: DomElement): string {
 }
 
 /**
- * 원본 글 요소(cms-description · cms-title · cms-thin-title · cms-eyebrow) 안에서
- * 줄바꿈으로 나타낼 수 없는 구조(목록·표·제목 등)나 줄 안 요소 속에 숨은 블록을 찾는다. 하나라도 있으면 그 글은 경계를 잃는다.
+ * 섹션 안의 "글 요소"에서 줄바꿈으로 나타낼 수 없는 구조를 찾는다. 하나라도 있으면 그 글은 경계를 잃는다.
+ * 글 요소: 원본 글 클래스(cms-description · cms-title · cms-thin-title · cms-eyebrow)가 있거나, 글을 직접 담거나,
+ * cms- 클래스 자식이 없는 목록 항목(li). 파서가 클래스 없이 li 전체를 글로 읽는 경우(type06 글머리)도 같은 규칙을 받는다
+ * (4단계 재검수 R-I-1).
+ * - 글 요소 안에 블록 상자(TEXT_BLOCKS)·줄 안 요소(TEXT_INLINE) 밖의 요소(목록·표·제목 등)가 있으면 문제.
+ * - 섹션 어디서든 줄 안 요소(span 등) 속에 블록 상자가 숨어 있으면 문제(richFrom이 줄로 나눌 수 없음).
  */
 export function textStructureProblems(root: DomElement): string[] {
   const problems: string[] = [];
-  const isText = (el: DomElement) => ['cms-description', 'cms-title', 'cms-thin-title', 'cms-eyebrow'].some((c) => classesOf(el).includes(c));
+  const TEXT_CLASSES = ['cms-description', 'cms-title', 'cms-thin-title', 'cms-eyebrow'];
+  const holdsText = (el: DomElement) => childNodes(el).some((n) => n.nodeName === '#text' && textContentOf(n).trim() !== '');
+  const leafItem = (el: DomElement) => el.tagName === 'li' && !descendants(el).some((d) => classesOf(d).some((c) => c.startsWith('cms-')));
+  const isText = (el: DomElement) => classesOf(el).some((c) => TEXT_CLASSES.includes(c)) || holdsText(el) || leafItem(el);
   for (const textEl of descendants(root, isText)) {
-    for (const d of descendants(textEl)) {
-      if (!TEXT_BLOCKS.has(d.tagName) && !TEXT_INLINE.has(d.tagName)) {
-        problems.push(`글 안의 <${d.tagName}>`);
-        break;
-      }
-      // 문단 블록은 글 요소 바로 아래이거나 문단 블록 안에만 있어야 줄로 나눌 수 있다(span > p 같은 경우는 안 됨)
-      if (TEXT_BLOCKS.has(d.tagName) && d.parentNode !== textEl && !(d.parentNode && isElement(d.parentNode as DomNode) && TEXT_BLOCKS.has((d.parentNode as DomElement).tagName))) {
-        problems.push(`줄 안 요소 속의 <${d.tagName}>`);
-        break;
-      }
-    }
+    // 글 요소 안의 글 요소(예: li 안의 p.cms-description)는 바깥에서 한 번만 보면 된다
+    if (ancestors(textEl).some((a) => a !== root && descendants(root).includes(a) && isText(a))) continue;
+    const bad = descendants(textEl).find((d) => !TEXT_BLOCKS.has(d.tagName) && !TEXT_INLINE.has(d.tagName));
+    if (bad) problems.push(`글 안의 <${bad.tagName}>`);
+  }
+  for (const block of descendants(root, (el) => TEXT_BLOCKS.has(el.tagName))) {
+    const parent = block.parentNode as DomNode | null;
+    if (parent && isElement(parent) && TEXT_INLINE.has(parent.tagName)) problems.push(`줄 안 요소 속의 <${block.tagName}>`);
   }
   return [...new Set(problems)];
 }
+
+const textContentOf = (n: DomNode) => (n as { value?: string }).value ?? '';
 
 export const HEADING = /^h[1-6]$/u;
 export const isHeading = (el: DomElement) => HEADING.test(el.tagName) || classesOf(el).some((c) => /(^|-)tit(le)?$/u.test(c));

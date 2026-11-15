@@ -238,3 +238,32 @@ describe('text elements keep paragraph boundaries or fall back (stage 4 review I
     for (const id of STAGE3) expect(convert(original(id)).html, id).not.toContain('<br>');
   });
 });
+
+// ---- 4단계 재검수 (da153b1) 지적: R-I-1 글 클래스가 없는 글 요소도 같은 구조 검사 ----
+
+describe('every text container gets the structure check, with or without a text class (stage 4 re-review R-I-1)', () => {
+  const card = (bullet: string) => `<section class="cms type06"><div class="cms-inner"><ul class="cms-column-list"><li class="cms-list-item"><div class="cms-inner-box"><div class="cms-description-box"><p class="cms-description">CARD</p><ul class="cms-bullet-list">${bullet}</ul></div></div></li></ul></div></section>`;
+
+  it.each([
+    ['A nested list', '<li class="cms-list-item">FIRST<ul><li>SECOND</li><li>THIRD</li></ul></li>'],
+    ['B block hidden in span', '<li class="cms-list-item"><span><section><p>FIRST</p><p>SECOND</p></section></span></li>'],
+    ['A with the text class', '<li class="cms-list-item cms-description">FIRST<ul><li>SECOND</li></ul></li>'],
+    ['B with the text class', '<li class="cms-list-item cms-description"><span><section><p>FIRST</p><p>SECOND</p></section></span></li>'],
+  ])('type06 bullet: %s falls back', (_label, bullet) => {
+    const result = convert(card(bullet));
+    expect(result.page.sections[0]!.type).toBe('fallback');
+    expect(result.html).not.toMatch(/FIRSTSECOND/u);
+  });
+
+  it('type06 bullet without the class still keeps plain paragraphs as lines', () => {
+    const result = convert(card('<li class="cms-list-item"><p>FIRST</p><p>SECOND</p></li>'));
+    expect(result.page.sections[0]!.type).toBe('type06');
+    expect(result.html).toContain('FIRST<br>SECOND');
+  });
+
+  const first = /<p class="cms-description">([^<]*)<\/p>/u;
+  it.each(STAGE3.filter((id) => first.test(original(id))))('%s: a block hidden in an inline element falls back', (id) => {
+    const result = convert(original(id).replace(first, '<p class="cms-description"><span><section><p>FIRST</p><p>SECOND</p></section></span></p>'.replace('<p class="cms-description">', '<div class="cms-description">').replace(/<\/p>$/u, '</div>')));
+    expect(result.page.sections[0]!.type).toBe('fallback');
+  });
+});

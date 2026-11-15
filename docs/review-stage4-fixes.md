@@ -30,3 +30,15 @@
 - `packages/core/test/stage3-review.test.ts`: 18개 타입 × (글 요소 안 문단 → 줄바꿈, 글 요소 안 목록 → fallback), type06 글머리 2종, 원본에 줄바꿈이 새로 생기지 않음, 표 칸 "글 + 문단". 수정 전 36개 실패.
 - `tests/visual/preset-layout.test.ts`: 108개(18 타입 × 3 화면 × 이미지 있음/없음). 수정 전 type16 이미지 없음 3개 실패.
 - 전체: `npm test` 478 passed · 1 skipped(inventory, `cms/` 필요), `npm run test:browser` 120 passed, lint·typecheck 오류 없음.
+
+## 재검수(`3e27ba5`) 지적 반영
+
+### R-I-1. type06 글머리에 `cms-description` 클래스가 없으면 구조 검사가 빠짐
+- 재현: 검수 문서 입력 A(`<li class="cms-list-item">FIRST<ul>…</ul></li>`) → `FIRSTSECONDTHIRD`, B(`<li class="cms-list-item"><span><section><p>FIRST</p><p>SECOND</p></section></span></li>`) → `FIRSTSECOND`. 둘 다 success, 경고 없음.
+- 원인: I-2 수정의 구조 검사가 "글 클래스가 있는 요소"만 봤다. type06은 클래스와 관계없이 글머리 li 전체를 글로 읽는다. 파서가 읽는 범위와 검사 범위가 달랐다.
+- 수정(`packages/core/src/parse/common.ts` `textStructureProblems`): 검사 대상을 **클래스가 아니라 구조로** 정한다.
+  - 글 요소 = 원본 글 클래스가 있거나, **글을 직접 담거나**, **cms- 클래스 자식이 없는 목록 항목(li)**. 이 안에 목록·표 등이 있으면 fallback.
+  - **섹션 어디서든** 줄 안 요소(span 등) 속에 블록 상자가 숨어 있으면 fallback(클래스와 무관).
+- 검수 문서 입력 그대로 실행: A·B 모두 `LOSSY_PARSE` + 섹션 fallback. 클래스 없는 글머리의 단순 `<p>FIRST</p><p>SECOND</p>`는 그대로 `FIRST<br>SECOND`.
+- 테스트: `stage3-review.test.ts`에 A·B(클래스 있음/없음 4종), 클래스 없는 단순 문단, 18개 타입 "줄 안 요소 속 블록" 추가. 수정 전 A·B 2개 실패.
+- 전체: `npm test` 500 passed · 1 skipped, `npm run test:browser` 120 passed, lint·typecheck 오류 없음. 기존 스냅샷 변화 없음.
