@@ -87,12 +87,14 @@ describe('type01', () => {
     const { result, section, def } = parseFixture('type01/pc-mo.source.html');
     expect(result.data).toEqual({
       image: {
-        pc: { src: 'https://cdn.example.com/acne_pc.jpg', alt: '여드름 치료 대표 이미지', width: 1200, height: 600, kind: 'https' },
-        mo: { src: 'https://cdn.example.com/acne_mo.jpg', alt: '여드름 치료 대표 이미지', width: 720, height: 600, kind: 'https' },
+        // 원본 마크업에는 width/height가 없다 (fixtures/original/type01.html)
+        pc: { src: 'https://cdn.example.com/acne_pc.jpg', alt: '여드름 치료 대표 이미지', kind: 'https' },
+        mo: { src: 'https://cdn.example.com/acne_mo.jpg', alt: '여드름 치료 대표 이미지', kind: 'https' },
       },
       title: '건드리지 말고<br>치료받자',
       desc: '여드름은 모낭 피지선에 발생하는 <strong>염증성 질환</strong>입니다.<br>초기에 치료하는 것이 중요합니다.',
     });
+    expect(result.lossless).toBe(true);
     expect(result.diagnostics).toEqual([]);
     await expect(JSON.stringify(section, null, 2) + '\n').toMatchFileSnapshot(fixture('type01/pc-mo.expected.json'));
     await expect(serialize(def.render(section, ctx())) + '\n').toMatchFileSnapshot(fixture('type01/pc-mo.expected.html'));

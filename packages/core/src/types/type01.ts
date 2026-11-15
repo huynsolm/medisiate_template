@@ -49,7 +49,8 @@ export const type01: TypeDefinition<Type01Data> = {
     const variant = variantFromClasses(src, TYPE01_SOURCE_VARIANTS, diagnostics);
     const { pair: image, extra } = pairImages(descendants(src.element, (el) => el.tagName === 'img'), src, diagnostics);
     const heading = descendants(src.element, isHeading)[0];
-    const paragraphs = descendants(src.element, (el) => el.tagName === 'p' && !(heading && descendants(heading).includes(el)));
+    // 원본 마크업은 제목도 <p class="cms-thin-title">이므로, 제목 요소 자신과 그 안의 문단은 설명에서 뺀다.
+    const paragraphs = descendants(src.element, (el) => el.tagName === 'p' && el !== heading && !(heading && descendants(heading).includes(el)));
     const desc = joinParagraphs(paragraphs.map(richFrom).filter(Boolean));
     const data: Type01Data = { image };
     const title = heading ? richFrom(heading) : '';

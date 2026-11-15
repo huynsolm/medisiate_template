@@ -8,15 +8,11 @@
       "pc": {
         "src": "https://cdn.example.com/acne_pc.jpg",
         "alt": "여드름 치료 대표 이미지",
-        "width": 1200,
-        "height": 600,
         "kind": "https"
       },
       "mo": {
         "src": "https://cdn.example.com/acne_mo.jpg",
         "alt": "여드름 치료 대표 이미지",
-        "width": 720,
-        "height": 600,
         "kind": "https"
       }
     },

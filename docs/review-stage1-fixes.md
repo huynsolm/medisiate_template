@@ -311,3 +311,25 @@ C-1의 실제 데이터 손실 재현 조건은 더 이상 성립하지 않았�
 검증 (Linux): `npm test` 142 passed · 1 skipped(inventory, `cms/` 필요), `npm run test:browser` 12 passed, `npm run lint`·`npm run typecheck` 오류 없음.
 
 남은 확인: 일반 권한 Windows에서 `npm test`(junction 테스트 통과, file symlink 테스트 3개 건너뜀 표시)와 의존성이 설치된 Windows에서 `npm run test:browser` 12개 실제 결과. M-2(type01 `highlight`)·M-3(`uncoveredText` 오탐)은 실제 `cms/` 표본이 있어야 확인할 수 있다.
+
+## 12. 원본 마크업 기준 확보와 type01 보정 (2026-11-15)
+
+사용자 지시: 원본 `cms/` 대신 **https://biny-gilt.vercel.app/cms-preview** 의 타입을 기준으로 삼는다.
+
+- 이 미리보기의 소스(`huynsolm/biny`)의 타입 정의는 원본 CMS 도구 `TypeNN.jsx`와 **같은 HTML**(클래스 문자열·중첩·조건부 요소·SVG)을 만들도록 작성·테스트돼 있다. 그 정의로 type01~26(08 제외) 25종의 원본 마크업을 만들어 `fixtures/original/`에 저장했다(출처·커밋·biny가 바꾼 점은 `fixtures/original/README.md`).
+- 원본 `cms.css`(http://fxfile.drline.net/cms/public/css/cms.css)는 받지 못했다. https를 지원하지 않는 http 전용 서버인데, 작업 세션의 프록시는 https만 통과시킨다. 필요하면 파일을 직접 올려 주어야 한다.
+
+**발견한 버그 (원본 구조에서만 드러남)**: 원본 type01은 제목이 `<p class="cms-thin-title">`라서, 설명 문단을 모을 때 제목 요소 자신이 빠지지 않아 **제목이 설명에 중복**됐다. 추정 fixture는 제목을 `<h3>`로 가정해 이 문제를 가렸다. 제목 요소 자신도 설명에서 빼도록 고쳤다.
+
+| 변경 | 내용 | 확인 |
+|---|---|---|
+| type01 parse | 설명 문단에서 제목 요소 자신 제외 | `packages/core/test/original-markup.test.ts` (수정 전 실패) |
+| type01 fixture | `pc-mo`, `bg-single` 입력을 원본 구조(`.cms-inner > .cms-header > p.cms-thin-title`, `.cms-visual > img.img-fluid.d-none.d-lg-block` / `img.w-100.d-block.d-lg-none`, `.cms-description-box > p.cms-description.larger`)로 교체. 기대 결과는 원본에 없는 이미지 width/height만 빠짐 | `packages/core/test/types.test.ts` (`lossless` 추가 확인) |
+| 원본 마크업 25종 | 아직 구현하지 않은 24개 타입도 변환 중 오류 없이 fallback으로 보존되고 이미지 주소가 하나도 빠지지 않음 | `original-markup.test.ts` |
+
+남은 확인:
+- **M-2 type01 `highlight`**: 원본 type01 마크업에는 변형 클래스가 없다. `highlight`는 근거가 없는 추정으로 남는다(코드는 그대로 두고, 실제 contents 표본에서 확인).
+- **type00**: biny에 없어 원본 구조를 확인하지 못했다(추정 구조 유지).
+- 나머지 24개 타입(3·4단계)은 이제 `fixtures/original/typeNN.html`을 원본 구조 기준으로 삼아 구현할 수 있다.
+
+검증 (Linux): `npm test` 170 passed · 1 skipped(inventory, `cms/` 필요), lint·typecheck 오류 없음.
