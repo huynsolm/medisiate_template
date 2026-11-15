@@ -1,3 +1,130 @@
+# 4단계 P5 재검수 결과 — be1b3cc
+
+- 검수일: 2026-11-15.
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `be1b3ccd94f7591111fc9f4705d713e04052622f`.
+- 범위: `5240b60..be1b3cc`. 기준 문서: `docs/review-stage4-p5-fixes.md` 및 검수 요청서 재검수 항목.
+- 애플리케이션·테스트·fixture 코드는 수정하지 않았다. 이번 변경은 이 검수 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 I-1의 두 입력은 수정됐다. 실제 중복 읽기 방어는 확인했지만, 빈 글 읽기까지 중복으로 취급하여 정상 본문을 미지원 fallback으로 바꾸는 회귀를 재현했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 1 | R-I-1: 빈 제목 요소도 포함 읽기로 집계하여 불필요한 fallback |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+## 이전 I-1 수정 확인 — 직접 실행
+
+이전 검수의 전체 HTML A·B를 그대로 코어와 Chromium에서 실행했다.
+
+| 원문 입력 | 실제 결과 | 판정 |
+|---|---|---|
+| A: type22 짧은 목록 안에만 p.cms-title(FIRST) | success, diagnostics [], fallback 0. 카드 제목을 별도 생성하지 않고 짧은 목록에 FIRST 한 번 | 수정 확인 |
+| B: type24 설명 안 span.cms-title(FIRST) | success, diagnostics [], fallback 0. 자동 순번 외 FIRST 한 번 | 수정 확인 |
+
+원본에 한 번 있는 FIRST가 출력에서 두 번 보이던 증상은 사라졌다. type22·24가 제목·설명을 직접 자식에서 읽도록 바꾼 효과와 일치한다.
+
+## Important
+
+### R-I-1. 빈 제목 요소를 읽었을 뿐인데 같은 글의 중복으로 판정하여 정상 설명을 fallback함
+
+**위치:** `packages/core/src/parse/common.ts:149`~`:152`(빈 결과도 횟수 기록), `:160`~`:168`(값을 보지 않고 포함 관계로 거부). 실제 호출은 `packages/core/src/types/type18.ts:59`, fallback 적용은 `packages/core/src/parse/original.ts`의 finish다.
+
+**확인 방식:** 이전 5240b60과 현재 코드에 같은 HTML을 전달한 코어 비교, 실제 Chromium 원본/이전/현재 출력 비교로 **직접 실행**했다. 원인 설명은 **정적 판독**이다.
+
+**재현 입력:**
+
+```html
+<div class="cms-container">
+  <section class="cms type18"><div class="cms-inner">
+    <ol class="cms-img-list">
+      <li class="cms-list-item">
+        <div class="cms-visual-text">
+          <p class="cms-description"><span class="cms-title"></span>BODY</p>
+        </div>
+      </li>
+    </ol>
+  </div></section>
+</div>
+```
+
+이는 빈 서식/자리표시 요소가 남은 유효한 HTML 변형이다. 표준 fixture가 이 형태를 생성한다는 주장은 아니며, 기존 파서가 정상적으로 처리하던 사용자 편집 입력의 회귀다. 제목은 스키마에서도 선택 사항이다.
+
+**이전 실제 결과:** success, diagnostics [], fallback 0. 항목 제목은 생성하지 않고 설명에서 BODY를 한 번 출력한다. Chromium 원본과 이전 출력의 표시 글은 모두 BODY다.
+
+**현재 실제 결과:** status failed, `LOSSY_PARSE`, 섹션 fallback 1. 사유는 다음과 같다.
+
+```text
+같은 글을 두 칸으로 읽음: <span> 글이 다른 칸의 글 안에 있음
+```
+
+Chromium에서도 정상 type18 프리셋 대신 `[변환 미지원] type18 ...` fallback을 표시한다. 원본은 보존되지만 정상 프리셋 변환이 거부된다. 빈 span에 공백 하나만 넣어도 동일하게 이전 success / 현재 fallback이다.
+
+**기대:** 빈 요소를 읽어 제목 값이 생기지 않고 BODY도 한 번만 출력되는 경우는 정상 변환되어야 한다. 실제 두 필드에 남는 글이 중복되는 경우와, 선택적 빈 필드를 조회한 경우를 구분해야 한다. 비어 있지 않은 `<span class="cms-title">FIRST</span>`을 설명으로도 읽는 기존 중복 사례는 계속 fallback되어야 한다.
+
+**원인 — 정적 판독:** type18의 textOf는 빈 제목 span과 설명 p를 각각 richFrom으로 읽는다. 빈 span의 반환값은 빈 문자열이므로 optional('title', ...)은 필드를 만들지 않는다. 그러나 richFrom은 반환값을 구하기 전에 빈 span도 읽기 횟수에 기록한다. duplicateReads는 이 반환값이나 실제 생성 필드를 보지 않고, 읽은 span의 조상 p도 읽혔다는 이유만으로 중복이라고 판정한다. 따라서 여기서는 두 번 출력될 글이 존재하지 않는데도 거부된다.
+
+이 항목은 데이터 손실이나 중복 방어 누락이 아니라 **정상 본문이 미지원 결과로 바뀌는 오탐 회귀**로 Important에 집계했다. 기본 원본 전체가 실패한다는 의미는 아니다.
+
+## 공통 중복 방어 확인
+
+### 직접 실행
+
+- 같은 요소를 두 번 richFrom으로 읽음 → duplicateReads가 중복을 찾음.
+- 부모→자식, 자식→부모 순서로 읽음 → 두 경우 모두 포함 읽기를 찾음.
+- 서로 다른 두 요소에 같은 글 FIRST가 있음 → 중복으로 취급하지 않음.
+- 한 번의 richFrom 내부에서 문단을 나누는 재귀 → 중복으로 취급하지 않음.
+- 검사 후 duplicateReads를 다시 호출 → 이전 횟수 잔여 없음.
+- type18·22·24·26 원본을 **동일한 DOM 객체로 두 번 parse** → 두 번 모두 fallback 사유 없음, 데이터 동일. 횟수 정리가 재파싱을 방해하지 않음.
+- 추가 비어 있지 않은 type18 포함 읽기 → LOSSY_PARSE 및 fallback. 빈 결과의 R-I-1과 대조했다.
+
+### 정적 판독
+
+읽기 기록은 DOM 객체별 WeakMap이며 내부 재귀는 richInner로 분리되어 외부 필드 조회와 구분된다. duplicateReads는 루트와 후손의 동일 객체·조상 관계를 검사하고 횟수를 지운다. finish는 다른 fallback 사유가 있어도 duplicateReads를 호출하므로 일반적인 조기 fallback 선택 때문에 횟수가 남는 경로는 아니다.
+
+현재 P2~P5의 글 읽기 도우미는 richFrom을 경유하며, type20·21의 새 border-list 도우미도 textOf를 쓴다. 이번에 조사한 실제 읽기 경로와 위 실행 입력에서는 비어 있지 않은 같은 요소/포함 읽기의 누락을 확인하지 못했다. 모든 가능한 미래 파서의 재사용·중복 출력까지 증명한 것은 아니다.
+
+## 기본 원본 및 일반 변형 비교 — 직접 실행
+
+이전 5240b60 코드를 임시 디렉터리에 펼쳐 비교했다. 저장소 코드는 변경하지 않았다.
+
+| 입력군 | 결과 |
+|---|---|
+| type01 및 P2~P5 24타입 × 원본/무배경/이미지 배경/색 배경 100조합 | 이전/현재 HTML 전부 동일 |
+| P2~P5 24타입 × 공백/이미지 제거/인라인 서식/문단 변형 96조합 | 이전/현재 HTML 전부 동일, 모두 fallback 0 |
+
+일반 변형은 공백·탭 추가, img 제거, 첫 해당 제목/설명에 strong·br·em 추가, 첫 p.cms-description을 div.cms-description > p+p로 바꾸는 방식이다. 해당 문단 요소가 없는 타입은 그 변형에서 원본을 대조했다. 따라서 기본 fixture·이 일반 입력군에서는 새 오탐이 없었지만, 빈 제목이 설명 안에 있는 R-I-1 입력은 이 검사와 별도로 실패한다.
+
+## 실행 결과와 한계
+
+| 직접 실행한 검사 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 종료 0, **670 passed / 1 skipped**, 파일 27 passed / 1 skipped |
+| 같은 환경의 `npm run test:browser` | 종료 0, **156 passed**, 파일 4 passed |
+| `npm run lint` | 종료 0 |
+| `npm run typecheck` | 종료 0 |
+| 이전 I-1 A·B | 코어·Chromium에서 글 한 번 출력 확인 |
+| 빈 제목 대조 | 빈 문자열·공백은 이전 success / 현재 fallback, 비어 있지 않은 중복도 fallback |
+| 공통 방어 검사 | 동일 요소/포함 양방향/별개 요소/재귀/정리 및 동일 DOM 재파싱 확인 |
+| 기본 원본·일반 변형 비교 | 100+96조합 동일 |
+
+- 전체 검사에 브라우저 검사가 포함되므로 670과 156을 합산하지 않는다. inventory 1개 건너뜀은 실제 cms/ 자료 부재에 따른 기존 조건이다.
+- Linux, Node v24.22.1, Chromium 156.0.8078.79 사용. 저장소 런처를 바꾸지 않고 기존 임시 Playwright 경로를 사용했다.
+- Windows·실제 운영 CMS·원본 CSS 시각 등급 비교는 실행하지 않았다. 별도 웹 편집기 저장·가져오기 흐름은 이번에는 다시 실행하지 않았다.
+- 임시 스크립트·입력·관측값은 `/tmp/p5-recheck/`, 공식 검사 로그는 `/tmp/p5-recheck-*.log`에 있다. 핵심 재현 입력과 결과는 위에 직접 기재했다.
+
+**최종 판정: 수정 후 재확인 필요.**
+
+## 이전 검수 원문 보존
+
+아래는 f620f79의 과거 검수 원문(보고 커밋 5240b60)이다. 과거 I-1은 수정 확인됐으며 현재 미해결 항목은 위 R-I-1이다.
+
+<details>
+<summary>최초 P5 검수 원문 — f620f79</summary>
+
 # 4단계 P5 검수 결과
 
 - 검수일: 2026-11-15.
@@ -130,3 +257,5 @@
 - 임시 입력·스크립트·관측값은 `/tmp/p5-review/`, 공식 검사 로그는 `/tmp/p5-*.log`에 있다. 핵심 재현 입력과 관측 결과는 위에 직접 기재했다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
