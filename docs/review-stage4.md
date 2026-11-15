@@ -1,3 +1,155 @@
+# 4단계 P4 재검수 결과 — da153b1
+
+- 검수일: 2026-11-15.
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `da153b1eacb4b0a1579cf497cce8941266f1d29b`.
+- 범위: `0db22f1..da153b1`. 기준 문서: `docs/review-stage4-fixes.md` 및 검수 요청서 7장.
+- 애플리케이션·테스트·fixture 코드는변경하지 않았다. 이번 변경은 이 검수 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 I-1은 수정됐고, I-2도 최초 재현 입력에서는 해결됐다. 다만 type06에서 읽는 글머리 항목과 새 구조 검사 대상이 일치하지 않아 I-2의 우회 입력이 남아 있다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 1 | R-I-1: 글머리 항목의 클래스에 따라 구조 검사 누락 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+## 이전 지적 수정 확인 — 직접 실행
+
+### I-1: type16 아이콘 없는 행
+
+이전 검수의 최소 HTML, 원본 fixture의 첫 아이콘만 제거한 HTML, type16 기본 데이터 세 가지를 모두 다시 렌더했다. 실제 Chromium에서 PC 1100 / 모바일 360 / 에디터 1100을 측정한 결과 세 입력 모두 다음과 같다.
+
+| 화면 | 이전 글 묶음 폭 | 현재 글 묶음 폭 | 현재 grid-column |
+|---|---:|---:|---|
+| PC 1100 | 30px | 944px | 2 |
+| 모바일 360 | 30px | 약 212.094px | 2 |
+| 에디터 1100 | 30px | 약 952.094px | 2 |
+
+**수정 확인.** `packages/core/src/types/type16.ts`의 빈 아이콘 조건에서 `grid-column: 2`가 적용되어 글이 본문 칸에 놓인다. 기존 아이콘 있는 원본 출력은 이전과 동일하다.
+
+### I-2: 원문의 문단·목록 경계
+
+- 이전 최소 입력의 `li.cms-list-item.cms-description > p + p`: `success`, diagnostics `[]`, fallback 0, `FIRST<br>SECOND`. Chromium에서도 FIRST/SECOND 사이 줄 경계 유지.
+- 이전 원본 fixture 변형의 중첩 목록: `LOSSY_PARSE`, 섹션 fallback으로 원본 보존.
+- P2·P3·P4 원본 fixture 18종 중 첫 `p.cms-description`이 있는 17종에 대해, 이를 `div.cms-description`으로 바꿔 문단 2개·중첩 목록·span 안 블록을 각각 넣었다. 글자 경계 소실 없이 변환하거나 fallback 처리됐고, 목록·숨은 블록은 모두 fallback이었다. type17은 해당 요소가 없어 이 변형 검사에서 제외했다.
+
+**최초 입력의 수정은 확인했지만, 아래 R-I-1 때문에 일반화된 해결로 판정하지 않는다.**
+
+## Important
+
+### R-I-1. type06 글머리에서 cms-description 클래스가 없으면 구조 검사가 빠져 경계가 다시 사라짐
+
+**위치:** `packages/core/src/types/type06.ts:53`(모든 글머리 li를 `richFrom()`으로 읽음), `packages/core/src/parse/common.ts:175`~`:176`(특정 글 클래스가 있는 요소만 검사), `:138` 이후 `richFrom()`의 직접 자식 블록 검사. 호출 지점은 `packages/core/src/parse/original.ts:78`.
+
+**확인 방식:** 최소 HTML 코어 변환, 클래스 하나만 추가한 대조 실험, Chromium 원본/출력 텍스트 비교로 **직접 실행**했다. 원인 설명은 **정적 판독**이다. 새로 생긴 회귀라기보다 I-2 수정의 잔여 경로다.
+
+**재현 입력 A — 중첩 목록:**
+
+```html
+<div class="cms-container">
+  <section class="cms type06"><div class="cms-inner">
+    <ul class="cms-column-list">
+      <li class="cms-list-item"><div class="cms-inner-box">
+        <div class="cms-description-box">
+          <p class="cms-description">CARD</p>
+          <ul class="cms-bullet-list">
+            <li class="cms-list-item">FIRST<ul><li>SECOND</li><li>THIRD</li></ul></li>
+          </ul>
+        </div>
+      </div></li>
+    </ul>
+  </div></section>
+</div>
+```
+
+**실제 결과:** `status="success"`, diagnostics `[]`, fallback 0. `items[0].subitems[0].text`는 `FIRSTSECONDTHIRD`, 출력은 다음과 같다.
+
+```html
+<li class="mig-item"><span class="mig-desc">FIRSTSECONDTHIRD</span></li>
+```
+
+Chromium 원본 `innerText`의 `FIRST\nSECOND\nTHIRD`가 출력에서 `FIRSTSECONDTHIRD`로 합쳐진다.
+
+**재현 입력 B — 줄 안 요소 안에 숨은 블록:** 위 입력의 안쪽 글머리 li만 아래처럼 바꾼다.
+
+```html
+<li class="cms-list-item"><span><section><p>FIRST</p><p>SECOND</p></section></span></li>
+```
+
+실제 HTML 파서가 만든 DOM과 Chromium에서도 확인했다. 역시 `success`, diagnostics `[]`, fallback 0이며 `FIRSTSECOND`를 출력한다. 원본의 문단 경계가 사라진다.
+
+**클래스 대조 — 직접 실행:** A·B의 해당 글머리 li에 `cms-description` 클래스 하나만 추가하면 둘 다 `LOSSY_PARSE` 및 섹션 fallback이 된다. 반대로 클래스 없는 항목의 단순 `<p>FIRST</p><p>SECOND</p>`는 현재 파서가 정상 수용하여 `FIRST<br>SECOND`로 옮긴다. 따라서 문제는 항목 자체를 지원하지 않는다는 데 있지 않고, 파서가 수용하는 항목 중 일부에만 새 검사가 적용된다는 데 있다.
+
+**기대 결과:** 파서가 소비하는 모든 글머리 항목에 동일한 구조 규칙을 적용해야 한다. 중첩 목록과 줄 안 요소 속 블록은, 클래스 유무에 관계없이 반영 기록이 정한 `LOSSY_PARSE` 및 섹션 fallback으로 보존해야 한다. 해당 마크업이 지원 범위 밖이라면 그 이유로 거부해도 되지만 조용히 합쳐서 성공 처리해서는 안 된다.
+
+**원인 — 정적 판독:** type06은 `listItems()`가 고른 `li.cms-list-item` 전체를 읽으며 `cms-description`을 요구하지 않는다. 반면 `textStructureProblems()`는 `cms-description`·`cms-title`·`cms-thin-title`·`cms-eyebrow`가 있는 요소만 살핀다. 이 불일치 때문에 클래스 없는 글머리 내부 목록은 검사되지 않고, `richFrom()`과 공백을 지우는 `uncoveredText()`를 거쳐 손실을 성공으로 처리한다. 숨은 블록도 같은 검사 누락으로 통과한다.
+
+## Critical / Minor
+
+이번 범위에서 별도 확정한 항목 없음. 테스트가 통과해도 위 추가 입력의 성공 판정 손실은 남는다.
+
+## P2·P3 및 3단계 사례 회귀 확인
+
+아래 항목은 모두 **직접 실행**했다.
+
+| 이전 사례 | 현재 결과 | 판단 |
+|---|---|---|
+| type15 원문: CARD → EXTRA_PARA 문단 → BULLET 목록 | 두 값 모두 출력, 목록→문단 순서 유지, success·경고 없음. Chromium에서도 확인 | 누락 재발 없음. 합의한 순서 정규화 유지 |
+| 표 `colspan="21"` / `rowspan="0"` | 값 보존, success | 회귀 없음 |
+| 표 `colspan="0x10"` / `colspan="2foo"` | `LOSSY_PARSE`, 섹션 fallback | 회귀 없음 |
+| 표 안 문단 2개 + 목록(최초 I-3 원문) | `LOSSY_PARSE`, 섹션 fallback | 회귀 없음 |
+| 표 안 section/article > p + p | `FIRST<br>SECOND`, success | 경계 유지 |
+| 표 안 목록 / span 안 블록 | `LOSSY_PARSE`, 섹션 fallback | 회귀 없음 |
+| 잘못된 JSON rowspan 객체·false·배열 | `INVALID_DATA`, 해당 섹션만 fallback, 정상 KEEP_VISIBLE 유지 | 숫자 검증·예외 격리 회귀 없음 |
+| 웹 type26 칸 글, type09·07 항목 글 비우기 | INVALID_DATA 없음, 새로고침 후에도 유지 | 빈 글 편집 회귀 없음 |
+
+### type26의 의도된 변경: 칸 안 글 + 문단
+
+다음 두 입력을 코어 및 Chromium에서 확인했다.
+
+```html
+<td>FIRST<p>SECOND</p></td>
+<td><section>FIRST<p>SECOND</p></section></td>
+```
+
+둘 다 `success`, diagnostics `[]`, fallback 0이며 `<td>FIRST<br>SECOND</td>`로 출력된다. 원본/출력 모두 FIRST와 SECOND 사이 줄 경계가 있다. **이전 fallback에서 성공 변환으로 바뀌었지만, 사용자가 지정한 정책 변경과 일치하므로 회귀로 세지 않는다.**
+
+### 일반 원본 출력·웹 편집
+
+- 이전 `0db22f1` 코드를 임시 디렉터리에 펼쳐 type01 및 P2/P3/P4 18개 타입 × 원본/무배경/이미지 배경/색 배경 **76개 조합**의 HTML을 대조했다. 원본 fixture처럼 중첩 블록이 없는 입력의 출력은 전부 동일했다. type16 아이콘 있는 원본도 동일하다.
+- 실제 Chromium 웹에서 P2/P3 11개 타입을 각각 편집→JSON 다운로드→가져오기→브라우저 새로고침했다. 모든 입력에서 편집 값과 출력 HTML이 유지됐다. type15·type26을 포함한다.
+- 공식 브라우저 검사 120개도 통과했다. 기존 이미지 있는 배치와 새로 추가된 18타입 × 3화면의 이미지 없는 배치 검사를 포함한다.
+
+## 실행 결과와 한계
+
+| 직접 실행한 검사 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 종료 0, **478 passed / 1 skipped**, 파일 26 passed / 1 skipped |
+| 같은 환경의 `npm run test:browser` | 종료 0, **120 passed**, 파일 4 passed |
+| `npm run lint` | 종료 0 |
+| `npm run typecheck` | 종료 0 |
+| 별도 코어 변환 입력 | 70건 기록: 이전 입력·글 구조 변형·표·클래스 없는 글머리 등. 원인 대조 2건 및 숫자 검증 3건 별도 실행 |
+| type16 글 폭 | 최소 입력 / fixture 아이콘 제거 / 기본 데이터 × 세 화면 확인 |
+| 원본 HTML 비교 | 이전/현재 76개 조합 동일 |
+| 웹 P2/P3 편집·저장·새로고침 | 11타입 및 빈 글 3필드 확인 |
+
+- 전체 검사에 브라우저 검사가 포함되므로 478과 120을 합산하지 않는다. inventory 1개 건너뜀은 실제 `cms/` 자료가 없는 기존 조건이다.
+- Linux, Node v24.22.1, 시스템 Chromium 156.0.8078.79 사용. 저장소 테스트·런처를 바꾸지 않고 기존 임시 Playwright 경로를 사용했다.
+- Windows·실제 운영 CMS·원본 CSS를 통한 시각 등급 비교는 이번에도 실행하지 않았다. 모든 가능한 입력에 대한 무결함을 의미하지 않는다.
+- 임시 입력·스크립트·관측 JSON은 `/tmp/stage4-recheck/`, 공식 검사 로그는 `/tmp/stage4-recheck-*.log`에 있다. 재현에 필요한 입력과 결과는 이 문서에 직접 기재했다.
+
+**최종 판정: 수정 후 재확인 필요.**
+
+## 부록: 최초 4단계 검수 원문
+
+아래는 `97cd9af`를 검수한 과거 기록(보고 커밋 `0db22f1`)이다. 과거 Important 2는 현재 미해결 건수가 아니며, 현재 판정은 위의 Important 1이다. 원문의 재현 입력을 보존한다.
+
+<details>
+<summary>최초 4단계 검수 원문 — 97cd9af</summary>
+
 # 4단계 P4 검수 결과
 
 - 검수일: 2026-11-15.
@@ -173,3 +325,5 @@ Chromium `innerText`는 원본 `FIRST\n\nSECOND`에서 출력 `FIRSTSECOND`로 �
 - 임시 재현 스크립트·입력·관측 JSON·스크린샷은 `/tmp/stage4-review/`, 공식 검사 로그는 `/tmp/stage4-*.log`에 있다. 임시 경로는 저장소 산출물이 아니므로 재현 핵심 입력과 관측값을 위에 기재했다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
