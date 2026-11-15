@@ -1,0 +1,40 @@
+{
+  "id": "s1",
+  "type": "type09",
+  "variant": "default",
+  "modifiers": {
+    "background": {
+      "kind": "color",
+      "value": "#f9f3ec",
+      "token": "type-bg"
+    }
+  },
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "perRow": 2,
+    "items": [
+      {
+        "text": "항목 1"
+      },
+      {
+        "text": "항목 2"
+      },
+      {
+        "text": "항목 3"
+      },
+      {
+        "text": "항목 4"
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type09",
+      "type-bg"
+    ]
+  }
+}

@@ -76,6 +76,7 @@ export const DIAGNOSTIC_CODES = [
   'MIXED_MODE_SPLIT',
   'SSI_REMOVED',
   'INVALID_DATA',
+  'PRESET_LAYOUT_FIXED',
 ] as const;
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number];
