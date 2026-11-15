@@ -137,7 +137,15 @@ const cleanRich = (html: string) => sanitizeRichText(html).replace(/\s+/gu, ' ')
  * allowlist가 블록 태그를 풀면서 "FIRST" "SECOND"가 "FIRSTSECOND"로 붙던 문제 (4단계 검수 I-2).
  * 목록·표처럼 줄바꿈으로 나타낼 수 없는 구조는 여기서 처리하지 않는다. 원본 마크업 파서는 finish()가 찾아 fallback한다.
  */
+/**
+ * richFrom이 글로 읽은 요소. finish()의 구조 검사가 "파서가 실제로 글로 읽은 범위"를 그대로 보도록 기록한다.
+ * 어떤 요소를 글로 읽는지 클래스·구조로 짐작하면 파서와 어긋난다(4단계 재검수에서 두 번 놓침).
+ * WeakSet이라 원본 DOM이 사라지면 함께 사라진다.
+ */
+const readAsText = new WeakSet<DomElement>();
+
 export function richFrom(el: DomElement): string {
+  readAsText.add(el);
   const nodes = childNodes(el);
   let inner: string;
   if (!nodes.some((n) => isElement(n) && TEXT_BLOCKS.has(n.tagName))) {
@@ -168,9 +176,9 @@ export function richFrom(el: DomElement): string {
 
 /**
  * 섹션 안의 "글 요소"에서 줄바꿈으로 나타낼 수 없는 구조를 찾는다. 하나라도 있으면 그 글은 경계를 잃는다.
- * 글 요소: 원본 글 클래스(cms-description · cms-title · cms-thin-title · cms-eyebrow)가 있거나, 글을 직접 담거나,
- * cms- 클래스 자식이 없는 목록 항목(li). 파서가 클래스 없이 li 전체를 글로 읽는 경우(type06 글머리)도 같은 규칙을 받는다
- * (4단계 재검수 R-I-1).
+ * 글 요소: **파서가 richFrom으로 실제로 읽은 요소**(기본), 그리고 읽지 않았더라도 원본 글 클래스
+ * (cms-description · cms-title · cms-thin-title · cms-eyebrow)가 있거나, 글을 직접 담거나, cms- 클래스 자식이 없는 li.
+ * 뒤의 세 가지는 파서가 읽지 않은 글이 finish()의 글 비교에서 빠지는 경우를 대비한 보수적 추가다.
  * - 글 요소 안에 블록 상자(TEXT_BLOCKS)·줄 안 요소(TEXT_INLINE) 밖의 요소(목록·표·제목 등)가 있으면 문제.
  * - 섹션 어디서든 줄 안 요소(span 등) 속에 블록 상자가 숨어 있으면 문제(richFrom이 줄로 나눌 수 없음).
  */
@@ -179,7 +187,7 @@ export function textStructureProblems(root: DomElement): string[] {
   const TEXT_CLASSES = ['cms-description', 'cms-title', 'cms-thin-title', 'cms-eyebrow'];
   const holdsText = (el: DomElement) => childNodes(el).some((n) => n.nodeName === '#text' && textContentOf(n).trim() !== '');
   const leafItem = (el: DomElement) => el.tagName === 'li' && !descendants(el).some((d) => classesOf(d).some((c) => c.startsWith('cms-')));
-  const isText = (el: DomElement) => classesOf(el).some((c) => TEXT_CLASSES.includes(c)) || holdsText(el) || leafItem(el);
+  const isText = (el: DomElement) => readAsText.has(el) || classesOf(el).some((c) => TEXT_CLASSES.includes(c)) || holdsText(el) || leafItem(el);
   for (const textEl of descendants(root, isText)) {
     // 글 요소 안의 글 요소(예: li 안의 p.cms-description)는 바깥에서 한 번만 보면 된다
     if (ancestors(textEl).some((a) => a !== root && descendants(root).includes(a) && isText(a))) continue;

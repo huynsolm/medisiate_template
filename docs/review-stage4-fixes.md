@@ -42,3 +42,13 @@
 - 검수 문서 입력 그대로 실행: A·B 모두 `LOSSY_PARSE` + 섹션 fallback. 클래스 없는 글머리의 단순 `<p>FIRST</p><p>SECOND</p>`는 그대로 `FIRST<br>SECOND`.
 - 테스트: `stage3-review.test.ts`에 A·B(클래스 있음/없음 4종), 클래스 없는 단순 문단, 18개 타입 "줄 안 요소 속 블록" 추가. 수정 전 A·B 2개 실패.
 - 전체: `npm test` 500 passed · 1 skipped, `npm run test:browser` 120 passed, lint·typecheck 오류 없음. 기존 스냅샷 변화 없음.
+
+## 3차 재검수(`8b0ca21`) 지적 반영
+
+### R-I-1 잔여. 글머리 안 cms- 클래스 후손 때문에 중첩 목록 검사가 빠짐
+- 재현: 검수 문서 입력(`<li class="cms-list-item"><p class="cms-description">FIRST</p><ul><li>SECOND</li><li>THIRD</li></ul></li>`) → `FIRST<br>SECONDTHIRD`, success. `span.cms-description`, `span.cms-extra` 변형도 같음.
+- 근본 원인: 1·2차 수정 모두 "파서가 어떤 요소를 글로 읽는가"를 **클래스나 구조로 짐작**했다. 짐작은 파서와 어긋날 수 있고, 실제로 두 번 어긋났다.
+- 수정: 짐작하지 않는다. `richFrom()`이 **실제로 글로 읽은 요소를 기록**하고(`WeakSet`), `finish()`의 구조 검사는 그 요소들을 반드시 검사한다(`packages/core/src/parse/common.ts`). 기존의 클래스·구조 기준은 "파서가 읽지 않은 글"에 대한 보수적 추가로 남겼다.
+- 전제 확인: P2·P3·P4 파서는 모든 글을 `richFrom`(직접 또는 `textOf`·`childText`)으로 읽는다. 다른 경로(`plainText`, `textContent`, `innerHtml` 등)를 쓰지 않는다는 것을 테스트로 고정했다(새 타입이 우회하면 실패).
+- 검수 문서 입력과 변형 5종(`p.cms-description`, `p`, `span.cms-description`, `span.cms-extra`, `strong`) 모두 섹션 fallback. 글머리 안 클래스 있는 문단 두 개는 그대로 `FIRST<br>SECOND`.
+- 전체: `npm test` 525 passed · 1 skipped, `npm run test:browser` 120 passed, lint·typecheck 오류 없음. 기존 스냅샷 변화 없음.

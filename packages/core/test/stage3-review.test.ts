@@ -267,3 +267,38 @@ describe('every text container gets the structure check, with or without a text 
     expect(result.page.sections[0]!.type).toBe('fallback');
   });
 });
+
+// ---- 4단계 3차 재검수 (75ffd4d) 지적: 검사 범위 = 파서가 실제로 글로 읽은 요소 ----
+
+describe('the structure check covers exactly what the parser reads as text (stage 4 re-review, R-I-1 remainder)', () => {
+  const card = (bullet: string) => `<section class="cms type06"><div class="cms-inner"><ul class="cms-column-list"><li class="cms-list-item"><div class="cms-inner-box"><div class="cms-description-box"><p class="cms-description">CARD</p><ul class="cms-bullet-list">${bullet}</ul></div></div></li></ul></div></section>`;
+
+  it.each([
+    '<p class="cms-description">FIRST</p>',
+    '<p>FIRST</p>',
+    '<span class="cms-description">FIRST</span>',
+    '<span class="cms-extra">FIRST</span>',
+    '<strong>FIRST</strong>',
+  ])('bullet "%s" + nested list falls back', (head) => {
+    const result = convert(card(`<li class="cms-list-item">${head}<ul><li>SECOND</li><li>THIRD</li></ul></li>`));
+    expect(result.page.sections[0]!.type).toBe('fallback');
+    expect(result.html).not.toMatch(/SECONDTHIRD/u);
+  });
+
+  it('a bullet with a class-bearing paragraph pair still converts as lines', () => {
+    const result = convert(card('<li class="cms-list-item"><p class="cms-description">FIRST</p><p class="cms-description">SECOND</p></li>'));
+    expect(result.page.sections[0]!.type).toBe('type06');
+    expect(result.html).toContain('FIRST<br>SECOND');
+  });
+});
+
+describe('stage 3/4 parsers read text only through richFrom (so the structure check sees it)', () => {
+  it.each([...STAGE3, 'check-rows'])('%s', async (id) => {
+    const { readFileSync } = await import('node:fs');
+    const file = id === 'check-rows' ? 'check-rows' : id;
+    const source = readFileSync(new URL(`../src/types/${file}.ts`, import.meta.url), 'utf8');
+    // type13·14는 check-rows.ts에 구현이 있다
+    if (/checkRowsType\(/u.test(source) && file !== 'check-rows') return;
+    expect(source).not.toMatch(/\b(plainText|textContent|innerHtml|blockText|nodesHtml)\b/u);
+  });
+});
