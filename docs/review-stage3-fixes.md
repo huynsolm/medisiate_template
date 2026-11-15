@@ -64,7 +64,7 @@
 - 검수 문서의 JSON 모델 그대로: `INVALID_DATA`, 잘못된 섹션만 fallback, 정상 섹션의 `KEEP_VISIBLE` 유지.
 
 ### R-M-1. 테스트 개수
-- 3장의 개수를 294로 정정했다.
+- 2장의 개수를 294로 정정했다.
 
 ### 재검수 반영 검증
 - `packages/core/test/stage3-review.test.ts`에 26개 추가(블록 상자 8종, fallback 4종, 잘못된 숫자 입력 10종, 정상 숫자 문자열 3종, 예외를 던지는 스키마 격리 1종). 수정 전 19개 실패 → 수정 후 전부 통과. (`hr` 사례는 수정 전에도 fallback이었다.)
