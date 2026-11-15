@@ -1,3 +1,138 @@
+# 3단계 P2·P3 재검수 결과 — c14fe4b
+
+- 검수일: 2026-11-15.
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `c14fe4bcada4d90a23f89802cbb8ed3291ad85fa`.
+- 범위: `0aea169..c14fe4b`. 반영 기록: `docs/review-stage3-fixes.md` 4장.
+- 애플리케이션·테스트·fixture는 수정하지 않았다. 이번 변경은 이 검수 문서뿐이다.
+
+## 판정
+
+**이번 반영 범위는 통과.** 이전 R-I-1, R-I-2, R-M-1의 수정을 직접 확인했다. 허용 목록 우회와 숫자 검증의 추가 입력에서도 새 결함을 확인하지 못했다.
+
+| 등급 | 현재 미해결 건수 | 판정 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 0 | 이전 R-I-1·R-I-2 수정 확인 |
+| Minor | 0 | 이전 R-M-1 정정 확인 |
+
+아래는 실행한 입력과 관측 결과다. 테스트 통과만으로 결함이 없다고 판단하지 않았으며, 직접 실행과 정적 판독을 구분했다. 이전 판정과 재현 입력은 아래 역사적 기록에 그대로 보존했다.
+
+## R-I-1: 표 칸 요소 허용 목록
+
+**위치:** `packages/core/src/types/type26.ts:59`~`:90`.
+
+### 이전 입력 재현 — 직접 실행
+
+```html
+<div class="cms-container">
+  <section class="cms type26"><div class="cms-inner">
+    <table class="cms-table"><tbody><tr>
+      <td><section><p>FIRST</p><p>SECOND</p></section></td>
+    </tr></tbody></table>
+  </div></section>
+</div>
+```
+
+내부 `section`을 `article`로 바꾼 입력도 실행했다.
+
+- 기대: 문단 경계를 보존하거나 섹션 fallback. 경고 없는 `FIRSTSECOND` 출력은 허용하지 않음.
+- 실제: 두 입력 모두 `success`, fallback 0, `<td>FIRST<br>SECOND</td>` 출력. Chromium `innerText`는 원본 `FIRST\n\nSECOND`, 출력 `FIRST\nSECOND`로, 줄 경계가 남는다. 이전에 수용한 문단 여백 차이는 유지된다.
+- 판정: **수정 확인**.
+
+### 허용 목록 누락·우회 입력 — 직접 실행
+
+표 칸 변환 관련 **76개 입력**을 추가로 실행했다.
+
+| 입력군 | 구체적 입력 | 기대·실제 결과 |
+|---|---|---|
+| 허용 블록 10종 | `p`, `div`, `section`, `article`, `aside`, `header`, `footer`, `main`, `nav`, `address`를 FIRST/SECOND 각각에 적용 | `FIRST<br>SECOND`, fallback 없음 |
+| 블록 중첩 | p를 제외한 위 상자 내부에 `<div><p>FIRST</p></div><section><p>SECOND</p></section>` | 두 문단 사이 `<br>` 유지 |
+| 줄 안 요소 12종 | `em`, `strong`, `b`, `i`, `u`, `sup`, `sub`, `span`, `a`, `small`, `mark`, `font`에 FIRST를 넣고 `<br>SECOND` 연결 | 두 값 유지, 오류 fallback 없음 |
+| 줄 안 요소 내부의 블록 | 위 12종 각각에 `<section><p>FIRST</p><p>SECOND</p></section>` 삽입 | 경계 손실을 성공으로 처리하지 않음: fallback 또는 HTML 파서 복구 후 경계 유지 |
+| 허용 목록 밖 요소 28종 | `ul`, `ol`, `dl`, `h1`, `h6`, `blockquote`, `pre`, `figure`, `hr`, `details`, `fieldset`, `button`, `select`, `textarea`, `ruby`, `wbr`, `kbd`, `samp`, `code`, `label`, `summary`, `dialog`, `svg`, `math`, `x-box`, `template`, `script`, `style`와 문단 조합 | 모두 섹션 fallback 및 `LOSSY_PARSE` |
+| 혼합·이미지·링크 5종 | `FIRST<section><p>SECOND</p></section>`, `<section>FIRST<p>SECOND</p></section>`, `<p>FIRST</p><br><p>SECOND</p>`, `FIRST<img src="/img.png">SECOND`, `<a href="javascript:alert(1)">FIRST</a>SECOND` | 앞 4개는 fallback, 링크는 텍스트를 유지한 변환 |
+
+**정적 판독:** 허용 목록 밖의 모든 후손 요소를 먼저 검사한다. 허용 블록은 재귀적으로 따라 내려가고, 블록이 직접 자식에 없더라도 후손에 숨어 있으면 fallback 사유를 남긴다. 블록과 바깥 텍스트가 섞이면 변환을 거부한다. 따라서 특정 미지원 태그가 차단 목록에 빠졌다는 이유로 조용히 풀리는 이전 경로는 제거됐다.
+
+`code`, `kbd`, `samp`, `wbr` 같은 줄 안 요소도 현재 목록에서는 빠져 있지만, 이 경우는 텍스트를 조용히 잃는 대신 fallback으로 보존한다. 변환 지원 범위가 보수적인 것이므로 이번 검수에서 결함으로 세지 않았다. `a`, `small`, `mark`, `font`, `img`는 칸 구조 검사 통과와 최종 rich text 보존 여부가 같지 않다. 최종 서식 허용 목록과 이미지 누락 검사도 적용되는 것을 함께 대조했다.
+
+## R-I-2: 숫자 입력 정규화와 예외 격리
+
+**위치:** `packages/core/src/schema/page.ts:12`~`:15`, `packages/core/src/types/type26.ts:17`~`:25`, `packages/core/src/types/type09.ts`·`type25.ts`의 `perRow`, `packages/core/src/page/render-page.ts:77` 이후 검증 처리.
+
+### 이전 JSON 입력 — 직접 실행
+
+이전 문서의 JSON 모델을 그대로 사용했다. 정상 type11 섹션(`KEEP_VISIBLE`)과 아래 type26 데이터가 있는 잘못된 섹션을 함께 넣었다.
+
+```json
+{ "body": [{ "cells": [{ "text": "X", "rowspan": { "toString": "x" } }] }] }
+```
+
+동일한 `rowspan`을 `false`로 바꾼 모델도 실행했다. 원본 전체 JSON은 아래 이전 검수 기록의 R-I-2에 있다.
+
+- 기대: `INVALID_DATA`, 잘못된 섹션만 fallback, 정상 섹션 유지. 예외와 `false → 0` 변환 없음.
+- 실제 코어: 두 모델 모두 `INVALID_DATA`, fallback 1, `KEEP_VISIBLE` 유지.
+- 실제 Chromium 웹: JSON 가져오기 후 해당 섹션의 데이터 검증 오류를 표시하고 정상 섹션 HTML을 유지. 전체 미리보기가 빈 문자열이 되지 않음.
+- 판정: **수정 확인**.
+
+### 숫자 필드 추가 입력 — 직접 실행
+
+type26 `colspan`·`rowspan`, type09·25 `perRow`에 대해 **96개 조합**을 실행했다. 잘못된 섹션 앞뒤에 정상 섹션을 두고 둘 다 출력되는지도 검사했다.
+
+| 입력군 | 입력 | 기대·실제 결과 |
+|---|---|---|
+| 잘못된 타입 | `false`, `true`, `[]`, `[2]`, `{ "toString": "x" }`, `{ "valueOf": "x" }` | 4개 필드 모두 `INVALID_DATA`, 해당 섹션 fallback |
+| 잘못된 숫자 문자열 | `"0x10"`, `"1e0"`, `"2foo"`, `"-1"`, `"2.0"`, 공백만 있는 문자열 | 4개 필드 모두 거부 |
+| 잘못된 숫자 | `NaN`, `Infinity`, `2.5`, `100000` | 거부. NaN/Infinity는 JSON이 아닌 코어 직접 호출로 검사 |
+| 병합 경계 | colspan 0·1001, rowspan 65535 | 거부 |
+| 허용 병합 값 | colspan 1·2·1000, rowspan 0·1·65534 및 해당 숫자 문자열·앞뒤 공백 | 수용, 1은 병합 속성 생략 |
+| 비움 값 | 병합의 `undefined`·`""`·`null`, perRow의 `undefined` | 병합 없음 또는 기본 perRow 적용 |
+| perRow 범위 | type09 1·`" 2 "`·3, type25 3·`" 4 "` | 수용 |
+| perRow 비정상 비움 | `null`, `""` | 거부 |
+
+모든 잘못된 조합에서 `INVALID_DATA` 및 해당 섹션 fallback을 확인했으며, 앞뒤 정상 섹션의 `KEEP_VISIBLE`·`AFTER_VISIBLE`이 유지됐다.
+
+**정적 판독:** `toNumberInput`은 숫자 또는 공백으로 감싼 ASCII 숫자 문자열만 변환한다. 배열·객체·boolean에는 `Number()`를 호출하지 않는다. 부호·지수·소수 문자열을 거부하는 정책은 반영 기록과 일치하며, 이 함수가 쓰이는 필드는 모두 정수 범위/선택값 필드다. 변환 후 범위 검증은 각 스키마가 담당한다.
+
+### 스키마 전처리 예외 — 직접 실행·정적 판독
+
+임시 레지스트리에 예외를 던지는 스키마를 등록하고 `renderPage()`를 실행했다. `Error('boom')`, 문자열 `'boom'`, `null`을 던지는 3종 모두 해당 섹션만 `INVALID_DATA` 및 fallback으로 처리하고 앞뒤 정상 섹션을 출력했다.
+
+정적 판독상 try/catch의 범위는 `schema.safeParse()` 및 검증 실패 메시지 구성이다. 이번 방어는 **스키마 검증 예외 격리**이며, 타입 renderer 내부에서 던지는 모든 예외까지 격리하는 기능으로 확대 해석하지 않았다.
+
+## R-M-1: 테스트 개수 정정
+
+**위치:** `docs/review-stage3-fixes.md` 2장과 4장.
+
+- 재현 입력: 문서의 이전/현재 테스트 집계 대조 및 대상 커밋에서 전체 `npm test`.
+- 기대: 86e0cec 결과는 294 passed / 1 skipped, 이번 26개 추가 후 320 passed / 1 skipped.
+- 실제: 2장의 이전 값이 294로 정정됐고, 4장은 이번 결과를 320으로 구분한다. 직접 실행 결과도 **320 passed / 1 skipped**.
+- 판정: **정정 확인**. 본문 중 “3장의 개수”라는 표현은 실제로는 2장의 수치를 가리키지만, 정정된 값과 검증 이력은 명확하므로 별도 결함으로 집계하지 않았다.
+
+## 검증 결과와 범위
+
+| 직접 실행 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 종료 0, 320 passed / 1 skipped, 파일 25 passed / 1 skipped |
+| 같은 환경의 `npm run test:browser` | 종료 0, 45 passed, 파일 4 passed |
+| `npm run lint` | 종료 0 |
+| `npm run typecheck` | 종료 0 |
+| 별도 표 셀·숫자·예외 재현 | 76개 / 96개 / 3종, 예상 결과 확인 |
+| 이전 R-I-1·R-I-2 실제 Chromium 검사 | 문단 경계 유지, 잘못된 JSON 격리 및 정상 섹션 유지 |
+
+- 전체 테스트에 브라우저 검사가 포함되므로 320과 45를 합산하지 않는다. inventory 1개 건너뜀은 운영 `cms/` 부재에 따른 기존 조건이다.
+- Linux, Node v24.22.1, 시스템 Chromium 156.0.8078.79 사용. 기존 임시 Playwright 경로를 사용했고 저장소의 테스트·런처를 변경하지 않았다. Windows 및 실제 운영 CMS는 이번에 실행하지 않았다.
+- type15 문단 순서 정규화와 문단 여백 차이에 대한 이전 제한사항은 유지된다. type15 원문 입력에서도 누락 없이 목록→문단 순서로 출력되는 것을 다시 확인했다.
+- 임시 재현 입력·스크립트·로그는 `/tmp/stage3-third/`, 공식 테스트 로그는 `/tmp/stage3-third-*.log`에 있다. 임시 경로는 저장소 산출물이 아니며, 재현 방법·입력군·관측 결과는 이 문서에 기재했다.
+
+## 역사적 검수 기록 보존
+
+아래는 `86e0cec` 재검수 결과와 그 안에 보존된 최초 검수 원문이다. 과거 Important 2 / Minor 1 또는 Important 4는 **현재 미해결 건수가 아니다.** 현재 판정은 이 문서 상단을 따른다.
+
+<details>
+<summary>이전 재검수 원문 — 86e0cec / 보고 커밋 0aea169</summary>
+
 # 3단계 P2·P3 재검수 결과
 
 - 검수일: 2026-11-15.
@@ -315,5 +450,7 @@ console.log(result.html);
 ## 최종 판정
 
 **수정 후 재확인 필요.** I-1~I-4를 수정한 뒤 해당 입력을 회귀 테스트에 넣고, 기존 unit·lint·typecheck·브라우저 suite를 다시 실행해야 한다. 이번 검수에서는 코드 수정·커밋·푸시를 하지 않았다.
+
+</details>
 
 </details>
