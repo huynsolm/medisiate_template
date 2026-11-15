@@ -333,3 +333,19 @@ describe('one original text is never output twice (stage 4 P5 review I-1)', () =
     },
   );
 });
+
+// ---- 4단계 P5 재검수 (be1b3cc) 지적 R-I-1: 빈 요소를 읽은 것은 중복이 아니다 ----
+
+describe('reading an empty element is not a duplicate (stage 4 P5 re-review R-I-1)', () => {
+  const t18 = (desc: string) => `<section class="cms type18"><div class="cms-inner"><ol class="cms-img-list"><li class="cms-list-item"><div class="cms-visual-text">${desc}</div></li></ol></div></section>`;
+
+  it.each(['<span class="cms-title"></span>', '<span class="cms-title"> </span>', '<span class="cms-title"><br></span>'])('empty title %s inside the description converts normally', (empty) => {
+    const result = convert(t18(`<p class="cms-description">${empty}BODY</p>`));
+    expect(result.page.sections[0]!.type).toBe('type18');
+    expect(result.html.split('BODY').length - 1).toBe(1);
+  });
+
+  it('a non-empty title inside the description still falls back', () => {
+    expect(convert(t18('<p class="cms-description"><span class="cms-title">FIRST</span>BODY</p>')).page.sections[0]!.type).toBe('fallback');
+  });
+});

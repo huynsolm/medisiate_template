@@ -16,3 +16,12 @@
 
 - `packages/core/test/stage3-review.test.ts`: 입력 A·B(정상 변환 + 글 한 번), 24개 타입 × (설명 안 `cms-title` / `cms-eyebrow` / `cms-description`) "한 번 이하 또는 fallback". 수정 전 9개 실패(A·B + type02·03·04·25·18·19·24).
 - 전체: `npm test` 670 passed · 1 skipped(inventory, `cms/` 필요), `npm run test:browser` 156 passed, lint·typecheck 오류 없음.
+
+## 재검수(`78065f2`) 지적 반영
+
+### R-I-1. 빈 제목 요소를 읽은 것을 중복으로 판정해 정상 본문을 fallback
+- 재현: 검수 문서 입력(type18 설명 안 `<span class="cms-title"></span>BODY`) → 이전 success, 현재 `LOSSY_PARSE` + fallback. 빈 span에 공백 하나여도 같음.
+- 원인: `richFrom()`이 결과를 보기 전에 읽은 횟수를 셌다. 빈 요소를 읽으면 필드가 생기지 않아 두 번 나올 글이 없는데도 "포함 읽기"로 판정했다.
+- 수정(`packages/core/src/parse/common.ts`): **글이 나온 읽기만** 센다(서식을 걷은 글이 비어 있지 않을 때). 구조 검사용 "읽은 요소" 기록은 그대로다.
+- 검수 문서 입력과 변형(빈 span, 공백만, `<br>`만) → 정상 type18 변환, BODY 한 번. 비어 있지 않은 `<span class="cms-title">FIRST</span>BODY`는 계속 fallback.
+- 전체: `npm test` 674 passed · 1 skipped, `npm run test:browser` 156 passed, lint·typecheck 오류 없음. 기존 스냅샷 변화 없음.

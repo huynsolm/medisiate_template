@@ -143,13 +143,15 @@ const cleanRich = (html: string) => sanitizeRichText(html).replace(/\s+/gu, ' ')
  * WeakSet이라 원본 DOM이 사라지면 함께 사라진다.
  */
 const readAsText = new WeakSet<DomElement>();
-/** 요소마다 richFrom으로 읽은 횟수(바깥 호출만). 같은 원본 글을 두 필드로 읽었는지 finish()가 확인한다. */
+/** 요소마다 richFrom으로 읽어 글이 나온 횟수(바깥 호출만). 같은 원본 글을 두 필드로 읽었는지 finish()가 확인한다. */
 const readCount = new WeakMap<DomElement, number>();
 
 export function richFrom(el: DomElement): string {
   readAsText.add(el);
-  readCount.set(el, (readCount.get(el) ?? 0) + 1);
-  return richInner(el);
+  const value = richInner(el);
+  // 글이 나온 읽기만 센다. 빈 요소(빈 제목 등)를 읽은 것은 필드를 만들지 않아 두 번 나올 글이 없다 (P5 재검수 R-I-1).
+  if (richTextToPlain(value).trim() !== '') readCount.set(el, (readCount.get(el) ?? 0) + 1);
+  return value;
 }
 
 /**
