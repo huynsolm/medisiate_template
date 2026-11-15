@@ -1,3 +1,119 @@
+# 4단계 P4 재검수 결과 — 591dce9
+
+- 검수일: 2026-11-15.
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `591dce9c19bb8428ed3d09fe4e3355bf510deaf1`.
+- 범위: `8b0ca21..591dce9`. 반영 기록: `docs/review-stage4-fixes.md` 마지막 장.
+- 애플리케이션·테스트·fixture 코드는 수정하지 않았다. 이번 변경은 이 검수 문서뿐이다.
+
+## 판정
+
+**이번 재검수 범위 완료.** 이전 R-I-1 잔여 입력과 변형의 수정이 확인됐다. 현재 P2~P4 본문 파서에서 richFrom을 우회하여 글을 읽는 경로를 찾지 못했고, 검사한 정상 입력 및 기존 사례에서도 새 회귀가 없었다.
+
+| 등급 | 현재 미해결 건수 | 판정 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 0 | 이전 R-I-1 잔여 수정 확인 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+아래는 직접 실행한 결과와 정적 판독의 근거다. 모든 가능한 입력이나 미래 코드 변경까지 무결함을 보증하는 판정은 아니다.
+
+## 이전 R-I-1 잔여 입력 — 직접 실행
+
+이전 문서의 전체 최소 HTML을 그대로 재실행했다. 핵심 글머리 입력은 다음과 같다.
+
+```html
+<li class="cms-list-item">
+  <p class="cms-description">FIRST</p>
+  <ul><li>SECOND</li><li>THIRD</li></ul>
+</li>
+```
+
+위 li는 type06의 `cms-column-list > li.cms-list-item > .cms-inner-box > .cms-description-box > ul.cms-bullet-list` 안에 들어간다. 전체 HTML은 아래 이전 검수 원문에 그대로 보존했다.
+
+| 재현 입력 | 기대 | 실제 |
+|---|---|---|
+| p.cms-description(FIRST) + 중첩 ul | LOSSY_PARSE 및 섹션 fallback | 일치. 이전 FIRST<br>SECONDTHIRD 성공 결과가 사라짐 |
+| span.cms-description(FIRST) + 중첩 ul | 동일 | 일치 |
+| span.cms-extra(FIRST) + 중첩 ul | 동일 | 일치 |
+| 이전 직접 글 FIRST + 중첩 ul | 동일 | 일치 |
+| 이전 span 안 section > p+p | 동일 | 일치 |
+| 클래스 있는/없는 p+p, 정상 인라인 글 | 성공 변환, 문단 경계 유지 | fallback 0. 문단은 FIRST<br>SECOND |
+
+세 잔여 변형과 이전 직접 글·숨은 블록 입력은 **실제 Chromium**에서도 원본 및 변환 결과를 확인했다. 잘못된 구조는 원본 HTML과 줄 경계를 보존하는 fallback이 되며, 정상 문단은 br 경계를 유지한다.
+
+추가로 FIRST를 직접 글 / p / p.cms-description / span.cms-description / span.cms-extra / strong으로 둔 6종과, 뒤 구조를 ul / ol / dl / table / h2 / span 안 section으로 둔 6종을 조합한 **36개 입력**을 실행했다. 모두 `LOSSY_PARSE`, 섹션 fallback 1이었다. 같은 프로세스에서 정상 문단과 잘못된 중첩 목록 변환을 3회 번갈아 실행해도 각 결과가 유지됐다.
+
+## richFrom 우회 읽기 경로 검토 — 정적 판독
+
+**관련 위치:** `packages/core/src/parse/common.ts:145`~`:148`(WeakSet 기록), `:190`~`:195`(검사 대상 포함), `packages/core/src/parse/original.ts`의 originalHeader·textOf·childText 및 finish.
+
+P2/P3/P4 18개 타입과 type13·14 공통 구현 check-rows.ts의 파서 및 호출하는 도우미를 대조했다.
+
+| 글 읽기 경로 | 확인한 처리 |
+|---|---|
+| 공통 머리글 | originalHeader가 제목·작은 제목 요소에 richFrom 호출 |
+| 대부분의 본문·제목·번호·설명 | textOf 또는 childText가 실제 선택한 요소에 richFrom 호출 |
+| type06 글머리 | li 전체를 richFrom으로 직접 읽음. 이번 수정으로 실제 li가 검사 대상에 포함됨 |
+| type26 셀 | cellText의 구조 사전 검사 후 richFrom으로 읽음. 사전 거부한 구조는 이미 fallback 사유를 기록하므로 우회 읽기 아님 |
+| type13·14 | 공통 check-rows.ts에서 textOf·childText 경유 |
+
+**현재 P2~P4 본문 요소를 plainText·textContent·innerHtml 등으로 직접 읽어 모델의 글 값으로 저장하는 다른 경로는 확인하지 못했다.** type02의 label, 각 타입의 num, type16의 mobileText도 textOf를 통해 기록되는 것을 확인했다.
+
+다음은 문자열을 읽지만 이 전제의 위반으로 보지 않았다.
+
+- 이미지의 주소·alt·너비·높이는 속성값으로 읽는다. DOM의 문단·목록을 소비하는 본문 글 경로가 아니다.
+- 표의 너비·병합 값, perRow 및 글 스타일 등은 속성·클래스로 읽는 설정값이다.
+- scanSection의 script 원문 진단, finish의 uncoveredText 비교, fallback 원본·줄 경계 추출은 진단·손실 검사·원본 보존 경로다. 정상 본문 모델을 richFrom 없이 생성하는 경로가 아니다.
+
+**실제 범위와 검사 범위:** 파서와 공통 도우미가 원본 DOM 요소 참조를 그대로 넘기며, richFrom 진입 시 그 참조를 WeakSet에 기록한다. finish는 같은 섹션의 동일 요소들을 순회한다. 이번 type06 사례처럼 클래스가 달라져도 실제 소비한 li가 isText가 되므로 내부 중첩 ul을 빠뜨리지 않는다. 재귀적으로 읽는 문단 요소도 기록된다. P2~P4에서는 섹션 루트 자체를 본문 글로 읽는 호출은 확인하지 못했다.
+
+새 전제 검사는 타입 파일의 금지 함수명 검색을 이용한 회귀 방지 장치다. 이것만으로 간접 도우미나 앞으로 추가될 모든 읽기 경로를 증명한다고 보지 않았고, 이번에는 도우미 호출까지 정적으로 대조했다. 향후 다른 본문 읽기 경로를 추가하면 같은 기록·검사 계약이 필요하다. 현재의 결함으로 집계할 항목은 없다.
+
+## 정상 입력 및 기존 사례 회귀 — 직접 실행
+
+이전 8b0ca21 코드를 임시 디렉터리에 펼쳐 비교했다. 저장소 소스는 바꾸지 않았다.
+
+| 입력군 | 결과 |
+|---|---|
+| type01 및 P2/P3/P4 18개 타입 × 원본/무배경/이미지 배경/색 배경 76조합 | HTML 전부 동일 |
+| P2/P3/P4 18개 타입 × 공백/이미지 제거/인라인 서식/문단 변형 72조합 | HTML 전부 동일, 모두 fallback 0 |
+| 기존 코어 재현·구조 변형 70건 재실행 | 이전 잔여 입력을 포함해 결과 기록. 새 경계 소실 없음 |
+| type15 원문 문단+목록 | 두 값 모두 출력, 합의한 목록→문단 순서 유지 |
+| type26 colspan 21 / rowspan 0 | 값 보존, success |
+| type26 colspan 0x10 / 2foo, 문단+목록, span 안 블록 | LOSSY_PARSE 및 섹션 fallback |
+| type26 section/article 안 문단, 칸 안 글+문단 | FIRST<br>SECOND, success |
+| type16 아이콘 없는 행 | 공식 브라우저의 이미지 없는 18타입 × 세 화면 검사 통과 |
+
+72조합은 이전 검사와 같은 변형이다. 공백·탭 추가, img 제거, 첫 해당 글의 strong/br/em 서식, 첫 p.cms-description을 div.cms-description > p+p로 바꾼 입력을 사용했다. 해당 요소가 없는 타입의 문단 변형은 원본을 그대로 대조했다. **이 검사 범위에서 정상 마크업을 새로 fallback시키는 사례는 없었다.**
+
+## 실행 결과와 한계
+
+| 직접 실행한 검사 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 종료 0, **525 passed / 1 skipped**, 파일 26 passed / 1 skipped |
+| 같은 환경의 `npm run test:browser` | 종료 0, **120 passed**, 파일 4 passed |
+| `npm run lint` | 종료 0 |
+| `npm run typecheck` | 종료 0 |
+| 추가 최소 입력 | 이전 사례·정상 변형 8건 |
+| 추가 위험 구조 조합 | 36건 모두 fallback, 정상/비정상 교대 3쌍도 일관됨 |
+| Chromium 추가 재현 | 잔여 3변형·이전 2변형·정상 문단 확인 |
+| 이전/현재 비교 | 정상 76+72조합, 기존 재현 70건 재실행 |
+
+- 전체 검사에 브라우저 검사가 포함되므로 525와 120을 합산하지 않는다. inventory 1개 건너뜀은 실제 cms/ 자료가 없는 기존 조건이다.
+- Linux, Node v24.22.1, Chromium 156.0.8078.79에서 실행했다. 저장소 런처를 바꾸지 않고 기존 임시 Playwright 경로를 사용했다.
+- Windows·실제 운영 CMS·원본 CSS를 통한 시각 등급 비교는 실행하지 않았다. 별도 웹 편집기 저장·가져오기 흐름은 이번에는 다시 실행하지 않았다.
+- 임시 재현 스크립트·관측값은 `/tmp/stage4-weakset/`, 공식 검사 로그는 `/tmp/stage4-weakset-*.log`에 있다. 핵심 입력·실제 결과는 위에 직접 기재했다.
+
+**최종 판정: 이번 재검수 범위 완료.**
+
+## 이전 검수 기록 보존
+
+아래는 75ffd4d의 과거 검수 원문(보고 커밋 8b0ca21)과 그 안의 이전 기록이다. 과거 Important 항목은 현재 미해결 지적이 아니며, 현재 판정은 이 문서 상단을 따른다.
+
+<details>
+<summary>이전 재검수 원문 — 75ffd4d</summary>
+
 # 4단계 P4 재검수 결과 — 75ffd4d
 
 - 검수일: 2026-11-15.
@@ -458,6 +574,8 @@ Chromium `innerText`는 원본 `FIRST\n\nSECOND`에서 출력 `FIRSTSECOND`로 �
 - 임시 재현 스크립트·입력·관측 JSON·스크린샷은 `/tmp/stage4-review/`, 공식 검사 로그는 `/tmp/stage4-*.log`에 있다. 임시 경로는 저장소 산출물이 아니므로 재현 핵심 입력과 관측값을 위에 기재했다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
