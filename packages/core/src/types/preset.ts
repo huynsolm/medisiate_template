@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import { h, type Child, type ElementNode } from '../html/h.ts';
+import { visualPcMo } from '../helpers/image.ts';
+import { isBlank, rich } from '../helpers/misc.ts';
 import { presetBackground } from '../helpers/background.ts';
 import { presetHeader } from '../helpers/header.ts';
-import type { SectionModel } from '../model/index.ts';
+import type { ImagePair, SectionModel } from '../model/index.ts';
 import type { FieldSpec } from './definition.ts';
 
 /**
@@ -36,5 +38,25 @@ export function presetSection(
     bg.layer,
     presetHeader({ eyebrow: section.data.eyebrow, title: section.data.heading }),
     h('div', { class: 'mig-body' }, body),
+  ]);
+}
+
+/**
+ * 호스트 type-03/04는 이미지 칸을 줄이지 않고(flex-shrink: 0) 칸 비율도 없어 큰 이미지가 글을 밀어낸다.
+ * 원본(col-lg-6)처럼 PC에서 이미지·글을 반반으로 둔다. 세로 배치(모바일)에서는 50%가 높이 기준이라 영향이 없다.
+ */
+export const HALF = { flex: '1 1 50%', minWidth: '0' } as const;
+
+/** li.mig-item > .mig-content > .mig-visual(반) + .mig-text-wrap(반: 번호·제목·설명) */
+export function imageTextItem(item: { num?: string | undefined; title?: string | undefined; desc?: string | undefined; image: ImagePair }): ElementNode {
+  return h('li', { class: 'mig-item' }, [
+    h('div', { class: 'mig-content' }, [
+      visualPcMo(item.image, { attrs: { style: HALF } }),
+      h('div', { class: 'mig-text-wrap', style: HALF }, [
+        !isBlank(item.num) && h('span', { class: 'mig-num' }, [rich(item.num)]),
+        !isBlank(item.title) && h('strong', { class: 'mig-title' }, [rich(item.title)]),
+        !isBlank(item.desc) && h('p', { class: 'mig-desc' }, [rich(item.desc)]),
+      ]),
+    ]),
   ]);
 }

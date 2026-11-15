@@ -1,13 +1,11 @@
-import { z } from 'zod';
 import { h } from '../html/h.ts';
-import { visualPcMo } from '../helpers/image.ts';
-import { isBlank, rich } from '../helpers/misc.ts';
+import { z } from 'zod';
 import { scanSection } from '../parse/common.ts';
 import { byClass, finish, imagesIn, layoutFixed, listItems, originalHeader, optional, textOf } from '../parse/original.ts';
 import { children, descendants, hasClass, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
-import { headerFields, headerShape, LIST_RESET, presetSection } from './preset.ts';
+import { headerFields, headerShape, imageTextItem, LIST_RESET, presetSection } from './preset.ts';
 
 const itemSchema = z.object({ num: z.string().optional(), title: z.string().optional(), desc: z.string().optional(), image: imagePairSchema.default({}) });
 const schema = z.object({
@@ -18,7 +16,6 @@ const schema = z.object({
 });
 export type Type03Data = z.infer<typeof schema>;
 
-const HALF = { flex: '1 1 50%', minWidth: '0' };
 
 /**
  * 원본: ol.cms-tile-list.array-zigzag(.reverse) > li.cms-list-item > .cms-visual(PC/MO)
@@ -72,20 +69,7 @@ export const type03: TypeDefinition<Type03Data> = {
   },
   render(section) {
     return presetSection('type-03', section, [
-      h('ul', { class: 'mig-list', style: LIST_RESET }, section.data.items.map((item) =>
-        h('li', { class: 'mig-item' }, [
-          h('div', { class: 'mig-content' }, [
-            // 호스트 type-03은 이미지 칸을 줄이지 않고(flex-shrink: 0) 비율도 없다. 원본(col-lg-6)처럼 PC에서 반반이 되게 한다.
-            // 모바일(세로 배치)에서는 50%가 높이 기준이라 영향이 없다.
-            visualPcMo(item.image, { attrs: { style: HALF } }),
-            h('div', { class: 'mig-text-wrap', style: HALF }, [
-              !isBlank(item.num) && h('span', { class: 'mig-num' }, [rich(item.num)]),
-              !isBlank(item.title) && h('strong', { class: 'mig-title' }, [rich(item.title)]),
-              !isBlank(item.desc) && h('p', { class: 'mig-desc' }, [rich(item.desc)]),
-            ]),
-          ]),
-        ])),
-      ),
+      h('ul', { class: 'mig-list', style: LIST_RESET }, section.data.items.map(imageTextItem)),
     ]);
   },
 };

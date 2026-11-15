@@ -6,13 +6,14 @@ import { loadPlaywright, type Browser } from '../support/browser.ts';
 
 const repo = path.resolve(import.meta.dirname, '../..');
 const pw = await loadPlaywright();
-const TYPES = ['type07', 'type09', 'type10', 'type02', 'type03'] as const;
+// 3단계 P2 + P3 타입
+const TYPES = ['type07', 'type09', 'type10', 'type02', 'type03', 'type26', 'type11', 'type04', 'type25', 'type15', 'type17'] as const;
 // 원래 크기가 큰 이미지: 호스트 CSS가 이미지 칸을 줄이지 않을 때(flex-shrink: 0) 넘침을 드러낸다.
 const big = (label: string, color: string) =>
   `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="100%" height="100%" fill="${color}"/><text x="40" y="80" font-size="48">${label}</text></svg>`)}`;
 
-/** 3단계 P2 타입(원본 마크업 → 호스트 프리셋)이 호스트 CSS 위에서 넘치거나 찌그러지지 않는지 */
-describe.skipIf(!pw)('P2 preset types on the host css', () => {
+/** 3단계 P2·P3 타입(원본 마크업 → 호스트 프리셋)이 호스트 CSS 위에서 넘치거나 찌그러지지 않는지 */
+describe.skipIf(!pw)('P2/P3 preset types on the host css', () => {
   let browser: Browser;
   let css: string;
   const html: Record<string, string> = {};
@@ -47,9 +48,11 @@ describe.skipIf(!pw)('P2 preset types on the host css', () => {
       });
       return {
         scrollWidth: document.documentElement.scrollWidth,
-        textWidths: Array.from(document.querySelectorAll('.type-03 .mig-text-wrap')).map((el) => rect(el).width),
+        textWidths: Array.from(document.querySelectorAll('.type-03 .mig-text-wrap, .type-04 .mig-text-wrap')).map((el) => rect(el).width),
         sectionWidth: rect(document.querySelector('section.mig-section')!).width,
         nestedOverflow: Math.max(0, ...nested),
+        // 프리셋 표(.mig-table)는 호스트가 min-width: 0으로 화면 폭에 맞춘다. 표가 화면 밖으로 나가지 않아야 한다
+        tables: Array.from(document.querySelectorAll('.table-responsive')).map((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, right: rect(el).right })),
       };
     });
     await page.close();
@@ -58,11 +61,15 @@ describe.skipIf(!pw)('P2 preset types on the host css', () => {
 
   for (const id of TYPES) {
     for (const [label, width, editor] of [['PC 1100', 1100, false], ['MO 360', 360, false], ['editor 1100', 1100, true]] as const) {
-      it(`${id} · ${label}: no horizontal overflow, text not squeezed, nested lists inside cards`, async () => {
+      it(`${id} · ${label}: no horizontal overflow, text not squeezed, nested lists inside cards, tables fit`, async () => {
         const r = await measure(html[id]!, width, editor);
         expect(r.scrollWidth).toBeLessThanOrEqual(width);
         for (const w of r.textWidths) expect(w).toBeGreaterThan(r.sectionWidth * (width >= 1024 && !editor ? 0.3 : 0.6));
         expect(r.nestedOverflow).toBeLessThanOrEqual(0.5);
+        for (const t of r.tables) {
+          expect(t.right).toBeLessThanOrEqual(width);
+          expect(t.scroll).toBeLessThanOrEqual(t.client);
+        }
       }, 30_000);
     }
   }

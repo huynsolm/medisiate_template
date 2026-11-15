@@ -1,0 +1,92 @@
+{
+  "id": "s1",
+  "type": "type25",
+  "variant": "default",
+  "modifiers": {
+    "background": {
+      "kind": "color",
+      "value": "#f9f3ec",
+      "token": "type-bg"
+    }
+  },
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "perRow": 4,
+    "items": [
+      {
+        "title": "칸 1 제목",
+        "desc": "설명을 입력해 보세요.",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      },
+      {
+        "title": "칸 2 제목",
+        "desc": "설명을 입력해 보세요.",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      },
+      {
+        "title": "칸 3 제목",
+        "desc": "설명을 입력해 보세요.",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      },
+      {
+        "title": "칸 4 제목",
+        "desc": "설명을 입력해 보세요.",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type25",
+      "type-bg"
+    ]
+  }
+}

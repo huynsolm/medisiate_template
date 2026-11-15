@@ -125,7 +125,14 @@ describe('pc/mobile backgrounds', () => {
     const out = serialize(type01.render({ id: 's1', type: 'type01', variant: 'default', modifiers, data: { image: {}, desc: 'x' } }, ctx()));
     expect(out).toContain('data-migration-bg="true" data-bg-scope="mobile"');
     expect(out).toContain("background-image: url('http://fxfile.drline.net/cms/public/images/common/cms_bg_1_m.jpg');");
-    expect(out).toMatch(/<div class="common-display-pc" aria-hidden="true" style="position: absolute; inset: 0; z-index: -1; background-image: url\('[^']+cms_bg_1\.jpg'\)/u);
+    expect(out).toMatch(/<div class="common-display-pc" aria-hidden="true" style="position: absolute; inset: 0; z-index: -1; background-color: #[0-9a-f]{6}; background-image: url\('[^']+cms_bg_1\.jpg'\)/u);
+  });
+
+  it('keeps the dark fallback colour on the pc layer so white text stays readable if the image fails', () => {
+    const { modifiers } = modifiersFromClasses(['cms', 'type01', 'type-bg', 'bg-image-2', 'text-white']);
+    const out = serialize(type01.render({ id: 's1', type: 'type01', variant: 'default', modifiers, data: { image: {}, desc: 'x' } }, ctx()));
+    const layer = /<div class="common-display-pc" aria-hidden="true" style="([^"]+)"/u.exec(out)?.[1] ?? '';
+    expect(layer).toContain(`background-color: ${modifiers.background!.mobile!.color};`);
   });
 });
 

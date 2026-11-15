@@ -59,7 +59,12 @@ export function pcBackgroundLayer(modifiers: SectionModifiers): ElementNode | nu
     {
       class: 'common-display-pc',
       'aria-hidden': 'true',
-      style: { position: 'absolute', inset: '0', zIndex: '-1', backgroundImage: `${overlayOf(bg)}${cssUrl(bg.value)}`, backgroundSize: 'cover', backgroundPosition: 'center' },
+      // 이미지를 못 불러와도(예: http 전용 이미지가 https 페이지에서 막힘) 흰 글자가 읽히도록 모바일과 같은 바탕색을 깐다
+      style: {
+        position: 'absolute', inset: '0', zIndex: '-1',
+        backgroundColor: bg.mobile.color ? cssColor(bg.mobile.color) : undefined,
+        backgroundImage: `${overlayOf(bg)}${cssUrl(bg.value)}`, backgroundSize: 'cover', backgroundPosition: 'center',
+      },
     },
     ['\u00a0'],
   );

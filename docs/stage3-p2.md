@@ -29,7 +29,7 @@
 ## 3. 검증
 
 - `packages/core/test/p2-types.test.ts`: 타입마다 원본 마크업 → 정확한 데이터, 손실 없음(경고·fallback 없음), 호스트 계약의 **자식 결합자 경로**대로 출력, 이미지 주소 보존, 스냅샷(`fixtures/types/typeNN/original.expected.{json,html}`). type09 열 수 3종·type03 반전 보존과 진단, 끼어든 이미지·문단 → fallback, 목록 초기화, 편집기 선택값(문자열) 처리.
-- `tests/visual/p2-layout.test.ts` (실제 Chromium, 호스트 CSS): 다섯 타입 × PC 1100 / MO 360 / 에디터 1100에서 가로 넘침 없음, type03 글 칸이 찌그러지지 않음, type10 하위 목록이 카드 안. 큰 이미지(1200×800)로 검사한다. type03 비율 수정을 빼면 실패함을 확인했다.
+- `tests/visual/preset-layout.test.ts`(P3 단계에서 이름 변경, P3 타입도 포함) (실제 Chromium, 호스트 CSS): 다섯 타입 × PC 1100 / MO 360 / 에디터 1100에서 가로 넘침 없음, type03 글 칸이 찌그러지지 않음, type10 하위 목록이 카드 안. 큰 이미지(1200×800)로 검사한다. type03 비율 수정을 빼면 실패함을 확인했다.
 - 전체: `npm test` 206 passed · 1 skipped(inventory, `cms/` 필요), `npm run test:browser` 27 passed, lint·typecheck 오류 없음.
 
 ## 4. 계획서 DoD 대비
