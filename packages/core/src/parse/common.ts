@@ -1,7 +1,7 @@
 import type { Diagnostic, ImagePair, ImageRef } from '../model/index.ts';
 import { imageRef } from '../helpers/image-ref.ts';
 import { blockStyleSpan, filterInlineStyle, richTextToPlain, sanitizeRichText } from '../html/rich-text.ts';
-import { ancestors, attr, classesOf, descendants, innerHtml, plainText, type DomElement, type SourceSection } from './dom.ts';
+import { ancestors, attr, childNodes, classesOf, descendants, innerHtml, isElement, nodesHtml, plainText, type DomElement, type DomNode, type SourceSection } from './dom.ts';
 import { modifiersFromClasses } from './modifiers.ts';
 
 /** script, on* 속성, 이미지 URL, 미등록 클래스를 진단으로 남긴다. */
@@ -124,11 +124,69 @@ export function variantFromClasses(src: SourceSection, sourceVariants: Record<st
   return found.length ? sourceVariants[found[0]!]! : 'default';
 }
 
-/** 요소 안 HTML을 서식 allowlist에 통과시킨다. */
+/** 글 안에서 줄바꿈(<br>)으로 경계를 나타낼 수 있는 블록: 문단(p)과 문단을 감싸기만 하는 상자들 */
+export const TEXT_BLOCKS: ReadonlySet<string> = new Set(['p', 'div', 'section', 'article', 'aside', 'header', 'footer', 'main', 'nav', 'address']);
+/** 글 안에 있어도 경계·구조를 잃지 않는 줄 안 요소 (img는 이미지 수 검사가 따로 맡는다) */
+export const TEXT_INLINE: ReadonlySet<string> = new Set(['em', 'strong', 'b', 'i', 'u', 'sup', 'sub', 'span', 'br', 'a', 'small', 'mark', 'font', 'img']);
+
+const cleanRich = (html: string) => sanitizeRichText(html).replace(/\s+/gu, ' ').replace(/\s*<br>\s*/gu, '<br>').trim();
+
+/**
+ * 요소 안 HTML을 서식 allowlist에 통과시킨다.
+ * 안에 문단 블록(TEXT_BLOCKS)이 있으면 블록마다 줄바꿈(<br>)으로 이어 경계를 지킨다.
+ * allowlist가 블록 태그를 풀면서 "FIRST" "SECOND"가 "FIRSTSECOND"로 붙던 문제 (4단계 검수 I-2).
+ * 목록·표처럼 줄바꿈으로 나타낼 수 없는 구조는 여기서 처리하지 않는다. 원본 마크업 파서는 finish()가 찾아 fallback한다.
+ */
 export function richFrom(el: DomElement): string {
-  const inner = sanitizeRichText(innerHtml(el)).replace(/\s+/gu, ' ').replace(/\s*<br>\s*/gu, '<br>').trim();
+  const nodes = childNodes(el);
+  let inner: string;
+  if (!nodes.some((n) => isElement(n) && TEXT_BLOCKS.has(n.tagName))) {
+    inner = cleanRich(innerHtml(el));
+  } else {
+    const lines: string[] = [];
+    let run: DomNode[] = [];
+    const flush = () => {
+      const line = cleanRich(nodesHtml(run));
+      if (line) lines.push(line);
+      run = [];
+    };
+    for (const n of nodes) {
+      if (isElement(n) && TEXT_BLOCKS.has(n.tagName)) {
+        flush();
+        const line = richFrom(n);
+        if (line) lines.push(line);
+      } else {
+        run.push(n);
+      }
+    }
+    flush();
+    inner = lines.join('<br>');
+  }
   // 단락·제목 자신의 허용 style(정렬·색·폭 등)은 블록 span으로 보존한다 (review I-8)
   return blockStyleSpan(el.tagName, attr(el, 'style'), inner);
+}
+
+/**
+ * 원본 글 요소(cms-description · cms-title · cms-thin-title · cms-eyebrow) 안에서
+ * 줄바꿈으로 나타낼 수 없는 구조(목록·표·제목 등)나 줄 안 요소 속에 숨은 블록을 찾는다. 하나라도 있으면 그 글은 경계를 잃는다.
+ */
+export function textStructureProblems(root: DomElement): string[] {
+  const problems: string[] = [];
+  const isText = (el: DomElement) => ['cms-description', 'cms-title', 'cms-thin-title', 'cms-eyebrow'].some((c) => classesOf(el).includes(c));
+  for (const textEl of descendants(root, isText)) {
+    for (const d of descendants(textEl)) {
+      if (!TEXT_BLOCKS.has(d.tagName) && !TEXT_INLINE.has(d.tagName)) {
+        problems.push(`글 안의 <${d.tagName}>`);
+        break;
+      }
+      // 문단 블록은 글 요소 바로 아래이거나 문단 블록 안에만 있어야 줄로 나눌 수 있다(span > p 같은 경우는 안 됨)
+      if (TEXT_BLOCKS.has(d.tagName) && d.parentNode !== textEl && !(d.parentNode && isElement(d.parentNode as DomNode) && TEXT_BLOCKS.has((d.parentNode as DomElement).tagName))) {
+        problems.push(`줄 안 요소 속의 <${d.tagName}>`);
+        break;
+      }
+    }
+  }
+  return [...new Set(problems)];
 }
 
 export const HEADING = /^h[1-6]$/u;

@@ -86,6 +86,11 @@ describe('type26 cells keep paragraph boundaries (review: 셀 내부 문단·목
     expect(result.html).toContain('<td>첫 문단<br>둘째 문단</td>');
   });
 
+  it('keeps loose text before a paragraph as its own line (shared rule since stage 4 review)', () => {
+    const { result } = check('type26', t26('<td>앞 글<p>문단</p></td>'));
+    expect(result.html).toContain('<td>앞 글<br>문단</td>');
+  });
+
   it('keeps a single paragraph cell as plain text', () => {
     const { data } = check('type26', t26('<td><p>한 문단</p></td>'));
     expect((data.body as Array<{ cells: Array<{ text: string }> }>)[0]!.cells[1]!.text).toBe('한 문단');
@@ -94,7 +99,6 @@ describe('type26 cells keep paragraph boundaries (review: 셀 내부 문단·목
   it.each([
     '<td><ul><li>a</li><li>b</li></ul></td>',
     '<td><p>문단</p><ol><li>a</li></ol></td>',
-    '<td>앞 글<p>문단</p></td>',
     '<td><table><tr><td>안쪽 표</td></tr></table></td>',
   ])('falls back for %s', (cell) => {
     const result = convert(t26(cell));
@@ -197,5 +201,40 @@ describe('number fields accept only numbers and digit strings (re-review R-I-2)'
     const out = renderPage(page('boom', {}), { registry });
     expect(out.diagnostics.map((d) => d.code)).toContain('INVALID_DATA');
     expect(out.html).toContain('KEEP_VISIBLE');
+  });
+});
+
+// ---- 4단계 검수 (a378da6) 지적: I-2 글 요소 안의 문단·목록 경계 (P2·P3·P4 전체) ----
+
+describe('text elements keep paragraph boundaries or fall back (stage 4 review I-2)', () => {
+  const first = /<p class="cms-description">([^<]*)<\/p>/u;
+  const withBlock = (id: string, inner: string) => original(id).replace(first, `<div class="cms-description">${inner}</div>`);
+
+  it.each(STAGE3.filter((id) => first.test(original(id))))('%s: paragraphs inside a text element become line breaks', (id) => {
+    const result = convert(withBlock(id, '<p>FIRST</p><p>SECOND</p>'));
+    const type = result.page.sections[0]!.type;
+    if (type !== 'fallback') expect(result.html).toMatch(/FIRST<br>SECOND/u);
+    expect(result.html).not.toMatch(/FIRSTSECOND/u);
+  });
+
+  it.each(STAGE3.filter((id) => first.test(original(id))))('%s: a list inside a text element falls back', (id) => {
+    const result = convert(withBlock(id, 'FIRST<ul><li>SECOND</li><li>THIRD</li></ul>'));
+    expect(result.page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('type06 bullet with two paragraphs keeps the boundary', () => {
+    const body = original('type06').replace('<li class="cms-list-item cms-description">세부 내용 1</li>', '<li class="cms-list-item cms-description"><p>FIRST</p><p>SECOND</p></li>');
+    const result = convert(body);
+    expect(result.page.sections[0]!.type).toBe('type06');
+    expect(result.html).toContain('<span class="mig-desc">FIRST<br>SECOND</span>');
+  });
+
+  it('type06 bullet with a nested list falls back', () => {
+    const body = original('type06').replace('<li class="cms-list-item cms-description">세부 내용 1</li>', '<li class="cms-list-item cms-description">FIRST<ul><li>SECOND</li></ul></li>');
+    expect(convert(body).page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('original markup without nested blocks is unchanged (no new line breaks)', () => {
+    for (const id of STAGE3) expect(convert(original(id)).html, id).not.toContain('<br>');
   });
 });

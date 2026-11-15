@@ -82,7 +82,9 @@ export const type16: TypeDefinition<Type16Data> = {
         h('li', { class: 'mig-item' }, [
           h('div', { class: 'mig-content' }, [
             visualPcMo(item.icon),
-            h('div', { class: 'mig-text-wrap' }, [
+            // 호스트 격자가 "30px 아이콘 칸 + 글 칸"이라 아이콘이 없으면 글이 30px 칸으로 들어간다.
+            // 아이콘이 없어도 글은 글 칸(2번째)에 두어 다른 행과 줄을 맞춘다 (4단계 검수 I-1).
+            h('div', { class: 'mig-text-wrap', style: item.icon.pc || item.icon.mo ? undefined : { gridColumn: '2' } }, [
               !isBlank(item.title) && h('strong', { class: 'mig-title' }, [rich(item.title)]),
               !isBlank(item.desc) && h('p', { class: 'mig-desc' }, [rich(item.desc)]),
             ]),

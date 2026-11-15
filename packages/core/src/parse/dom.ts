@@ -103,7 +103,12 @@ export function outerHtml(element: DomElement): string {
 
 /** 요소의 자식 HTML (서식 텍스트 추출용) */
 export function innerHtml(element: DomElement): string {
-  return childNodes(element)
+  return nodesHtml(childNodes(element));
+}
+
+/** 노드 목록의 HTML (요소·글만, 주석 제외) */
+export function nodesHtml(nodes: DomNode[]): string {
+  return nodes
     .map((n) => (isElement(n) ? serializeOuter(n) : n.nodeName === '#text' ? escapeForHtml((n as DefaultTreeAdapterMap['textNode']).value) : ''))
     .join('');
 }

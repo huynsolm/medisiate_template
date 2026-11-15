@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { h } from '../html/h.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
-import { richFrom, scanSection } from '../parse/common.ts';
+import { richFrom, scanSection, TEXT_BLOCKS, TEXT_INLINE } from '../parse/common.ts';
 import { byClass, childText, finish, firstByClass, originalHeader } from '../parse/original.ts';
-import { attr, childNodes, children, descendants, isElement, textContent, type DomElement } from '../parse/dom.ts';
+import { attr, children, descendants, type DomElement } from '../parse/dom.ts';
 import { CSS_LENGTH, toNumberInput } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, presetSection } from './preset.ts';
@@ -56,38 +56,23 @@ function spanOf(el: DomElement, name: 'colspan' | 'rowspan', range: { min: numbe
   return n === 1 ? undefined : n;
 }
 
-/** 줄바꿈으로 경계를 나타낼 수 있는 블록: 문단(p)과, 문단을 감싸기만 하는 상자들 */
-const CELL_BLOCK = new Set(['p', 'div', 'section', 'article', 'aside', 'header', 'footer', 'main', 'nav', 'address']);
-/** 칸 글(rich)이 허용하는 줄 안 요소. 이 밖의 요소는 경계·구조를 잃을 수 있으므로 옮기지 않는다 */
-const CELL_INLINE = new Set(['em', 'strong', 'b', 'i', 'u', 'sup', 'sub', 'span', 'br', 'a', 'small', 'mark', 'font', 'img']);
-
 /**
- * 칸 글. 칸 안의 문단은 줄바꿈(<br>)으로 이어 경계를 지킨다.
- * 블록 상자 목록(CELL_BLOCK)과 줄 안 요소(CELL_INLINE) 밖의 요소(목록·표·제목·hr·details 등)가 있거나,
- * 줄 안 요소 안에 블록이 있거나, 문단 밖 글과 문단이 섞인 칸은 옮기지 않고 problem에 기록한다(섹션 fallback).
+ * 칸 글. 칸 안의 문단은 줄바꿈(<br>)으로 이어 경계를 지킨다(richFrom, 공통 규칙).
+ * 블록 상자(TEXT_BLOCKS)와 줄 안 요소(TEXT_INLINE) 밖의 요소(목록·표·제목·hr·details 등)가 있거나,
+ * 줄 안 요소 안에 블록이 숨은 칸은 경계를 잃으므로 옮기지 않고 problem에 기록한다(섹션 fallback).
  */
 function cellText(el: DomElement, problems: string[]): string {
-  const unsupported = descendants(el, (d) => !CELL_BLOCK.has(d.tagName) && !CELL_INLINE.has(d.tagName))[0];
+  const unsupported = descendants(el, (d) => !TEXT_BLOCKS.has(d.tagName) && !TEXT_INLINE.has(d.tagName))[0];
   if (unsupported) {
     problems.push(`칸 안의 <${unsupported.tagName}>`);
     return '';
   }
-  const blocks = children(el).filter((c) => CELL_BLOCK.has(c.tagName));
-  if (blocks.length === 0) {
-    // 줄 안 요소(span 등) 안에 숨은 블록도 경계를 잃으므로 옮기지 않는다 (re-review R-I-1)
-    const hidden = descendants(el, (d) => CELL_BLOCK.has(d.tagName))[0];
-    if (hidden) {
-      problems.push(`줄 안 요소 안의 <${hidden.tagName}>`);
-      return '';
-    }
-    return richFrom(el);
-  }
-  const loose = childNodes(el).some((n) => (isElement(n) ? !CELL_BLOCK.has(n.tagName) : textContent(n).trim() !== ''));
-  if (loose) {
-    problems.push('칸 안에서 문단과 문단 밖 글이 섞임');
+  const hidden = descendants(el, (d) => TEXT_BLOCKS.has(d.tagName) && d.parentNode !== el && !TEXT_BLOCKS.has((d.parentNode as DomElement).tagName))[0];
+  if (hidden) {
+    problems.push(`줄 안 요소 안의 <${hidden.tagName}>`);
     return '';
   }
-  return blocks.map((b) => cellText(b, problems)).filter(Boolean).join('<br>');
+  return richFrom(el);
 }
 
 function rowsOf(group: DomElement | undefined, problems: string[]): Array<{ cells: Cell[] }> {

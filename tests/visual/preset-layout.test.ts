@@ -17,6 +17,8 @@ describe.skipIf(!pw)('P2/P3/P4 preset types on the host css', () => {
   let browser: Browser;
   let css: string;
   const html: Record<string, string> = {};
+  // 이미지가 없는 항목(편집기 기본값, 아이콘을 지운 원본 등)에서도 배치가 무너지지 않아야 한다 (4단계 검수 I-1)
+  const noImages: Record<string, string> = {};
 
   beforeAll(async () => {
     browser = await pw!.chromium.launch();
@@ -27,6 +29,8 @@ describe.skipIf(!pw)('P2/P3/P4 preset types on the host css', () => {
         .replaceAll('/images/cms-sample-m.svg', big('MO', '#c98'))
         .replaceAll('/images/cms-sample.svg', big('PC', '#79c'));
       html[id] = convertDocument(`<div class="cms-container">${body}</div>`, `${id}.html`, opts).html;
+      const bare = (await readFile(path.join(repo, 'fixtures/original', `${id}.html`), 'utf8')).replaceAll(/<img\b[^>]*>/gu, '');
+      noImages[id] = convertDocument(`<div class="cms-container">${bare}</div>`, `${id}.html`, opts).html;
     }
   }, 60_000);
 
@@ -50,6 +54,13 @@ describe.skipIf(!pw)('P2/P3/P4 preset types on the host css', () => {
         scrollWidth: document.documentElement.scrollWidth,
         textWidths: Array.from(document.querySelectorAll('.type-03 .mig-text-wrap, .type-04 .mig-text-wrap')).map((el) => rect(el).width),
         sectionWidth: rect(document.querySelector('section.mig-section')!).width,
+        // 좁은 칸(예: 30px 아이콘 칸)에 들어가 글이 여러 줄로 꺾인 글 상자 수. 짧은 글이 원래 좁은 것은 문제가 아니다.
+        squeezedText: Array.from(document.querySelectorAll('.mig-item .mig-text-wrap, .mig-item .mig-desc, .mig-item .mig-title')).filter((el) => {
+          if ((el.textContent ?? '').trim() === '' || rect(el).width > 60) return false;
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          return new Set(Array.from(range.getClientRects()).map((r) => Math.round(r.top))).size > 1;
+        }).map((el) => `${el.className}: ${(el.textContent ?? '').trim().slice(0, 20)}`),
         // 본문(.mig-body)이 섹션 안쪽 폭을 다 써야 한다. 배경 섹션은 호스트가 가운데 정렬 flex라 내용 폭으로 줄어들 수 있다.
         bodyRatio: (() => {
           const section = document.querySelector('section.mig-section')!;
@@ -68,12 +79,19 @@ describe.skipIf(!pw)('P2/P3/P4 preset types on the host css', () => {
 
   for (const id of TYPES) {
     for (const [label, width, editor] of [['PC 1100', 1100, false], ['MO 360', 360, false], ['editor 1100', 1100, true]] as const) {
+      it(`${id} without images · ${label}: text keeps a readable width`, async () => {
+        const r = await measure(noImages[id]!, width, editor);
+        expect(r.scrollWidth).toBeLessThanOrEqual(width);
+        expect(r.squeezedText).toEqual([]);
+      }, 30_000);
+
       it(`${id} · ${label}: no horizontal overflow, text not squeezed, nested lists inside cards, tables fit, body uses the full width`, async () => {
         const r = await measure(html[id]!, width, editor);
         expect(r.scrollWidth).toBeLessThanOrEqual(width);
         for (const w of r.textWidths) expect(w).toBeGreaterThan(r.sectionWidth * (width >= 1024 && !editor ? 0.3 : 0.6));
         expect(r.nestedOverflow).toBeLessThanOrEqual(0.5);
         expect(r.bodyRatio).toBeGreaterThan(0.99);
+        expect(r.squeezedText).toEqual([]);
         for (const t of r.tables) {
           expect(t.right).toBeLessThanOrEqual(width);
           expect(t.scroll).toBeLessThanOrEqual(t.client);
