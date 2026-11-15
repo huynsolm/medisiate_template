@@ -1,3 +1,136 @@
+# 4단계 P4 재검수 결과 — 75ffd4d
+
+- 검수일: 2026-11-15.
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `75ffd4dcba3d9b3972cb949fb27e4f5dd682a310`.
+- 범위: `3e27ba5..75ffd4d`. 반영 기록: `docs/review-stage4-fixes.md` 마지막 장 R-I-1.
+- 애플리케이션·테스트·fixture는 수정하지 않았다. 이번 변경은 이 검수 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 A·B 입력은 수정됐다. 검사한 정상 마크업에서는 새로 잘못 fallback되는 사례가 없었지만, 글머리의 자식에 cms- 클래스가 있으면 중첩 목록을 검사하지 않는 잔여 경로가 있다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 1 | R-I-1 잔여: cms- 클래스 후손이 있는 글머리의 중첩 목록 검사 누락 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+## 이전 R-I-1 입력 재현 — 직접 실행
+
+- A: `<li class="cms-list-item">FIRST<ul><li>SECOND</li><li>THIRD</li></ul></li>` → `LOSSY_PARSE`, 섹션 fallback. 원본 HTML·텍스트 보존.
+- B: `<li class="cms-list-item"><span><section><p>FIRST</p><p>SECOND</p></section></span></li>` → `LOSSY_PARSE`, 섹션 fallback.
+- 클래스 없는 단순 `<p>FIRST</p><p>SECOND</p>` → `success`, fallback 0, `FIRST<br>SECOND`.
+- 위 A·B는 코어와 실제 Chromium 양쪽에서 확인했다. 이전 입력의 수정 효과는 확인되지만, 아래 입력 때문에 전체 문제가 해결됐다고 판정하지 않는다.
+
+## Important
+
+### R-I-1 잔여. 글머리 안 cms- 클래스 후손 때문에 검사에서 빠진 중첩 목록이 조용히 합쳐짐
+
+**위치:** `packages/core/src/parse/common.ts:180`~`:187`, 특히 `leafItem` 조건 `:181`. 파서의 소비 지점은 `packages/core/src/types/type06.ts:53`.
+
+**확인 방식:** 최소 HTML 코어 변환, 클래스 하나만 제거한 대조 실험, 실제 Chromium 원본/출력 텍스트 비교로 **직접 실행**했다. 아래 원인 설명은 **정적 판독**이다. I-2/R-I-1의 잔여 사례이며, 정상 원본의 잘못된 fallback과는 다른 문제다.
+
+**재현 입력:**
+
+```html
+<div class="cms-container">
+  <section class="cms type06"><div class="cms-inner">
+    <ul class="cms-column-list">
+      <li class="cms-list-item"><div class="cms-inner-box">
+        <div class="cms-description-box">
+          <p class="cms-description">CARD</p>
+          <ul class="cms-bullet-list">
+            <li class="cms-list-item">
+              <p class="cms-description">FIRST</p>
+              <ul><li>SECOND</li><li>THIRD</li></ul>
+            </li>
+          </ul>
+        </div>
+      </div></li>
+    </ul>
+  </div></section>
+</div>
+```
+
+**실제 결과:** `status="success"`, diagnostics `[]`, fallback 0. `items[0].subitems[0].text`는 `FIRST<br>SECONDTHIRD`, 출력은 다음과 같다.
+
+```html
+<li class="mig-item"><span class="mig-desc">FIRST<br>SECONDTHIRD</span></li>
+```
+
+Chromium 원본 글머리 `innerText`는 `FIRST\n\nSECOND\nTHIRD`이고, 출력 글머리는 `FIRST\nSECONDTHIRD`이다. SECOND와 THIRD의 목록 경계가 경고 없이 사라진다.
+
+**대조 입력 — 직접 실행:** 위 FIRST의 `<p class="cms-description">`에서 클래스만 제거하면 `LOSSY_PARSE` 및 섹션 fallback이 된다. 반대로 그 문단을 `<span class="cms-description">FIRST</span>` 또는 `<span class="cms-extra">FIRST</span>`으로 바꾸면 다시 success·경고 없음이며 출력 텍스트가 `FIRSTSECONDTHIRD`로 합쳐진다. 실제 글 클래스가 아닌 임의의 cms- 클래스도 부모 li의 검사 여부를 바꾼다.
+
+**기대 결과:** 파서가 한 글머리의 rich 값으로 읽는 전체 범위에 중첩 목록이 있으므로, 자식 클래스나 FIRST의 감싸는 방식과 관계없이 `LOSSY_PARSE` 및 섹션 fallback으로 보존해야 한다. 지원하지 않는 구조라면 그 이유로 거부할 수 있지만, 경계를 지운 성공 결과로 내보내서는 안 된다.
+
+**원인 — 정적 판독:** 해당 li는 직접 텍스트 노드가 없고, `p.cms-description`이라는 cms- 후손이 있어 `holdsText`와 `leafItem`이 모두 false다. 검사 대상이 된 자식 p는 형제 ul을 포함하지 않는다. ul 자체도 직접 텍스트가 없고, 안쪽 li들은 SECOND/THIRD만 가져 문제를 찾지 못한다. 반면 type06 파서는 바깥 글머리 li 전체를 `richFrom()`으로 읽어 내부 ul을 텍스트로 풀어낸다. **구조 분류 대상과 파서가 소비하는 전체 글 범위의 불일치가 아직 남아 있다.**
+
+이전 A·B의 수정이 잘못됐다는 뜻은 아니다. A의 직접 텍스트 FIRST를 문단/인라인 자식으로 감싸면 같은 손실이 남는다는 일반화 사례다. 같은 원인인 세 변형은 한 건으로 집계했다.
+
+## 정상 원본의 잘못된 fallback 확인
+
+다음은 모두 **직접 실행**하여 이전 `3e27ba5` 코드와 현재 코드를 비교했다. 이전 코드는 임시 디렉터리에 펼쳤고 저장소 소스는 변경하지 않았다.
+
+| 입력군 | 비교 수 | 결과 |
+|---|---:|---|
+| type01 및 P2/P3/P4 18개 타입 × 원본/무배경/이미지 배경/색 배경 | 76 | 출력 HTML 전부 동일 |
+| P2/P3/P4 18개 타입 × 공백 변형/이미지 제거/인라인 서식/문단 변형 | 72 | 이전·현재 HTML 동일, 모두 fallback 0 |
+| 클래스 없는 글머리의 p+p, cms-description 문단+p, strong/span 인라인 글 | 3 | 모두 success, 문단은 br 경계 유지 |
+
+72개 정상 변형의 구체적 구성은 다음과 같다.
+
+- 공백: 원본의 요소 뒤 줄바꿈 앞에 공백·탭을 추가.
+- 이미지 제거: 원본의 모든 img 요소를 제거. 아이콘 없는 type16도 포함.
+- 인라인 서식: 첫 해당 `p.cms-description` 또는 `p.cms-title`의 글을 strong으로 감싸고 `br + em(EXTRA)` 추가.
+- 문단 변형: 첫 `p.cms-description`을 `div.cms-description > p(기존 글) + p(EXTRA)`로 바꿈. 해당 요소가 없는 타입은 원본을 그대로 비교했다.
+
+**이 범위에서는 정상 원본을 새로 fallback시키는 사례를 찾지 못했다.** 실제 운영 CMS 자료가 없으므로 모든 정상 원본에서 오탐이 없다고 확대 해석하지 않는다. 글이 없는 구조용 li를 무조건 검사하는 대신 cms- 후손으로 제외하는 의도는 이해되지만, 위 R-I-1처럼 실제 rich 소비 범위를 제외하는 부작용이 있다.
+
+## P2·P3와 기존 사례 회귀 확인 — 직접 실행
+
+이전 재현 입력 및 구조 변형 70건도 다시 실행하고 결과를 기록했다.
+
+| 사례 | 현재 결과 |
+|---|---|
+| type15 원문 문단+목록 | 두 값 모두 출력, 합의한 목록→문단 순서 유지, success |
+| type26 colspan 21 / rowspan 0 | 값 유지, success |
+| type26 colspan 0x10 / 2foo | LOSSY_PARSE 및 섹션 fallback |
+| type26 문단+목록, span 안 블록 | LOSSY_PARSE 및 섹션 fallback |
+| type26 section/article 안 문단 2개 | FIRST<br>SECOND, success |
+| type26 글+문단 / section 안 글+문단 | FIRST<br>SECOND, success. 사용자가 지정한 정책 유지 |
+| I-1 아이콘 없는 type16 | 공식 브라우저의 이미지 없는 18타입 × 세 화면 검사 통과 |
+
+정상 마크업 비교와 별개로, 위처럼 원본 보존이 필요한 입력은 계속 fallback되는 것도 확인했다. 이번 잔여 결함 외에 이 입력군에서 새 회귀는 확인하지 못했다.
+
+## 실행 결과와 한계
+
+| 직접 실행한 검사 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 종료 0, **500 passed / 1 skipped**, 파일 26 passed / 1 skipped |
+| 같은 환경의 `npm run test:browser` | 종료 0, **120 passed**, 파일 4 passed |
+| `npm run lint` | 종료 0 |
+| `npm run typecheck` | 종료 0 |
+| 추가 최소 입력·대조 | 8개 변형과 클래스 제거 대조 1개 |
+| 실제 Chromium | 잔여 결함 3변형, 정상 문단, 이전 A·B의 변환 결과 확인 |
+| 이전/현재 정상 출력 비교 | 76개 + 72개 조합 |
+| 기존 사례 재실행 | 70건 결과 기록 |
+
+- 전체 검사에 브라우저 검사가 포함되므로 500과 120을 합산하지 않는다. inventory 1개 건너뜀은 실제 cms/ 자료 부재에 따른 기존 조건이다.
+- Linux, Node v24.22.1, Chromium 156.0.8078.79에서 실행했다. 저장소 런처는 변경하지 않았고 기존 임시 Playwright 경로를 사용했다.
+- Windows·실제 운영 CMS·원본 CSS를 통한 시각 등급 비교는 실행하지 않았다. 이번 별도 브라우저 재현은 HTML의 DOM·텍스트를 확인했고, 웹 편집기 저장/가져오기 흐름은 별도로 다시 실행하지 않았다.
+- 임시 입력·스크립트·관측값은 `/tmp/stage4-lastcheck/`, 공식 검사 로그는 `/tmp/stage4-finalcheck-*.log`에 있다. 임시 경로는 저장소 산출물이 아니므로 핵심 재현 입력과 실제 결과를 위에 직접 기재했다.
+
+**최종 판정: 수정 후 재확인 필요.**
+
+## 이전 검수 기록 보존
+
+아래는 `da153b1` 재검수 원문(보고 커밋 `3e27ba5`)과 그 안의 이전 기록이다. 과거 재현 입력의 이력을 보존하며, 현재 판정·재현 입력은 이 문서 상단을 따른다.
+
+<details>
+<summary>이전 재검수 원문 — da153b1</summary>
+
 # 4단계 P4 재검수 결과 — da153b1
 
 - 검수일: 2026-11-15.
@@ -325,5 +458,7 @@ Chromium `innerText`는 원본 `FIRST\n\nSECOND`에서 출력 `FIRSTSECOND`로 �
 - 임시 재현 스크립트·입력·관측 JSON·스크린샷은 `/tmp/stage4-review/`, 공식 검사 로그는 `/tmp/stage4-*.log`에 있다. 임시 경로는 저장소 산출물이 아니므로 재현 핵심 입력과 관측값을 위에 기재했다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
