@@ -1,3 +1,112 @@
+# 4단계 P5 재검수 결과 — e460cfe
+
+- 검수일: 2026-11-16 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `e460cfe7383bfe0b783953b0c428f476fa93fcb2`.
+- 범위: `78065f2..e460cfe`. 반영 기록: `docs/review-stage4-p5-fixes.md` 마지막 장 R-I-1.
+- 애플리케이션·테스트·fixture 코드는 수정하지 않았다. 이번 변경은 이 검수 문서뿐이다.
+
+## 판정
+
+**이번 재검수 범위 완료.** 이전 빈 제목 오탐은 수정됐고, 빈 값 제외로 실제 글의 중복 검사가 빠지는 사례는 이번 입력군에서 발견하지 못했다.
+
+| 등급 | 현재 미해결 건수 | 판정 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 0 | 이전 R-I-1 수정 확인 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+아래는 직접 실행과 정적 판독의 근거다. 모든 가능한 입력에 대한 무결함을 의미하지 않는다.
+
+## 이전 R-I-1 재현 — 직접 실행
+
+이전 검수의 최소 type18 HTML을 그대로 다시 변환했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type18"><div class="cms-inner">
+    <ol class="cms-img-list">
+      <li class="cms-list-item"><div class="cms-visual-text">
+        <p class="cms-description"><span class="cms-title"></span>BODY</p>
+      </div></li>
+    </ol>
+  </div></section>
+</div>
+```
+
+- 기대: 정상 type18 변환, BODY 한 번, 중복 읽기로 인한 fallback 없음.
+- 현재 코어: success, diagnostics [], fallback 0.
+- 실제 Chromium: 원본과 현재 출력의 표시 글은 모두 BODY. 이전 78065f2 코드의 동일 입력은 LOSSY_PARSE 및 미지원 fallback이었으므로 오탐 해소를 확인했다.
+
+## 빈 값 제외와 실제 중복 방어 — 직접 실행
+
+추가 **64건**을 실행했다.
+
+| 검사 | 입력·기대 | 실제 |
+|---|---|---|
+| type18 제목 자리표시 8종 | 빈 문자열, 공백, 탭/줄바꿈, &nbsp;, &#160;, br, 빈 strong, 공백 span | 모두 정상 변환, fallback 0, BODY 유지 |
+| type18 제목에 글이 있는 7종 | FIRST, 앞뒤 공백, NBSP로 감싼 FIRST, 문자 엔티티로 쓴 FIRST, strong/span 서식, br 뒤 FIRST | 설명과 함께 읽히는 위험 입력은 계속 fallback |
+| 같은 요소 두 번 읽기 | 위 빈 값·글 있는 값 15종 | 글 있는 7종만 중복 감지 |
+| 부모→자식 포함 읽기 | 같은 15종 | 글 있는 7종만 중복 감지 |
+| 자식→부모 포함 읽기 | 같은 15종 | 글 있는 7종만 중복 감지 |
+| 최초 P5 I-1 A·B | type22 하위 제목, type24 설명 내부 제목 | 성공 변환, FIRST 한 번씩 |
+| 글 없는 지원 불가 구조 2종 | type22 짧은 목록의 빈 중첩 ul, 빈 span 안 section | 둘 다 계속 섹션 fallback |
+
+동일 요소·포함 읽기 검사는 실제 DOM 요소에 richFrom을 호출한 뒤 duplicateReads의 결과를 직접 대조했다. `&#70;IRST`처럼 엔티티로 적힌 글도 비어 있지 않은 값으로 처리된다. 빈 ul이나 숨은 블록의 경우 글자 수가 0이어도 구조 검사가 유지되어, 이번 변경이 지원 불가 구조를 성공으로 통과시키지는 않았다.
+
+추가 기존 방어 검사도 재실행했다.
+
+- 서로 다른 두 요소의 글이 둘 다 FIRST여도 중복으로 취급하지 않음.
+- richFrom 한 번 안에서 문단을 나누는 내부 재귀는 중복으로 취급하지 않음.
+- 검사 후 읽기 횟수가 정리됨.
+- type18·22·24·26의 같은 DOM 객체를 두 번 parse해도 정상 결과·데이터가 유지됨.
+
+## 변경 판독
+
+**정적 판독 위치:** `packages/core/src/parse/common.ts`의 richFrom, readCount 및 duplicateReads. 실제 코드 변경은 richFrom의 읽기 집계 조건에 한정된다.
+
+richFrom은 구조 검사용 readAsText 기록을 먼저 남기고, richInner 결과에서 서식을 걷은 글이 비어 있지 않을 때만 readCount를 증가시킨다. 따라서 빈 제목은 포함 읽기의 텍스트 중복 대상에서 제외하면서도, 읽은 요소의 내부 구조 검사는 유지한다. duplicateReads의 동일 객체·조상 관계 검사와 읽기 횟수 정리 코드는 바꾸지 않았다.
+
+이번에 확인한 P2~P5 글 읽기 경로에서 실제 글이 있는 요소를 빈 값으로 오판해 중복을 놓치는 경로는 찾지 못했다. 공백·NBSP·br만 있는 읽기는 사용자가 지정한 빈 값 정책과 일치한다. 글 없는 서식 요소의 출력 여부를 실제 글의 중복과 동일하게 취급하지 않았다.
+
+## 정상 입력·기존 결과 회귀 — 직접 실행
+
+이전 78065f2 코드를 임시 디렉터리에 펼쳐 현재 코드와 비교했다. 저장소 소스는 바꾸지 않았다.
+
+| 입력군 | 결과 |
+|---|---|
+| type01 및 P2~P5 24타입 × 원본/무배경/이미지 배경/색 배경 100조합 | HTML 전부 동일 |
+| P2~P5 24타입 × 공백/이미지 제거/인라인 서식/문단 변형 96조합 | HTML 전부 동일, 모두 fallback 0 |
+
+일반 변형은 기존 검수와 동일한 방식(공백·탭 추가, img 제거, 첫 해당 글의 strong/br/em 서식, 첫 p.cms-description을 div.cms-description > p+p로 변경)이다. 해당 문단 요소가 없는 타입은 원본을 그대로 대조했다. 이 기본 입력군은 이전에도 정상 변환됐고, 이번에도 새 fallback이 없었다.
+
+## 실행 결과와 한계
+
+| 직접 실행한 검사 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 종료 0, **674 passed / 1 skipped**, 파일 27 passed / 1 skipped |
+| 같은 환경의 `npm run test:browser` | 종료 0, **156 passed**, 파일 4 passed |
+| `npm run lint` | 종료 0 |
+| `npm run typecheck` | 종료 0 |
+| 이전 오탐 입력 | 코어·Chromium에서 정상 type18 변환 확인 |
+| 추가 입력 | 64건 예상 결과 확인 |
+| 기본 원본·일반 변형 | 100+96조합 동일 |
+| 기존 읽기 방어·동일 DOM 재파싱 | 정상 결과 유지 |
+
+- 전체 검사에 브라우저 검사가 포함되므로 전체 통과 수와 별도 브라우저 통과 수를 합산하지 않는다. inventory 1개 건너뜀은 실제 cms/ 자료 부재에 따른 기존 조건이다.
+- Linux, Node v24.22.1, Chromium 156.0.8078.79 사용. 저장소 런처를 바꾸지 않고 기존 임시 Playwright 경로를 사용했다.
+- Windows·실제 운영 CMS·원본 CSS 시각 등급 비교는 실행하지 않았다. 별도 웹 편집기 저장·가져오기 흐름은 이번에는 다시 실행하지 않았다.
+- 임시 재현 입력·스크립트·관측값은 `/tmp/p5-empty/`, 공식 검사 로그는 `/tmp/p5-empty-*.log`에 있다. 핵심 입력과 실제 결과는 위에 직접 기재했다.
+
+**최종 판정: 이번 재검수 범위 완료.**
+
+## 이전 검수 기록 보존
+
+아래는 be1b3cc의 이전 검수 원문(보고 커밋 78065f2)과 그 안의 최초 P5 기록이다. 과거 Important는 현재 미해결 항목이 아니며, 현재 판정은 위 결과를 따른다.
+
+<details>
+<summary>이전 재검수 원문 — be1b3cc</summary>
+
 # 4단계 P5 재검수 결과 — be1b3cc
 
 - 검수일: 2026-11-15.
@@ -257,5 +366,7 @@ Chromium에서도 정상 type18 프리셋 대신 `[변환 미지원] type18 ...`
 - 임시 입력·스크립트·관측값은 `/tmp/p5-review/`, 공식 검사 로그는 `/tmp/p5-*.log`에 있다. 핵심 재현 입력과 관측 결과는 위에 직접 기재했다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
