@@ -3,6 +3,7 @@ import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:
 import os from 'node:os';
 import path from 'node:path';
 import { isResolvedWithinOutput, safeRemove, safeWrite } from '../src/fs/safe-write.js';
+import { requireFileSymlinks } from './support/file-symlink.js';
 
 let tempRoot: string | undefined;
 
@@ -26,8 +27,9 @@ describe('safeWrite', () => {
     expect(await readFile(target, 'utf8')).toBe('ok');
   });
 
-  it('refuses to write through a target file that is a symlink (I-6)', async () => {
+  it('refuses to write through a target file that is a symlink (I-6)', async ({ skip }) => {
     tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-write-'));
+    await requireFileSymlinks(tempRoot, skip);
     const victim = path.join(tempRoot, 'cms', 'contents', 'a.html');
     await mkdir(path.dirname(victim), { recursive: true });
     await writeFile(victim, 'original');
@@ -64,9 +66,10 @@ describe('safeWrite', () => {
 });
 
 describe('safeRemove', () => {
-  it('only removes files below output and never follows links', async () => {
+  it('only removes files below output and never follows links', async ({ skip }) => {
     const { safeRemove } = await import('../src/fs/safe-write.js');
     tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-rm-'));
+    await requireFileSymlinks(tempRoot, skip);
     const victim = path.join(tempRoot, 'cms', 'a.html');
     await mkdir(path.dirname(victim), { recursive: true });
     await writeFile(victim, 'keep');
@@ -115,8 +118,9 @@ describe('safeWrite atomic replace (I-7)', () => {
     expect(await readdir(path.dirname(target))).toEqual(['a.json']);
   });
 
-  it('replaces a target that became a link instead of writing through it', async () => {
+  it('replaces a target that became a link instead of writing through it', async ({ skip }) => {
     tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-atomic-'));
+    await requireFileSymlinks(tempRoot, skip);
     const victim = path.join(tempRoot, 'victim.txt');
     await writeFile(victim, 'keep');
     const target = path.join(tempRoot, 'output', 'a.txt');

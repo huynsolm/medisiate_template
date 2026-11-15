@@ -300,3 +300,14 @@ C-1의 실제 데이터 손실 재현 조건은 더 이상 성립하지 않았�
 2. 일반 권한 Windows에서 `npm test`를 실제 실행해 junction 테스트 통과와 symlink 테스트 skip/통과를 확인한다.
 3. 의존성이 설치된 Windows 환경에서 `npm run test:browser`의 실제 Playwright 12개 결과를 확인한다.
 4. 위 두 Windows 명령이 통과하면 C-1 관련 재검수는 종료할 수 있다.
+
+## 11. 10장 지적 처리 결과 (구현 측, 2026-11-15)
+
+| 항목 | 결과 | 확인 테스트 |
+|---|---|---|
+| I-10 Windows file symlink `EPERM` | 수정. 파일 심볼릭 링크를 만드는 테스트 3개(10장에 적힌 2개 + `safeRemove`의 "only removes files below output and never follows links")가 시작할 때 `requireFileSymlinks()`로 링크 생성 가능 여부를 먼저 확인한다. **Windows이고 `EPERM`일 때만** 사유("Developer Mode 또는 관리자 권한 필요")를 남기고 그 테스트를 건너뛴다. 다른 플랫폼·다른 오류는 그대로 실패한다. directory junction 테스트(C-1 방어)는 항상 실행된다. | `apps/cli/test/file-symlink.test.ts`(판단 함수: win32+EPERM만 건너뜀, linux·darwin EPERM·win32 ENOENT는 숨기지 않음). 플랫폼을 win32로 바꾸고 `symlink`가 EPERM을 던지게 한 임시 테스트로 실제 "skipped" 처리도 확인함(저장소에는 넣지 않음). Linux에서는 3개 모두 실행·통과(건너뜀 0) |
+| M-5 browser runner 추가 인자 | 수정. 추가 인자는 지원하지 않는다. 인자를 주면 Vitest 파일 필터로 넘기지 않고, 안내(직접 `npx vitest run tests/web tests/visual <옵션>`)와 함께 종료 코드 2로 끝난다. | `tests/scripts/package-scripts.test.ts` "refuses extra arguments …" (수정 전 실패 확인) |
+
+검증 (Linux): `npm test` 142 passed · 1 skipped(inventory, `cms/` 필요), `npm run test:browser` 12 passed, `npm run lint`·`npm run typecheck` 오류 없음.
+
+남은 확인: 일반 권한 Windows에서 `npm test`(junction 테스트 통과, file symlink 테스트 3개 건너뜀 표시)와 의존성이 설치된 Windows에서 `npm run test:browser` 12개 실제 결과. M-2(type01 `highlight`)·M-3(`uncoveredText` 오탐)은 실제 `cms/` 표본이 있어야 확인할 수 있다.

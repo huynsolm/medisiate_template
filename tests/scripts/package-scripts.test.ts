@@ -11,3 +11,14 @@ describe('npm scripts (I-9)', () => {
     }
   });
 });
+
+describe('test:browser runner arguments (review M-5)', () => {
+  it('refuses extra arguments instead of passing them to Vitest as file filters', async () => {
+    const { spawnSync } = await import('node:child_process');
+    const result = spawnSync(process.execPath, [path.resolve(import.meta.dirname, '../../scripts/test-browser.mjs'), '--reporter=dot'], {
+      encoding: 'utf8',
+    });
+    expect(result.status).toBe(2);
+    expect(result.stderr).toMatch(/--reporter=dot/u);
+  });
+});
