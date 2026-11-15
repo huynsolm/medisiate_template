@@ -1,0 +1,38 @@
+{
+  "id": "s1",
+  "type": "type05",
+  "variant": "default",
+  "modifiers": {
+    "background": {
+      "kind": "color",
+      "value": "#f9e9e3",
+      "token": "bg-color-1"
+    }
+  },
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "image": {
+      "pc": {
+        "src": "/images/cms-sample.svg",
+        "alt": "",
+        "kind": "relative"
+      },
+      "mo": {
+        "src": "/images/cms-sample-m.svg",
+        "alt": "",
+        "kind": "relative"
+      }
+    }
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type05",
+      "type-bg",
+      "bg-color-1"
+    ]
+  }
+}

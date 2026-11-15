@@ -1,0 +1,79 @@
+{
+  "id": "s1",
+  "type": "type12",
+  "variant": "default",
+  "modifiers": {
+    "textWhite": true,
+    "background": {
+      "kind": "image",
+      "value": "http://fxfile.drline.net/cms/public/images/common/cms_bg_2.jpg",
+      "token": "bg-image-2",
+      "mobile": {
+        "value": "http://fxfile.drline.net/cms/public/images/common/cms_bg_2_m.jpg",
+        "color": "#181a27"
+      }
+    }
+  },
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "items": [
+      {
+        "text": "칸 1 내용을 입력해 보세요.",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      },
+      {
+        "text": "칸 2 내용을 입력해 보세요.",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      },
+      {
+        "text": "칸 3 내용을 입력해 보세요.",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type12",
+      "type-bg",
+      "bg-image-2",
+      "text-white"
+    ]
+  }
+}
