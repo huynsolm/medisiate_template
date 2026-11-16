@@ -176,3 +176,39 @@ describe('I-2 type33 Q&A answers keep paragraph boundaries; wrapped lists fall b
     expect(convert(qna('<div><ul><li>FIRST</li><li>SECOND</li></ul></div>')).page.sections[0]!.type).toBe('fallback');
   });
 });
+
+// ---- 4차 재검수(cadc0ef) 지적 ----
+
+describe('order check v4', () => {
+  it('I-1 a title and a description with repeated words swapping places is detected', () => {
+    const result = convert('<section class="cms type10"><div class="cms-inner"><ol class="cms-figure-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">검사검사</p></div><div class="cms-figure-text"><p class="cms-title">검사</p></div></li></ol></div></section>');
+    const html = result.html.replace(/<!--[\s\S]*?-->/gu, '');
+    if (result.page.sections[0]!.type !== 'fallback') expect(html.indexOf('검사검사')).toBeLessThan(html.indexOf('>검사<'));
+    else expect(result.page.diagnostics.some((d) => d.code === 'LOSSY_PARSE' && /순서/u.test(d.message))).toBe(true);
+  });
+
+  it('I-1 two original paragraphs joined into one line-broken paragraph are still fine', () => {
+    const result = convert('<section class="cms type04"><div class="cms-inner"><ol class="cms-tile-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">첫 문단</p><p class="cms-description">둘째 문단</p></div></li></ol></div></section>');
+    expect(result.page.sections[0]!.type).toBe('type04');
+  });
+
+  it('I-3 a mobile image written before the PC image is a normal responsive pair', () => {
+    const result = convert('<section class="cms type23"><div class="cms-inner"><div class="cms-visual"><img src="https://example.com/mo.png" alt="" class="d-block d-lg-none"><img src="https://example.com/pc.png" alt="" class="d-none d-lg-block"></div></div></section>');
+    expect(result.page.sections[0]!.type).toBe('type23');
+  });
+});
+
+describe('I-2 type33 Q&A keeps an ordered list and its start number', () => {
+  const qna = (answer: string) => `<section class="cms type33"><div class="cms-inner"><dl class="cms-inner-box"><dt><span>Q</span><div class="cms-description"><button>QUESTION</button></div></dt><dd><div class="copy"><span>A</span><div class="cms-description">${answer}</div></div></dd></dl></div></section>`;
+
+  it('ol start=3 stays an ordered list starting at 3', () => {
+    const result = convert(qna('<ol start="3"><li>FIRST</li><li>SECOND</li></ol>'));
+    expect(result.page.sections[0]!.type).toBe('type33');
+    expect(result.html).toMatch(/<ol start="3"[^>]*>/u);
+    expect(result.html).not.toMatch(/<ul[^>]*>\s*<li class="mig-desc">FIRST/u);
+  });
+
+  it('a plain ul stays a bullet list', () => {
+    expect(convert(qna('<ul><li>FIRST</li></ul>')).html).toMatch(/<ul[^>]*>\s*<li class="mig-desc">FIRST/u);
+  });
+});

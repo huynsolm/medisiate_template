@@ -222,6 +222,48 @@ function orderTokens(node: DomNode, ignore: ((el: DomElement) => boolean) | unde
   return out;
 }
 
+/**
+ * 연달아 있는 이미지 토큰 중 같은 링크 아래 것들은 화면 크기에 따라 하나만 보이는 반응형 후보(PC/MO)다.
+ * 원본 DOM 나열 순서(MO 먼저 등)와 출력 순서(PC 먼저)가 달라도 같은 결과이므로 묶음 안에서는 정렬해 비교한다 (4차 재검수 I-3).
+ * 묶음과 주변 글의 앞뒤는 그대로 비교된다.
+ */
+function normalizeImageRuns(tokens: OrderToken[]): OrderToken[] {
+  const out: OrderToken[] = [];
+  for (let i = 0; i < tokens.length;) {
+    if (tokens[i]![0] !== 'i') { out.push(tokens[i]!); i++; continue; }
+    let j = i;
+    while (j < tokens.length && tokens[j]![0] === 'i' && tokens[j]![1] === tokens[i]![1]) j++;
+    out.push(...tokens.slice(i, j).sort((x, y) => x[2].localeCompare(y[2])));
+    i = j;
+  }
+  return out;
+}
+
+const BLOCK_TAGS = new Set(['p', 'div', 'li', 'dt', 'dd', 'td', 'th', 'tr', 'caption', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'section', 'article', 'header', 'footer', 'ul', 'ol', 'dl', 'table', 'figure', 'blockquote', 'pre', 'address', 'aside', 'nav', 'main']);
+
+/**
+ * 공백 없는 글 흐름과 블록 경계 위치(글자 수 기준). 블록 요소의 시작·끝과 <br>이 경계다.
+ * 이어진 글만 비교하면 "본문 검사검사 → 제목 검사"와 "제목 검사 → 본문 검사검사"가 같게 나온다(4차 재검수 I-1).
+ */
+function textBoundaries(node: DomNode, ignore: ((el: DomElement) => boolean) | undefined, acc: { text: string; bounds: Set<number> } = { text: '', bounds: new Set() }) {
+  if (node.nodeName === '#text') {
+    acc.text += ((node as { value?: string }).value ?? '').replace(/\s+/gu, '');
+    return acc;
+  }
+  if (!('childNodes' in node)) return acc;
+  const el = 'tagName' in node ? (node as DomElement) : undefined;
+  if (el && (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el))) return acc;
+  if (el?.tagName === 'br') {
+    acc.bounds.add(acc.text.length);
+    return acc;
+  }
+  const block = el ? BLOCK_TAGS.has(el.tagName) : false;
+  if (block) acc.bounds.add(acc.text.length);
+  for (const child of node.childNodes as DomNode[]) textBoundaries(child, ignore, acc);
+  if (block) acc.bounds.add(acc.text.length);
+  return acc;
+}
+
 /** 섹션 하나를 출력했을 때 원본과 글·링크·이미지 순서가 다르면 이유를, 같으면 undefined. */
 export function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions, ignore?: (el: DomElement) => boolean): string | undefined {
   const single: PageModel = {
@@ -231,10 +273,20 @@ export function textOrderDiffers(element: DomElement, section: SectionModel, opt
   // orderCheck: 렌더러가 원본에 없는 생성 글(type24 순서 번호)을 빼고, CSS로 화면 순서를 뒤집는 타입(type30)은 화면 순서대로 출력한다
   const rendered = renderPage(single, { registry: options.registry, orderCheck: true });
   if (rendered.fallbackCount > 0) return undefined; // 데이터 검증 실패는 아래 전체 렌더가 INVALID_DATA로 따로 보고한다
-  const a = orderTokens(element, ignore, '', []);
-  const b = orderTokens(parseHtmlFragment(rendered.html) as unknown as DomNode, undefined, '', []);
+  const outputRoot = parseHtmlFragment(rendered.html) as unknown as DomNode;
+  const a = normalizeImageRuns(orderTokens(element, ignore, '', []));
+  const b = normalizeImageRuns(orderTokens(outputRoot, undefined, '', []));
   const at = a.findIndex((token, i) => !b[i] || token[0] !== b[i]![0] || token[1] !== b[i]![1] || token[2] !== b[i]![2]);
-  if (at < 0 && a.length === b.length) return undefined;
+  if (at < 0 && a.length === b.length) {
+    // 글이 같아도, 출력에 원본에 없던 블록 경계가 생겼다면 글 덩어리의 앞뒤가 바뀐 것이다.
+    // 경계가 줄어드는 것(원본 문단 두 개 → 줄바꿈으로 이은 한 문단, 머리글 블록 → 줄 안 요소)은 허용한다.
+    const src = textBoundaries(element, ignore);
+    const out = textBoundaries(outputRoot, undefined);
+    const extra = [...out.bounds].filter((n) => n > 0 && n < out.text.length && !src.bounds.has(n));
+    if (extra.length === 0) return undefined;
+    const n = extra[0]!;
+    return `원본과 글 순서가 다름: 출력에서 "${out.text.slice(Math.max(0, n - 12), n)}|${out.text.slice(n, n + 12)}" 사이가 나뉨(원본에는 이 경계가 없음)`;
+  }
   const show = (t: OrderToken | undefined) => (t ? `${t[0] === 'i' ? '이미지 ' : ''}${t[2].slice(0, 24)}${t[1] ? ' (링크)' : ''}` : '(없음)');
   const i = at < 0 ? a.length : at;
   return `원본과 글 순서가 다름: 원본 "${show(a[i])}" 자리에 출력 "${show(b[i])}"`;

@@ -5,7 +5,8 @@ import { generalHeader } from '../helpers/header.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { markReadInParts, richFrom, richFromNodes, scanSection, structureProblemsInNodes } from '../parse/common.ts';
 import { finish, originalHeader } from '../parse/original.ts';
-import { childNodes, children, descendants, hasClass, isElement, type DomElement } from '../parse/dom.ts';
+import { attr, childNodes, children, descendants, hasClass, isElement, type DomElement } from '../parse/dom.ts';
+import { toNumberInput } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 import { figureFactsSchema, figureFactsType, type FigureFactsData } from './type27.ts';
 
@@ -13,8 +14,11 @@ const qnaSchema = z.object({
   question: z.string().default(''),
   /** 답 글(목록 앞) */
   answer: z.string().optional(),
-  /** 답 안 목록(원본 ul.cms-list-box) */
+  /** 답 안 목록(원본 ul.cms-list-box 또는 번호 목록 ol) */
   list: z.array(z.object({ text: z.string().default('') })).default([]),
+  /** 답 안 목록이 번호 목록(ol)인지와 시작 번호 (4차 재검수 I-2) */
+  ordered: z.boolean().optional(),
+  start: z.preprocess(toNumberInput, z.number().int().min(0).max(100000)).optional(),
 });
 const schema = figureFactsSchema.extend({ qna: z.array(qnaSchema).default([]) });
 export type Type33Data = FigureFactsData & { qna: Array<z.infer<typeof qnaSchema>> };
@@ -27,7 +31,7 @@ const isQna = (section: { variant: string; data: { qna?: unknown[] } }) => secti
  * 답 요소의 글(목록 앞)과 첫 목록(답의 직접 자식 ul/ol). 목록 뒤의 글이나 두 번째 목록은 읽지 않는다(남은 글 검사가 fallback).
  * 목록 앞 글은 공통 규칙대로 문단을 줄바꿈으로 잇고, 그 안의 다른 구조(감싼 목록 등)는 problems에 기록한다(섹션 fallback).
  */
-function readAnswer(el: DomElement, problems: string[]): { answer: string; list: Array<{ text: string }> } {
+function readAnswer(el: DomElement, problems: string[]): { answer: string; list: Array<{ text: string }>; ordered?: boolean; start?: number } {
   markReadInParts(el);
   const nodes = childNodes(el);
   const at = nodes.findIndex((n) => isElement(n) && (n.tagName === 'ul' || n.tagName === 'ol'));
@@ -36,7 +40,14 @@ function readAnswer(el: DomElement, problems: string[]): { answer: string; list:
   const answer = richFromNodes(before);
   const listEl = at < 0 ? undefined : (nodes[at] as DomElement);
   const list = listEl ? children(listEl).filter((c) => c.tagName === 'li').map((li) => ({ text: richFrom(li) })) : [];
-  return { answer, list };
+  if (listEl?.tagName !== 'ol') return { answer, list };
+  // 번호 목록: 시작 번호만 옮긴다. 항목별 value·reversed·type(문자 번호 등)은 담을 자리가 없으므로 fallback
+  for (const name of ['reversed', 'type']) if (attr(listEl, name) !== undefined) problems.push(`번호 목록의 ${name} 속성`);
+  if (children(listEl).some((li) => attr(li, 'value') !== undefined)) problems.push('번호 목록 항목의 value 속성');
+  const rawStart = attr(listEl, 'start');
+  const start = rawStart !== undefined && /^\s*\d+\s*$/u.test(rawStart) ? Number(rawStart) : undefined;
+  if (rawStart !== undefined && start === undefined) problems.push(`번호 목록의 start="${rawStart}"`);
+  return { answer, list, ordered: true, ...(start !== undefined && start !== 1 ? { start } : {}) };
 }
 
 /**
@@ -66,6 +77,8 @@ export const type33: TypeDefinition<Type33Data> = {
         { key: 'question', label: '질문', kind: 'richText' },
         { key: 'answer', label: '답', kind: 'richText' },
         { key: 'list', label: '답 안 목록', kind: 'repeat', min: 0, max: 12, fields: [{ key: 'text', label: '글', kind: 'richText' }] },
+        { key: 'ordered', label: '번호 목록', kind: 'checkbox' },
+        { key: 'start', label: '시작 번호', kind: 'number', min: 0 },
       ],
     },
   ],
@@ -86,10 +99,10 @@ export const type33: TypeDefinition<Type33Data> = {
       const qEl = dt ? descendants(dt, (el) => hasClass(el, 'cms-description'))[0] : undefined;
       const aEl = dd ? descendants(dd, (el) => hasClass(el, 'cms-description'))[0] : undefined;
       const question = qEl ? richFrom(qEl) : '';
-      const { answer, list } = aEl ? readAnswer(aEl, problems) : { answer: '', list: [] };
+      const { answer, list, ordered, start } = aEl ? readAnswer(aEl, problems) : { answer: '', list: [], ordered: undefined, start: undefined };
       // 원본의 Q·A 표시(span)는 호스트가 다시 그리는 표시라 옮기지 않는다
       used.push('Q', 'A', question, answer, ...list.map((l) => l.text));
-      return { question, ...(answer ? { answer } : {}), list };
+      return { question, ...(answer ? { answer } : {}), list, ...(ordered ? { ordered } : {}), ...(start !== undefined ? { start } : {}) };
     });
     const data: Type33Data = {
       ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}),
@@ -109,7 +122,10 @@ export const type33: TypeDefinition<Type33Data> = {
         h('div', { class: 'mig-faq-question' }, [h('strong', { class: 'mig-title' }, [rich(item.question)])]),
         h('div', { class: 'mig-faq-answer' }, [
           !isBlank(item.answer) && h('p', { class: 'mig-desc' }, [rich(item.answer)]),
-          item.list.length > 0 && h('ul', { style: { listStyle: 'disc', paddingLeft: '1.2em', margin: '0' } }, item.list.map((l) => h('li', { class: 'mig-desc' }, [rich(l.text)]))),
+          item.list.length > 0 && h(item.ordered ? 'ol' : 'ul', {
+            ...(item.ordered && item.start !== undefined ? { start: item.start } : {}),
+            style: { listStyle: item.ordered ? 'decimal' : 'disc', paddingLeft: '1.2em', margin: '0' },
+          }, item.list.map((l) => h('li', { class: 'mig-desc' }, [rich(l.text)]))),
         ]),
       ]))),
     ]);
