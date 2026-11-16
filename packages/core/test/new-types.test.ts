@@ -38,3 +38,29 @@ describe('type27 · 원 안의 작은 글·값 목록', () => {
     expect(result.html).toContain('원 아래 설명');
   });
 });
+
+describe('type28 · 강조 표시 + 이미지 + 설명', () => {
+  it('parses the original component (section 1)', async () => {
+    const result = convert(sectionOf('type28', 1));
+    const section = result.page.sections[0]!;
+    expect(section.type).toBe('type28');
+    expect(section.data).toMatchObject({
+      eyebrow: '우리아이는', heading: '잘 크고 있나요?', badge: 'CHECK POINT', textFirst: false, items: [],
+    });
+    const paragraphs = (section.data as { paragraphs: Array<{ text: string }> }).paragraphs;
+    expect(paragraphs).toHaveLength(2);
+    expect(paragraphs[0]!.text).toContain('아이의 키는 유전적인 영향도 있지만 아이의 건강과 환경이 최종적인 키를 완성합니다.');
+    expect(paragraphs[1]!.text).toBe('아이의 키, 현재 상태와 방해 요소를 예측하여<br>꾸준하고 건강하게 자랄 수 있는 환경을 만들어 주는 것이 중요합니다.');
+    expect(follow(result.html, ['section.type-28', 'div.mig-body', 'div.mig-text-wrap', 'span.mig-badge'])).toHaveLength(1);
+    expect(follow(result.html, ['section.type-28', 'div.mig-body', 'div.mig-text-wrap', 'p.mig-desc'])).toHaveLength(2);
+    await expect(JSON.stringify(section, null, 2) + '\n').toMatchFileSnapshot(snapshot('type28/component.expected.json'));
+    await expect(result.html).toMatchFileSnapshot(snapshot('type28/component.expected.html'));
+  });
+
+  it('keeps the text before the image when the original has it first', () => {
+    const body = sectionOf('type28', 1).replace(/(<div class="cms-visual">[\s\S]*?<\/div>)\s*(<div class="cms-description-box text-center">[\s\S]*?<\/div>)/u, '$2$1');
+    const result = convert(body);
+    expect((result.page.sections[0]!.data as { textFirst: boolean }).textFirst).toBe(true);
+    expect(result.html.indexOf('mig-desc')).toBeLessThan(result.html.indexOf('mig-visual'));
+  });
+});

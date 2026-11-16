@@ -10,8 +10,8 @@ import { convert } from './support/original.ts';
  */
 const root = path.resolve(import.meta.dirname, '../../..');
 const component = (id: string) => readFileSync(path.join(root, 'reference/cms-original/component', `${id}.html`), 'utf8');
-// 구현한 타입 전부 (type08·28~36은 아직 없음)
-const FIXED = ['type00', 'type01', 'type02', 'type03', 'type04', 'type05', 'type06', 'type07', 'type09', 'type10', 'type11', 'type12', 'type13', 'type14', 'type15', 'type16', 'type17', 'type18', 'type19', 'type20', 'type21', 'type22', 'type23', 'type24', 'type25', 'type26', 'type27'];
+// 구현한 타입 전부 (type08·29~36은 아직 없음)
+const FIXED = ['type00', 'type01', 'type02', 'type03', 'type04', 'type05', 'type06', 'type07', 'type09', 'type10', 'type11', 'type12', 'type13', 'type14', 'type15', 'type16', 'type17', 'type18', 'type19', 'type20', 'type21', 'type22', 'type23', 'type24', 'type25', 'type26', 'type27', 'type28'];
 /** 아직 지원하지 않는 원본 변형: 섹션 번호 → 이유. fallback(원본 보존)이 맞는 동작이다. */
 const KNOWN: Record<string, Record<number, string>> = {
   type25: { 5: '증례 변형(번호·제목 + 설명 + 이미지 줄 여러 개)은 아직 모델에 없음' },
