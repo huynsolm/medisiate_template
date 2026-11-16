@@ -99,3 +99,14 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - type33 답 번호 목록(`ordered`, `start`).
 - type01 제목 → 이미지 예외는 여전히 사용자 결정 대기다.
 - 기대 수치: `npm test` 822 passed, `npm run test:browser` 180 passed, 703페이지 success 312 / partial 376 / failed 15, 순서 사유 보존 9개.
+
+## 12. 6차 재검수 (지적 반영 + 새 타입)
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(4차 재검수 I-1~I-3). 범위: `e6ed7ae..` 이후.
+- 새 타입(`docs/real-pages-baseline.md` 7장):
+  - **type31**: 일반 모드(호스트 프리셋 없음). `.mig-title-wrap` 제목 + `ul.mig-list.type-bullet` 줄, 소제목·`*`/`※` 주석. 주석 표시는 원본 CSS가 그리던 것을 글로 출력하고 순서 검사용 출력에서는 뺀다.
+  - **type32**: type27 원 목록 공통 함수 + 강조 글 상자·안내, 호스트 type-27 카드.
+  - **type08**: type07과 같은 구조, 호스트 type-08 프리셋.
+  - type34는 보류(실제 사용이 백업 폴더 복사본뿐).
+- 확인 요청: 일반 모드 type31 출력이 프리셋 블록과 섞인 페이지에서 감싸개가 나뉘는지, type31 줄 종류 판정(클래스)이 실제 페이지의 다른 클래스 조합에서 틀리지 않는지, type32 목록 클래스 판정(`cms-figure-list` + 숫자)이 다른 목록을 잘못 잡지 않는지.
+- 기대 수치: `npm test` 865 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.

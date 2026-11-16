@@ -189,3 +189,29 @@ describe('type31 · 제목별 안내 줄 목록 (일반 모드)', () => {
     expect(html).toContain('※ 당구장 주석');
   });
 });
+
+describe('type32 · 강조 글 + 안내 + 원 목록 (호스트 type-27 카드)', () => {
+  it('parses the original component (section 1)', async () => {
+    const result = convert(sectionOf('type32', 1));
+    const section = result.page.sections[0]!;
+    expect(section.type).toBe('type32');
+    expect(section.data).toMatchObject({ callout: '전화예약 1833-4211' });
+    expect((section.data as { items: Array<{ label?: string; text: string }> }).items.map((i) => [i.label, i.text])).toEqual([['평 일', '오전 9시 ~ 오후 6시'], ['토요일', '오전 9시 ~ 오후 1시']]);
+    expect(follow(result.html, ['section.type-27', 'div.mig-body', 'div.mig-highlight-box', 'strong.mig-title'])).toHaveLength(1);
+    expect(follow(result.html, ['section.type-27', 'div.mig-body', 'ul.mig-list', 'li.mig-item'])).toHaveLength(2);
+    await expect(JSON.stringify(section, null, 2) + '\n').toMatchFileSnapshot(snapshot('type32/component.expected.json'));
+    await expect(result.html).toMatchFileSnapshot(snapshot('type32/component.expected.html'));
+  });
+});
+
+describe('type08 · 이미지 + 글머리 목록 (type07과 같은 구조, 호스트 type-08)', () => {
+  it('parses the original component (section 1)', async () => {
+    const result = convert(sectionOf('type08', 1));
+    const section = result.page.sections[0]!;
+    expect(section.type).toBe('type08');
+    expect((section.data as { items: Array<{ text: string }> }).items[0]!.text).toBe('고혈압');
+    expect(follow(result.html, ['section.type-08', 'div.mig-body', 'div.mig-content', 'ul.mig-list', 'li.mig-item'])).toHaveLength(7);
+    await expect(JSON.stringify(section, null, 2) + '\n').toMatchFileSnapshot(snapshot('type08/component.expected.json'));
+    await expect(result.html).toMatchFileSnapshot(snapshot('type08/component.expected.html'));
+  });
+});

@@ -22,11 +22,12 @@ export type Type07Data = z.infer<typeof schema>;
  * 원본: .cms-column-wrap > .cms-visual(PC/MO) + .cms-list-wrap > ul.cms-bullet-list > li.cms-list-item > p.cms-description
  * 호스트: section.type-07 > .mig-body > .mig-content > .mig-visual(직접 자식, PC 4:6 격자) + ul.mig-list > li.mig-item
  */
-export const type07: TypeDefinition<Type07Data> = {
-  id: 'type07',
-  label: 'type07 이미지 + 글머리 목록',
+export function imageBulletsType(id: string, label: string, preset: 'type-07' | 'type-08'): TypeDefinition<Type07Data> {
+  return {
+  id,
+  label,
   strategy: 'preset',
-  hostPreset: 'type-07',
+  hostPreset: preset,
   variants: ['default'],
   schema: schema as z.ZodType<Type07Data>,
   fields: [
@@ -51,7 +52,7 @@ export const type07: TypeDefinition<Type07Data> = {
   },
   render(section) {
     const d = section.data;
-    return presetSection('type-07', section, withNotes(d, [
+    return presetSection(preset, section, withNotes(d, [
       h('div', { class: 'mig-content' }, [
         visualPcMo(d.image),
         d.items.length > 0 && h('ul', { class: 'mig-list', style: LIST_RESET }, d.items.map((item) => h('li', { class: 'mig-item' }, [
@@ -62,3 +63,6 @@ export const type07: TypeDefinition<Type07Data> = {
     ]));
   },
 };
+}
+
+export const type07 = imageBulletsType('type07', 'type07 이미지 + 글머리 목록', 'type-07');

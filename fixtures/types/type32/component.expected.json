@@ -1,0 +1,38 @@
+{
+  "id": "s1",
+  "type": "type32",
+  "variant": "default",
+  "modifiers": {
+    "background": {
+      "kind": "color",
+      "value": "#f9f3ec",
+      "token": "type-bg"
+    }
+  },
+  "data": {
+    "heading": "예약방법",
+    "callout": "전화예약 1833-4211",
+    "intro": "전화예약 가능하며 내원 예약은 다음과 같습니다.<br>단, 공휴일은 접수가 불가합니다.",
+    "items": [
+      {
+        "label": "평 일",
+        "text": "오전 9시 ~ 오후 6시",
+        "icon": {}
+      },
+      {
+        "label": "토요일",
+        "text": "오전 9시 ~ 오후 1시",
+        "icon": {}
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type32",
+      "type-bg"
+    ]
+  }
+}

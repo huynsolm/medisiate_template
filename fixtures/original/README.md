@@ -23,3 +23,5 @@ biny 재현본에 없던 타입은 진짜 원본 컴포넌트(`reference/cms-ori
 | `type30.html` | `reference/cms-original/component/type30.html` 1번째 섹션 |
 | `type29.html` | `reference/cms-original/component/type29.html` 1번째 섹션 |
 | `type31.html` | `reference/cms-original/component/type31.html` 1번째 섹션 |
+| `type32.html` | `reference/cms-original/component/type32.html` 1번째 섹션 |
+| `type08.html` | `reference/cms-original/component/type08.html` 1번째 섹션 |
