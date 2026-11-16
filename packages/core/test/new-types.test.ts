@@ -107,3 +107,27 @@ describe('type29 · 이미지 + 가운데 설명 (+ 버튼)', () => {
     expect(defaultRegistry.get('type29')!.schema.safeParse({ buttons: [{ text: 'x', link: 'javascript:alert(1)' }] }).success).toBe(false);
   });
 });
+
+describe('type33 · 원 안의 아이콘·작은 글·값 (실제 페이지 형태, 호스트 type-27 카드로 출력)', () => {
+  const real = `<section class="cms type33"><div class="cms-inner"><div class="cms-header top-border"><p class="cms-eyebrow">안면거상술</p><p class="cms-title">수술 정보</p></div>
+    <div class="cms-list-wrap"><ol class="cms-figure-list item-between-border text-type-3 row justify-content-center">
+    <li class="cms-list-item col-6 col-lg-3"><div class="cms-figure circle"><div class="cms-inner"><div class="cms-icon"><img src="https://cdn.example.com/i1.png" alt="" class="d-none d-lg-block"><img src="https://cdn.example.com/i1_m.png" alt="" class="d-block d-lg-none"></div>
+    <div class="cms-figure-text"><p class="cms-eyebrow">수술 시간</p><p class="cms-description">3시간</p></div></div></div></li>
+    <li class="cms-list-item col-6 col-lg-3"><div class="cms-figure circle"><div class="cms-inner"><div class="cms-figure-text"><p class="cms-eyebrow">마취 방법</p><p class="cms-description">수면마취</p></div></div></div></li>
+    </ol></div></div></section>`;
+
+  it('reads the icon next to the text box and renders with the host type-27 card preset', () => {
+    const result = convert(real);
+    const section = result.page.sections[0]!;
+    expect(section.type).toBe('type33');
+    const items = (section.data as { items: Array<{ label?: string; text: string; icon: { pc?: { src: string } } }> }).items;
+    expect(items.map((i) => [i.label, i.text])).toEqual([['수술 시간', '3시간'], ['마취 방법', '수면마취']]);
+    expect(items[0]!.icon.pc?.src).toBe('https://cdn.example.com/i1.png');
+    expect(follow(result.html, ['section.type-27', 'div.mig-body', 'ul.mig-list', 'li.mig-item', 'span.mig-label'])).toHaveLength(2);
+  });
+
+  it('the Q&A accordion form is preserved as a fallback for now', () => {
+    const qna = '<section class="cms type33"><div class="cms-inner"><div class="cms-list-wrap"><div class="cms-list-item"><dl class="cms-inner-box"><dt class="title"><span>Q</span><div class="cms-description"><button>질문?</button></div></dt><dd class="collapse"><div class="copy"><span>A</span><div class="cms-description">답변</div></div></dd></dl></div></div></div></section>';
+    expect(convert(qna).page.sections[0]!.type).toBe('fallback');
+  });
+});

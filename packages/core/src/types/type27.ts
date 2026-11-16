@@ -16,6 +16,7 @@ const itemSchema = z.object({
 });
 const schema = z.object({ ...headerShape, ...notesShape, items: z.array(itemSchema).default([]) });
 export type Type27Data = z.infer<typeof schema>;
+export type FigureFactsData = Type27Data;
 
 /**
  * 원본(reference/cms-original/component/type27.html):
@@ -25,9 +26,10 @@ export type Type27Data = z.infer<typeof schema>;
  *   목록 뒤 설명은 공통 note.
  * 원 도형과 항목 사이 +·− 기호(item-between-plus, minus)는 원본 CSS 장식이라 옮기지 않는다(안의 글은 옮김).
  */
-export const type27: TypeDefinition<Type27Data> = {
-  id: 'type27',
-  label: 'type27 원 안의 작은 글·값 목록',
+export function figureFactsType(id: string, label: string): TypeDefinition<Type27Data> {
+  return {
+  id,
+  label,
   strategy: 'preset',
   hostPreset: 'type-27',
   variants: ['default'],
@@ -53,7 +55,8 @@ export const type27: TypeDefinition<Type27Data> = {
     const extra: DomElement[] = [];
     const items = listItems(list).map((li) => {
       const figure = descendants(li, byClass('cms-figure-text'))[0];
-      const { pair: icon, extra: more } = imagesIn(figure ? descendants(figure, byClass('cms-icon'))[0] : undefined, src, diagnostics);
+      // 아이콘은 글 상자 안(type27 실제 페이지) 또는 옆(type33 실제 페이지: .cms-figure > .cms-inner > .cms-icon + .cms-figure-text)
+      const { pair: icon, extra: more } = imagesIn(descendants(li, byClass('cms-icon'))[0], src, diagnostics);
       extra.push(...more);
       const shape = descendants(li, byClass('cms-figure'))[0];
       const below = descendants(li, (d) => hasClass(d, 'cms-description') && !(shape && (d === shape || ancestors(d).includes(shape))))
@@ -80,3 +83,6 @@ export const type27: TypeDefinition<Type27Data> = {
     ]));
   },
 };
+}
+
+export const type27 = figureFactsType('type27', 'type27 원 안의 작은 글·값 목록');
