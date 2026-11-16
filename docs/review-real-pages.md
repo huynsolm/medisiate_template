@@ -1,3 +1,146 @@
+# 실제 원본·703페이지 9차 재검수 — bd8d1c2
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `bd8d1c2`, 범위: `00f2827..bd8d1c2`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장 및 `docs/review-request-real-pages.md` 16장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 복사본을 준비했다. cms/는 gitignore 대상이며 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았고 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 세 입력은 해결됐다. 다만 조상에 가려진 mixed 자식 때문에 정상 PC 전용 이미지를 거부하는 새 오탐, 임의 mig-* 클래스에 의한 역할 역전 누락, 선택한 Bootstrap 4 모델에 없는 표시 유틸리티의 잘못된 적용을 재현했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 3 | I-1 가려진 mixed 오탐, I-2 입력 클래스의 역할 경계 위장, I-3 Bootstrap 4에 없는 유틸리티 적용 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+세 건은 **추가 최소 입력**이다. 실제 703페이지에 같은 결함이 발생했다고 주장하지 않는다. I-1은 00f2827에서 정상 변환하던 입력의 새 회귀다. I-2·I-3은 이번 규칙의 잔여 문제이며, 이전 기준에서도 존재했다. 알려진 992~1023px 호스트 경계 차이는 지적하지 않았다.
+
+## 이전 입력 재확인 — 직접 실행
+
+| 이전 입력 | bd8d1c2 결과 |
+|---|---|
+| d-block d-xl-none | 구간별 표시 차이 사유로 LOSSY_PARSE·fallback 1 |
+| d-block d-sm-none d-md-block | 구간별 표시 차이 사유로 LOSSY_PARSE·fallback 1 |
+| d-block d-none / d-none d-block | 둘 다 success·무경고·fallback 0, only 없음 |
+| d-none d-lg-block d-lg-none / d-none d-lg-none d-lg-block | 둘 다 success·무경고·fallback 0, only=pc |
+| 두 본문 검사·검사 다음 제목 검사<em>검사</em> | LOSSY_PARSE·fallback 1. em 경계만으로 통과하던 원래 입력 해결 |
+
+기존 28타입 × 4변형(공백·이미지 없음·인라인 서식·문단 블록) 총 112개 입력도 전부 fallback 0이며, 00f2827과 출력 HTML이 byte 단위로 같다.
+
+## Important
+
+### I-1. 부모가 모바일 전체에서 숨는 정상 PC 전용 입력을 자식 자신의 mixed만 보고 fallback
+
+**위치:** `packages/core/src/convert/convert-document.ts:314`~`:327`, 특히 ownVisibility만 쓰는 `:319`~`:321`. 대비되는 조상 합성 함수는 `packages/core/src/parse/common.ts`의 visibilityOf다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner">
+    <div class="cms-visual d-none d-lg-block">
+      <img src="https://example.com/image.png" alt=""
+           class="d-block d-sm-none d-md-block">
+    </div>
+  </div></section>
+</div>
+```
+
+**실제:** 현재 failed·LOSSY_PARSE·fallback 1. 사유는 모바일 화면 안에서 d-block d-sm-none d-md-block이 폭에 따라 보였다 숨었다 한다는 것이다. 00f2827의 동일 입력은 success·무경고·fallback 0이며 only=pc로 출력된다.
+
+**Chromium — 직접 실행:** 원본에 Bootstrap 4.6.2 + cms.css, 이전 정상 출력에 host-style.css를 적용했다. 360/600/800px에서 원본·이전 출력 모두 숨김, 1100/1300px에서 양쪽 모두 표시였다. 현재 fallback을 정상 출력처럼 비교한 것이 아니라 **이미 존재하는 PC 전용 출력 후보와 원본이 동등함**을 대조했다. 부모가 모바일·태블릿 전체를 숨기므로 자식의 sm 변화는 실제 화면에 나타나지 않는다.
+
+**기대:** 조상까지 합친 실제 표시가 PC 전용으로 일정하면 정상 변환해야 한다. 부모 d-none d-lg-block을 제거한 별도 대조 입력은 실제 mixed이므로 fallback이 맞으며 현재도 그렇게 동작한다.
+
+**원인 — 정적 판독:** pairImages는 visibilityOf로 부모 숨김을 합쳐 올바른 only=pc 후보를 만들 수 있다. 그러나 새 partlyShown은 각 요소 자신의 mixed만 보고 검사하며, 조상에 의해 해당 화면에서 계속 숨는지 보지 않는다. segments가 조상 숨김을 반영하더라도 그 비교 전에 partlyShown이 섹션을 거부한다. 서로 다른 표시 판정 경로의 결과가 어긋나는 경우다.
+
+### I-2. 입력에서 보존된 임의 mig-* 클래스가 실제 호스트 역할인 것처럼 합치기 경계가 됨
+
+**위치:** `packages/core/src/convert/convert-document.ts:259`의 separates; 원본의 임의 class를 보존하는 경로는 `packages/core/src/html/rich-text.ts:121`~`:125`다.
+
+**재현 입력 — 직접 실행:** 지난 em 입력에 CSS 규칙이 없는 클래스 하나만 추가했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type10"><div class="cms-inner">
+    <ol class="cms-figure-list"><li class="cms-list-item">
+      <div class="cms-description-box">
+        <p class="cms-description">검사</p>
+        <p class="cms-description">검사</p>
+      </div>
+      <div class="cms-figure-text">
+        <p class="cms-title">검사<em class="mig-inline-demo">검사</em></p>
+      </div>
+    </li></ol>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics `[]`, fallback 0. 원본의 본문 두 문단 → 제목이 출력에서 제목 → 검사<br>검사 본문으로 역전된다. 같은 입력에서 mig-inline-demo 클래스를 빼면 이번 수정대로 fallback이다.
+
+**Chromium — 직접 실행:** 1100px 원본은 본문 y=50/98 다음 제목 y=128, 출력은 제목 y=65 다음 본문 y=123이다. 360/600/800/1300px에서도 같은 역전이다. em의 computed display는 원본·출력 모두 inline이고, 보유 cms.css·host-style.css에는 mig-inline-demo 규칙이 없다. 실제 줄 구분이 생긴 것이 아니다.
+
+**기대:** 렌더러가 생성한 호스트 역할 경계와 입력에서 온 임의 서식 클래스를 구분해야 한다. 이름이 mig-로 시작한다는 이유만으로 본문 두 문단을 한 줄 제목과 대응시키면 안 된다. 임의 클래스를 입력에서 전부 금지한다는 계약도 현재 없으며, 서식 sanitizer는 이 클래스를 그대로 보존한다.
+
+**원인 — 정적 판독:** separates는 실제 역할·CSS 표시·생성 출처와 관계없이 c.startsWith('mig-')면 true다. 따라서 원본 em에 보존된 클래스도 soft 경계를 만들고, matcher는 앞의 두 본문을 출력 제목에 합쳐 대응시킨다. ‘호스트 역할 클래스만 허용’이라는 취지와 단순 접두사 검사가 일치하지 않는다.
+
+### I-3. Bootstrap 4 모델이라고 하면서 실제 Bootstrap 4에 없는 d-lg-grid를 표시 규칙으로 적용
+
+**위치:** `packages/core/src/parse/common.ts:84`~`:85`의 D_ORDER/D_CLASS. grid·inline-grid·contents가 Bootstrap 4 유틸리티 값과 함께 들어 있다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner"><div class="cms-visual">
+    <img src="https://example.com/image.png" alt="" class="d-none d-lg-grid">
+  </div></div></section>
+</div>
+```
+
+**실제:** success, diagnostics `[]`, fallback 0, 모델 only=pc. 출력은 PC에서 이미지를 표시한다. Chromium에 Bootstrap 4.6.2를 적용한 원본은 d-none 때문에 1100/1300px에서도 숨김이지만 출력은 표시된다. 360/600/800px에서는 양쪽 모두 숨김이다.
+
+**기대:** Bootstrap 4로 계산한다면 그 버전에 실제 존재하는 유틸리티와 CSS 선언 순서만 적용해야 한다. 원본 스타일 정의가 없는 클래스가 d-none을 덮어쓰는 것처럼 계산돼서는 안 된다. 사용자 정의 grid 유틸리티를 지원할 계획이라면 그 규칙의 출처와 버전을 별도로 확인해야 한다.
+
+**원인 — 정적 판독·배포 CSS 대조:** Bootstrap 4.6.2에는 .d-lg-grid, .d-lg-inline-grid, .d-lg-contents가 없다. 현재 D_ORDER의 앞부분 none → inline → inline-block → block → table → table-row → table-cell → flex → inline-flex 순서는 배포 CSS와 일치하지만, 뒤에 덧붙인 세 값은 그 CSS에 존재하지 않는다. 코드가 가상의 d-lg-grid 규칙을 PC 표시로 적용하고 only와 순서 검사도 같은 가정을 써서 무경고로 통과한다.
+
+이 항목은 **선택한 Bootstrap 4 가정 아래에서 확정한 불일치**이며, 원본 실사이트의 CSS가 실제로 이 클래스를 정의하는지까지 확인했다는 주장은 아니다. Bootstrap 버전 미확인 자체와 별도로, 현재 명시한 기준과 구현의 일관성을 지적한다.
+
+## Bootstrap 4 가정에 대한 판단
+
+**정적 판독:** 원본 header는 /FlexX/cms/Module/resources/css/bootstrap.css를 참조하지만 파일 자체나 버전은 보유 자료에 없다. 실제 페이지의 d-lg/d-xl, col-lg, data-toggle="collapse"·data-target 같은 사용은 Bootstrap 4 선택을 뒷받침하는 정황이다. 예를 들어 `13280/0301_소아예방접종.html`의 Q&A 버튼에 data-toggle가 있다. 다만 사용 중인 클래스의 최대가 xl이라는 사실만으로 Bootstrap 5나 커스텀 빌드를 배제할 수는 없다.
+
+**직접 확인:** 기준으로 사용한 [Bootstrap 4.6.2 배포 CSS](https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css)의 실제 선언 순서는 현재 D_ORDER의 표준 아홉 값과 일치한다. 따라서 **Bootstrap 4를 전제로 한 동일 폭 우선순위 수정은 타당**하다. 이전 Codex가 4.6.2로 대조했다는 사실은 원본 버전에 대한 독립 증거가 아니다.
+
+원본 CSS 확보도 시도했지만 `https://fxfile.drline.net/FlexX/cms/Module/resources/css/bootstrap.css` 요청이 403 오류로 실패했다. 원본이 4.6.2라고 확정하지 않는다. 보고서에서는 잠정 기준과 원본 검증을 구분하며, 버전 미확인 자체를 별도 결함 건수에 더하지 않았다. I-3의 미지원 값까지 Bootstrap 4 유틸리티로 받아들이는 것은 그 가정으로 정당화되지 않는다.
+
+## 실행 조건·실제 페이지 대조
+
+**직접 실행:**
+
+- Chromium 원본에는 Bootstrap 4.6.2 + reference/cms-original/css/cms.css, 출력에는 reference/host-style.css를 적용했다. 실사이트 전체 CSS를 확보한 비교가 아니다. 외부 이미지는 동일한 로컬 100×80 SVG로 응답하고 360/600/800/1100/1300px에서 표시·글 위치를 측정했다.
+- 703개 파일을 00f2827과 현재 코드로 각각 변환해 파일 상태 및 섹션 type/fallback을 대조했다. 변화 0개. success 320 / partial 368 / failed 15 유지.
+- 순서 사유 fallback 9개 고정 목록 테스트도 통과했다. 이번 새 오탐 I-1은 이 703페이지 표본 밖의 입력이다.
+- 위 112개 정상 변형 입력 모두 이전 HTML과 같으며, 기존 type01 원본 순서 복원·서식 문단·머리글 합침 검사도 통과했다.
+- 임시 재현 스크립트·브라우저 기록은 /tmp에만 두고 커밋하지 않았다. 아래는 검수 당시 코드에서 직접 실행한 결과다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 33 files / 890 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 4 files / 192 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 703 / success 320 / partial 368 / failed 15 |
+| 추가 최소 입력·Chromium 검사 | 위 재현 및 대조 입력 확인 |
+
+명령은 모두 종료 코드 0이었다. 자동 테스트 통과와 위 세 검수 지적을 구분한다. 아래는 이전 원문 보관이며 현재 판정 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — 4014df5 및 그 이전 기록</summary>
+
 # 실제 원본·703페이지 8차 재검수 — 4014df5
 
 - 검수일: 2026-11-17 (KST).
@@ -1212,6 +1355,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
