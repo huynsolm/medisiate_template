@@ -3,8 +3,8 @@ import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, finish, imagesIn, layoutFixed, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
-import { children, classesOf, descendants, type DomElement } from '../parse/dom.ts';
+import { byClass, finish, imagesIn, itemPart, layoutFixed, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { classesOf, descendants, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, LIST_RESET, presetSection } from './preset.ts';
@@ -53,9 +53,9 @@ export const type18: TypeDefinition<Type18Data> = {
     const used: string[] = [...header.used];
     const extra: DomElement[] = [];
     const items = listItems(list).map((li) => {
-      const { pair, extra: more } = imagesIn(children(li).find(byClass('cms-visual')), src, diagnostics);
+      const { pair, extra: more } = imagesIn(itemPart(li, 'cms-visual'), src, diagnostics);
       extra.push(...more);
-      const text = children(li).find(byClass('cms-visual-text'));
+      const text = itemPart(li, 'cms-visual-text');
       const item = { ...optional('num', textOf(text, 'cms-eyebrow')), ...optional('title', textOf(text, 'cms-title')), ...optional('desc', textOf(text, 'cms-description')), image: pair };
       used.push(item.num ?? '', item.title ?? '', item.desc ?? '');
       return item;

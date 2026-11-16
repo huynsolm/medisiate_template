@@ -32,6 +32,8 @@ const widthSchema = z.preprocess(
 const schema = z.object({
   ...headerShape,
   desc: z.string().optional(),
+  /** 표 제목(원본 caption.sr-only, 화면 낭독기용). 호스트도 caption을 화면에서 숨긴다 */
+  caption: z.string().optional(),
   colWidths: z.array(z.object({ width: widthSchema })).default([]),
   head: z.array(rowSchema).default([]),
   body: z.array(rowSchema).default([]),
@@ -101,6 +103,7 @@ export const type26: TypeDefinition<Type26Data> = {
   fields: [
     ...headerFields,
     { key: 'desc', label: '표 위 설명', kind: 'richText' },
+    { key: 'caption', label: '표 제목 (화면 낭독기용, 화면에는 안 보임)', kind: 'text' },
     { key: 'colWidths', label: '열 너비', kind: 'repeat', min: 0, max: 10, fields: [{ key: 'width', label: 'auto 또는 30% 같은 값 (비우면 auto)', kind: 'text' }] },
     ...(['head', 'body'] as const).map((key) => ({
       key, label: key === 'head' ? '머리글 행' : '본문 행', kind: 'repeat' as const, min: 0, max: 20,
@@ -120,7 +123,12 @@ export const type26: TypeDefinition<Type26Data> = {
     const scan = scanSection(src);
     const table = descendants(src.element, (el) => el.tagName === 'table')[0];
     const cols = table ? descendants(table, (el) => el.tagName === 'col') : [];
-    const colWidths = cols.map((col) => ({ width: WIDTH.exec(attr(col, 'style') ?? '')?.[1]?.trim() ?? 'auto' }));
+    // 너비는 style(width: 20%) 또는 width 속성(width="20%")에서 읽는다. 실제 페이지에는 width:* · width:% 같은 오타가 있는데,
+    // 브라우저는 잘못된 값을 무시하므로(= 너비 지정 없음) auto로 옮긴다. 그대로 담으면 스키마가 섹션 전체를 거부했다.
+    const colWidths = cols.map((col) => {
+      const raw = (WIDTH.exec(attr(col, 'style') ?? '')?.[1] ?? attr(col, 'width') ?? '').trim();
+      return { width: CSS_LENGTH.test(raw) ? raw : /^\d+(\.\d+)?$/u.test(raw) ? `${raw}px` : 'auto' };
+    });
     // 열 너비는 데이터로 옮기므로, width만 있는 col style은 "버린 style" 경고에서 뺀다.
     const diagnostics = scan.diagnostics.filter((d) => !(d.code === 'INLINE_STYLE_DROPPED' && d.detail?.tag === 'col'
       && (d.detail.declarations as string[]).every((decl) => WIDTH.test(decl))));
@@ -128,13 +136,15 @@ export const type26: TypeDefinition<Type26Data> = {
     const wrap = firstByClass(src.element, 'cms-table-wrap');
     const desc = childText(wrap ? children(wrap).find(byClass('cms-description-box')) : undefined, 'cms-description');
     const problems: string[] = [];
+    const captionEl = table ? children(table).find((el) => el.tagName === 'caption') : undefined;
+    const caption = captionEl ? richFrom(captionEl) : '';
     const head = rowsOf(table ? children(table).find((el) => el.tagName === 'thead') : undefined, problems);
     const body = rowsOf(table ? children(table).find((el) => el.tagName === 'tbody') : undefined, problems);
     const data: Type26Data = {
       ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}),
-      ...(desc ? { desc } : {}), colWidths, head, body,
+      ...(desc ? { desc } : {}), ...(caption ? { caption } : {}), colWidths, head, body,
     };
-    const used = [...header.used, desc, ...[...head, ...body].flatMap((r) => r.cells.map((c) => c.text))];
+    const used = [...header.used, desc, caption, ...[...head, ...body].flatMap((r) => r.cells.map((c) => c.text))];
     const result = finish(src, data, used, [], { modifiers: scan.modifiers, diagnostics });
     // 표 구조를 바꾸지 않고는 옮길 수 없는 칸이 있으면 섹션 전체를 원본 그대로 보존한다
     return problems.length > 0 && !result.fallbackReason
@@ -150,6 +160,7 @@ export const type26: TypeDefinition<Type26Data> = {
         !isBlank(d.desc) && h('p', { class: 'mig-desc' }, [rich(d.desc)]),
         h('div', { class: 'table-responsive' }, [
           h('table', { class: 'mig-table' }, [
+            !isBlank(d.caption) && h('caption', {}, [rich(d.caption)]),
             d.colWidths.length > 0 && h('colgroup', {}, d.colWidths.map((c) => h('col', { style: { width: c.width } }))),
             d.head.length > 0 && h('thead', {}, rows(d.head)),
             h('tbody', {}, rows(d.body)),

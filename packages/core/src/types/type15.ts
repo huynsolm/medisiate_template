@@ -3,7 +3,7 @@ import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, childText, finish, imagesIn, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { byClass, childText, finish, imagesIn, itemPart, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
 import { children, descendants, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
@@ -50,9 +50,9 @@ export const type15: TypeDefinition<Type15Data> = {
     const used: string[] = [...header.used];
     const extra: DomElement[] = [];
     const items = listItems(descendants(src.element, byClass('cms-column-list'))[0]).map((li) => {
-      const { pair, extra: more } = imagesIn(children(li).find(byClass('cms-visual')), src, diagnostics);
+      const { pair, extra: more } = imagesIn(itemPart(li, 'cms-visual'), src, diagnostics);
       extra.push(...more);
-      const box = children(li).find(byClass('cms-description-box'));
+      const box = itemPart(li, 'cms-description-box');
       const bullets = box ? children(box).find(byClass('cms-bullet-list')) : undefined;
       const item = {
         ...optional('title', childText(box, 'cms-title')),

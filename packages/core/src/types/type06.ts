@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
-import { byClass, childText, finish, imagesIn, listItems, originalHeader } from '../parse/original.ts';
+import { byClass, childText, finish, imagesIn, itemPart, listItems, originalHeader } from '../parse/original.ts';
 import { richFrom, scanSection } from '../parse/common.ts';
 import { children, descendants, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
@@ -45,7 +45,7 @@ export const type06: TypeDefinition<Type06Data> = {
     const used: string[] = [...header.used];
     const extra: DomElement[] = [];
     const items = listItems(descendants(src.element, byClass('cms-column-list'))[0]).map((li) => {
-      const box = children(li).find(byClass('cms-inner-box')) ?? li;
+      const box = itemPart(li, 'cms-inner-box') ?? li;
       const { pair, extra: more } = imagesIn(children(box).find(byClass('cms-icon')), src, diagnostics);
       extra.push(...more);
       const desc = children(box).find(byClass('cms-description-box'));

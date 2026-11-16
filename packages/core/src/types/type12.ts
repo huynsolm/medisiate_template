@@ -3,7 +3,7 @@ import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, childText, finish, imagesIn, listItems, originalHeader } from '../parse/original.ts';
+import { byClass, childText, finish, imagesIn, itemPart, listItems, originalHeader } from '../parse/original.ts';
 import { children, descendants, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
@@ -33,7 +33,7 @@ export const type12: TypeDefinition<Type12Data> = {
     const header = originalHeader(src.element);
     const extra: DomElement[] = [];
     const items = listItems(descendants(src.element, byClass('cms-column-list'))[0]).map((li) => {
-      const box = children(li).find(byClass('cms-inner-box')) ?? li;
+      const box = itemPart(li, 'cms-inner-box') ?? li;
       const { pair, extra: more } = imagesIn(children(box).find(byClass('cms-icon')), src, diagnostics);
       extra.push(...more);
       return { text: childText(children(box).find(byClass('cms-description-box')), 'cms-description'), image: pair };

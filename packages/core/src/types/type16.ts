@@ -3,7 +3,7 @@ import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, finish, imagesIn, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { byClass, finish, imagesIn, itemPart, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
 import { children, descendants } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
@@ -59,9 +59,9 @@ export const type16: TypeDefinition<Type16Data> = {
     const mobileText = textOf(figure, 'cms-title');
     const used: string[] = [...header.used, mobileText];
     const items = listItems(descendants(src.element, byClass('cms-column-list'))[0]).map((li) => {
-      const { pair: icon, extra: more } = imagesIn(children(li).find(byClass('cms-icon')), src, diagnostics);
+      const { pair: icon, extra: more } = imagesIn(itemPart(li, 'cms-icon'), src, diagnostics);
       extra.push(...more);
-      const box = children(li).find(byClass('cms-description-box'));
+      const box = itemPart(li, 'cms-description-box');
       const item = { ...optional('title', textOf(box, 'cms-title')), ...optional('desc', textOf(box, 'cms-description')), icon };
       used.push(item.title ?? '', item.desc ?? '');
       return item;

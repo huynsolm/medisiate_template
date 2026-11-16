@@ -1,8 +1,8 @@
 import { h } from '../html/h.ts';
 import { z } from 'zod';
 import { scanSection } from '../parse/common.ts';
-import { byClass, finish, imagesIn, layoutFixed, listItems, originalHeader, optional, textOf } from '../parse/original.ts';
-import { children, descendants, hasClass, type DomElement } from '../parse/dom.ts';
+import { byClass, finish, imagesIn, itemPart, layoutFixed, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { descendants, hasClass, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, imageTextItem, LIST_RESET, presetSection } from './preset.ts';
@@ -52,9 +52,9 @@ export const type03: TypeDefinition<Type03Data> = {
     const used: string[] = [...header.used];
     const extra: DomElement[] = [];
     const items = listItems(list).map((li) => {
-      const { pair, extra: more } = imagesIn(children(li).find(byClass('cms-visual')), src, diagnostics);
+      const { pair, extra: more } = imagesIn(itemPart(li, 'cms-visual'), src, diagnostics);
       extra.push(...more);
-      const box = children(li).find(byClass('cms-description-box'));
+      const box = itemPart(li, 'cms-description-box');
       const item = {
         ...optional('num', textOf(box, 'cms-eyebrow')),
         ...optional('title', textOf(box, 'cms-title')),

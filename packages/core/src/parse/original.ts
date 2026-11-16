@@ -29,6 +29,20 @@ export function originalHeader(root: DomElement): { eyebrow?: string; heading?: 
   return out;
 }
 
+/**
+ * 목록 항목 안의 부분(이미지 칸, 설명 상자 등). 원본 템플릿은 li의 직접 자식이지만, 실제 페이지는
+ * `li > div.row > .cms-visual`처럼 감싸는 상자를 넣은 경우가 많다. 이 항목 안에서(하위 목록 항목 안은 제외) 첫 번째로 찾는다.
+ */
+export function itemPart(li: DomElement | undefined, name: string): DomElement | undefined {
+  if (!li) return undefined;
+  const owner = (el: DomElement) => {
+    let node = el.parentNode as DomElement | null;
+    while (node && node !== li && node.tagName !== 'li') node = node.parentNode as DomElement | null;
+    return node;
+  };
+  return descendants(li, (el) => hasClass(el, name) && owner(el) === li)[0];
+}
+
 /** 직접 자식 중 원본 목록 항목(li.cms-list-item) */
 export const listItems = (list: DomElement | undefined) => (list ? children(list).filter(byClass('cms-list-item')) : []);
 

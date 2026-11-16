@@ -2,8 +2,8 @@ import { z } from 'zod';
 import { h } from '../html/h.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, childText, finish, listItems, originalHeader, optional, textOf } from '../parse/original.ts';
-import { children, descendants } from '../parse/dom.ts';
+import { byClass, childText, finish, itemPart, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { descendants } from '../parse/dom.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, LIST_RESET, presetSection } from './preset.ts';
 
@@ -46,7 +46,7 @@ export const type02: TypeDefinition<Type02Data> = {
     const used: string[] = [...header.used];
     const items = listItems(list).map((li) => {
       const figure = descendants(li, byClass('cms-figure-text'))[0];
-      const box = children(li).find(byClass('cms-description-box'));
+      const box = itemPart(li, 'cms-description-box');
       const item = {
         ...optional('label', textOf(figure, 'cms-eyebrow')),
         ...optional('title', textOf(figure, 'cms-description')),

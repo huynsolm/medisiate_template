@@ -61,7 +61,8 @@ export const type10: TypeDefinition<Type10Data> = {
       const sub = box ? descendants(box, byClass('cms-border-list'))[0] : undefined;
       const item = {
         ...optional('num', textOf(figure, 'cms-eyebrow')),
-        ...optional('title', textOf(figure, 'cms-title')),
+        // 진짜 원본은 육각형 안 핵심 단어가 p.cms-description이다(biny 재현본은 cms-title). 둘 다 받는다.
+        ...optional('title', textOf(figure, 'cms-title') || textOf(figure, 'cms-description')),
         ...optional('subtitle', childText(box, 'cms-eyebrow')),
         ...optional('desc', childText(box, 'cms-description')),
         subitems: listItems(sub).map((s) => ({ text: textOf(s, 'cms-title') })),

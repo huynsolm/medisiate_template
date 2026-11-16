@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { h, raw } from '../html/h.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, childText, finish, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { byClass, childText, finish, itemPart, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
 import { children, descendants, hasClass } from '../parse/dom.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, LIST_RESET, presetSection } from './preset.ts';
@@ -42,7 +42,7 @@ export function checkRowsType(id: 'type13' | 'type14', options: { bottom: boolea
       const { modifiers, diagnostics } = scanSection(src);
       const header = originalHeader(src.element);
       const items = listItems(descendants(src.element, byClass('cms-table-list'))[0]).map((li) => {
-        const cells = children(children(li).find(byClass('cms-inner-box')) ?? li);
+        const cells = children(itemPart(li, 'cms-inner-box') ?? li);
         const numCell = cells.find((c) => hasClass(c, 'cms-fixed-cell') && hasClass(c, 'cms-description-box'));
         const textCell = cells.find((c) => hasClass(c, 'cms-description-box') && !hasClass(c, 'cms-fixed-cell'));
         return { ...optional('num', textOf(numCell, 'cms-description')), text: textOf(textCell, 'cms-description') };
