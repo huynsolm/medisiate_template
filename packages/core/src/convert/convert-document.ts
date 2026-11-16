@@ -1,7 +1,7 @@
 import { parse } from 'parse5';
 import type { Diagnostic, FileStatus, ImageKind, PageMeta, PageModel, SectionModel, Theme } from '../model/index.ts';
 import { renderPage } from '../page/render-page.ts';
-import { attr, descendants, hasClass, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
+import { attr, descendants, hasClass, outerHtml, parseHtmlFragment, plainText, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
 import { sectionTypeId } from '../parse/sections.ts';
 import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
@@ -133,14 +133,23 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
       sections.push(fallbackFromSource(src, id, result.fallbackReason));
       continue;
     }
-    sections.push({
+    const section: SectionModel = {
       id,
       type: def.id,
       variant: result.variant,
       modifiers: result.modifiers,
       data: result.data,
       source: { file: src.file, index: src.index, classList: src.classList },
-    });
+    };
+    // 글을 모두 담았어도 순서가 바뀔 수 있다(예: 버튼 뒤 문단이 버튼 앞으로). 이 섹션만 출력해 원본과 글 순서를 비교하고,
+    // 다르면 원본을 보존한다 (실제 원본 대조 재검수 R-I-2, I-3). 비교 규칙은 real-pages 테스트와 같다.
+    const reordered = textOrderDiffers(src.element, section, options);
+    if (reordered) {
+      diagnostics.push({ level: 'warn', code: 'LOSSY_PARSE', message: `${def.id}: ${reordered} → 원본을 fallback으로 보존`, sectionIndex: src.index });
+      sections.push(fallbackFromSource(src, id, reordered));
+      continue;
+    }
+    sections.push(section);
   }
 
   const titleSection = sections.find((s) => s.type === 'type00');
@@ -175,4 +184,23 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
     images,
     fallbackCount,
   };
+}
+
+const squashText = (html: string) => plainText(parseHtmlFragment(html.replace(/<!--[\s\S]*?-->|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gu, '')) as never).replace(/\s+/gu, '');
+
+/** 섹션 하나를 출력했을 때 원본과 글 순서가 다르면 이유를, 같으면 undefined. type24 순서 번호는 합의된 생성 글이라 뺀다. */
+function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions): string | undefined {
+  const single: PageModel = {
+    version: 1, theme: options.theme, sections: [section], diagnostics: [],
+    meta: { coreVersion: options.coreVersion, hostCss: options.hostCss },
+  };
+  const rendered = renderPage(single, { registry: options.registry });
+  if (rendered.fallbackCount > 0) return undefined; // 데이터 검증 실패는 아래 전체 렌더가 INVALID_DATA로 따로 보고한다
+  const output = section.type === 'type24' ? rendered.html.replace(/<span class="mig-num">\d+<\/span>/gu, '') : rendered.html;
+  const a = squashText(outerHtml(element));
+  const b = squashText(output);
+  if (a === b) return undefined;
+  let at = 0;
+  while (at < a.length && a[at] === b[at]) at++;
+  return `원본과 글 순서가 다름: …${a.slice(Math.max(0, at - 10), at + 20)}`;
 }

@@ -28,3 +28,22 @@
 ## 검증
 - `npm test` 799 passed(건너뜀 0, `cms/` 있음), `npm run test:browser` 180 passed, lint·typecheck 오류 없음. 기존 스냅샷 변화 없음.
 - 703페이지: success 314 / partial 374 / failed 15 (수정으로 상태가 바뀐 파일 없음: I-3 페이지는 이미 success였고 순서만 바뀜).
+
+## 재검수(`f2e48e4`) 지적 반영
+
+### R-I-1. 단위 없는 CSS 너비(`width:20`)가 유효한 width 속성을 가림
+- 원인: style 값과 HTML 속성에 같은 검사를 써서 CSS의 `20`도 px로 인정했다. 표준 모드 CSS에서 단위 없는 0 아닌 길이는 무효다.
+- 수정: CSS 값은 단위가 있어야 길이(0만 예외), **HTML width 속성만** 숫자를 px로 본다. 순서는 그대로(유효한 style → 유효한 속성 → auto).
+
+### R-I-2. type29 버튼 뒤 문단이 버튼 앞으로 이동 (그리고 같은 종류의 문제 전체)
+- 원인: 한 상자 안에 섞인 문단·버튼을 따로 모아 문단 → 버튼 순서로 출력했다. I-3(표 뒤 주의 글)과 같은 종류다. "글을 모두 담았는가" 검사는 순서 변화를 보지 못하고, 실제 페이지 순서 테스트는 703페이지에 없는 입력을 잡지 못한다.
+- 수정(모든 타입 공통): **변환 중 섹션마다 순서 검사**를 한다(`packages/core/src/convert/convert-document.ts` `textOrderDiffers`). 파싱한 섹션 하나를 출력해 원본과 공백 없는 글을 순서까지 비교하고, 다르면 `LOSSY_PARSE`("원본과 글 순서가 다름") + 섹션 fallback으로 원본을 보존한다. 규칙은 real-pages 테스트와 같고, type24 순서 번호(합의된 생성 글)만 뺀다.
+- 결과:
+  - 검수 문서 입력(type29 FIRST→BUTTON→LAST)은 fallback(원본 순서 보존).
+  - **type15의 "문단이 글머리보다 앞" 입력도 이제 fallback**이다. 3단계에서 "글머리 → 문단 순서 정규화"로 수용했던 동작을 더 안전한 쪽(원본 보존)으로 바꾼 것이다.
+  - 실제 703페이지 결과는 바뀌지 않음(순서 불일치가 원래 0이었음). 변환 시간 5.6초 → 약 8초.
+- 각 테스트는 해당 수정을 되돌리면 실패함을 확인했다.
+
+### 검증
+- `npm test` 804 passed, `npm run test:browser` 180 passed, lint·typecheck 오류 없음. 기존 스냅샷 변화 없음.
+- 703페이지: success 314 / partial 374 / failed 15.

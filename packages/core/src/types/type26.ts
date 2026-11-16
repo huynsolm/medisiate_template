@@ -131,11 +131,16 @@ export const type26: TypeDefinition<Type26Data> = {
     // 너비는 style(width: 20%) 또는 width 속성(width="20%")에서 읽는다. 실제 페이지에는 width:* · width:% 같은 오타가 있는데,
     // 브라우저는 잘못된 값을 무시하므로(= 너비 지정 없음) auto로 옮긴다. 그대로 담으면 스키마가 섹션 전체를 거부했다.
     // 브라우저 순서: 유효한 style 너비 → (없거나 무효면) 유효한 width 속성 → 너비 없음(auto). (검수 I-2: 무효한 style이 유효한 속성을 가리던 문제)
-    const validWidth = (raw: string | undefined) => {
+    // CSS 값은 단위가 있어야 길이다(표준 모드: width:20은 무효, 0만 예외). HTML width 속성만 숫자를 px로 본다 (재검수 R-I-1).
+    const cssWidth = (raw: string | undefined) => {
+      const v = (raw ?? '').trim();
+      return CSS_LENGTH.test(v) ? v : undefined;
+    };
+    const attrWidth = (raw: string | undefined) => {
       const v = (raw ?? '').trim();
       return CSS_LENGTH.test(v) ? v : /^\d+(\.\d+)?$/u.test(v) ? `${v}px` : undefined;
     };
-    const colWidths = cols.map((col) => ({ width: validWidth(WIDTH.exec(attr(col, 'style') ?? '')?.[1]) ?? validWidth(attr(col, 'width')) ?? 'auto' }));
+    const colWidths = cols.map((col) => ({ width: cssWidth(WIDTH.exec(attr(col, 'style') ?? '')?.[1]) ?? attrWidth(attr(col, 'width')) ?? 'auto' }));
     // 열 너비는 데이터로 옮기므로, width만 있는 col style은 "버린 style" 경고에서 뺀다.
     const diagnostics = scan.diagnostics.filter((d) => !(d.code === 'INLINE_STYLE_DROPPED' && d.detail?.tag === 'col'
       && (d.detail.declarations as string[]).every((decl) => WIDTH.test(decl))));

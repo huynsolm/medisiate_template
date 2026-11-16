@@ -70,3 +70,10 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
   - **링크** (모든 타입 공통, `docs/real-pages-baseline.md` 6장): 서식 글 안 `<a href>`와 이미지를 감싼 링크를 안전한 주소만 보존(`safeHref`), 위험한 주소는 `UNSAFE_LINK_REMOVED` 경고. 우회 가능한 주소 형태가 있는지 봐 주세요.
 - 기대 수치: `npm test` 799 passed, `npm run test:browser` 180 passed, 703페이지 success 314 / partial 374 / failed 15.
 - 결과는 `docs/review-real-pages.md`를 갱신해 같은 브랜치에 커밋·푸시해 주세요.
+
+## 8. 2차 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(R-I-1, R-I-2). 범위: `f2e48e4..` 이후.
+- R-I-2는 type29만 고치지 않고 **변환 중 섹션별 글 순서 검사**(모든 타입)로 막았다. 이 검사가 정상 원본을 잘못 fallback시키는 경우(서식·공백·생성 글 차이 등)와, 순서가 바뀌었는데도 통과하는 경우가 있는지 봐 주세요.
+- type15 "문단이 글머리 앞" 입력은 이제 fallback이다(3단계 순서 정규화 합의를 더 안전한 쪽으로 변경).
+- 기대 수치: `npm test` 804 passed, `npm run test:browser` 180 passed, 703페이지 success 314 / partial 374 / failed 15.

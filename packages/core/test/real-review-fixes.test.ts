@@ -71,3 +71,42 @@ describe('type01 with an eyebrow + title header keeps the header before the imag
     expect(html.indexOf('회전근개 파열의')).toBeLessThan(html.indexOf('어떤 증상이 있나요?'));
   });
 });
+
+// ---- 재검수(f497c31) 지적 ----
+
+describe('R-I-1 a unitless CSS width is invalid; the HTML width attribute applies', () => {
+  it('col width="80%" style="width:20" keeps 80%', () => {
+    const result = convert(table('<table class="cms-table"><colgroup><col width="80%" style="width:20"><col></colgroup><tbody><tr><td>FIRST</td><td>SECOND</td></tr></tbody></table>'));
+    expect((result.page.sections[0]!.data as { colWidths: Array<{ width: string }> }).colWidths[0]!.width).toBe('80%');
+  });
+
+  it('a unitless HTML width attribute still means px', () => {
+    const result = convert(table('<table class="cms-table"><colgroup><col width="120"></colgroup><tbody><tr><td>A</td></tr></tbody></table>'));
+    expect((result.page.sections[0]!.data as { colWidths: Array<{ width: string }> }).colWidths[0]!.width).toBe('120px');
+  });
+});
+
+describe('R-I-2 a section whose text order would change is preserved (runtime order check, all types)', () => {
+  it('type29: paragraph after the button stays after it, or the section falls back', () => {
+    const result = convert('<section class="cms type29"><div class="cms-inner"><div class="cms-description-box"><p class="cms-description">FIRST</p><p class="cms-button-wrap"><a class="cms-square-button" href="/go">BUTTON</a></p><p class="cms-description">LAST</p></div></div></section>');
+    const html = result.html.replace(/<!--[\s\S]*?-->/gu, '');
+    if (result.page.sections[0]!.type !== 'fallback') {
+      expect(html.indexOf('FIRST')).toBeLessThan(html.indexOf('BUTTON'));
+      expect(html.indexOf('BUTTON')).toBeLessThan(html.indexOf('LAST'));
+    } else {
+      expect(result.page.diagnostics.some((d) => d.code === 'LOSSY_PARSE' && /순서/u.test(d.message))).toBe(true);
+    }
+  });
+
+  it('type15: a paragraph placed before the bullets is no longer silently moved after them', () => {
+    const body = '<section class="cms type15"><div class="cms-inner"><ul class="cms-column-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-title">CARD</p><p class="cms-description">EXTRA_PARA</p><ul class="cms-bullet-list"><li class="cms-list-item"><p class="cms-description">BULLET</p></li></ul></div></li></ul></div></section>';
+    const result = convert(body);
+    expect(result.page.sections[0]!.type).toBe('fallback');
+    expect(result.page.diagnostics.some((d) => d.code === 'LOSSY_PARSE' && /순서/u.test(d.message))).toBe(true);
+  });
+
+  it('a normal section is not affected', () => {
+    const result = convert('<section class="cms type29"><div class="cms-inner"><div class="cms-description-box"><p class="cms-description">FIRST</p><p class="cms-button-wrap"><a class="cms-square-button" href="/go">BUTTON</a></p></div></div></section>');
+    expect(result.page.sections[0]!.type).toBe('type29');
+  });
+});
