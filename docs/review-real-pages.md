@@ -1,3 +1,157 @@
+# 실제 원본·703페이지 8차 재검수 — 4014df5
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `4014df5`, 범위: `5f2b966..4014df5`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장 및 `docs/review-request-real-pages.md` 15장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 복사본을 준비했다. cms/는 gitignore 대상으로 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았고 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 지난 보고서의 원래 입력들은 해결됐다. 다만 세 대표 폭 사이의 표시 변화 누락, 같은 breakpoint에서의 잘못된 클래스 우선순위, 인라인 서식 경계를 이용한 역할 역전 누락을 추가 입력으로 재현했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 3 | I-1 sm/xl 표시 구간 누락, I-2 같은 breakpoint의 클래스 우선순위 오탐, I-3 인라인 서식 경계로 역할 역전 통과 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+세 항목은 **추가 최소 입력**이다. 실제 703페이지에서 같은 결함이 발생했다고 주장하지 않는다. 알려진 원본 992px / 호스트 1024px 경계 차이는 지적하지 않았다. I-1은 그 구간 밖인 600px·1300px에서 확인했다.
+
+## 이전 입력 수정 확인 — 직접 실행
+
+| 이전 입력 | 현재 결과 |
+|---|---|
+| type23 이미지 d-lg-block 단독 | success·무경고·fallback 0, only 없음. 360/600/800/1100/1300px에서 원본·출력 모두 표시 |
+| type23 이미지 d-none d-lg-inline-block | success·무경고·fallback 0, only=pc. 360/600/800px 숨김, 1100/1300px 표시 |
+| type23 이미지 d-none d-md-block d-lg-none | LOSSY_PARSE·fallback 1. 태블릿 전용을 무경고로 다른 폭에 표시하지 않음 |
+| type10 두 본문 검사·검사 다음 서식 없는 제목 검사검사 | LOSSY_PARSE·fallback 1. 구분 없는 제목에 두 본문을 대응시키던 원래 입력 해결 |
+| 이전 독립 이미지 역전 / 서로 다른 링크 PC·MO 대안 | 전자는 fallback, 후자는 success·무경고·fallback 0 유지 |
+
+번호 목록, type01 원본 제목 위치, 이전 링크 비교 표시 충돌 등의 기존 검사는 전체 테스트에 포함되어 통과했다. 아래 재현 입력과 해당 원래 입력을 구분한다.
+
+## 브라우저 비교 조건
+
+직접 실행한 Chromium 비교에는 원본 `reference/cms-original/css/cms.css`와 [Bootstrap 4.6.2 배포 CSS](https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css)를 함께 적용했다. 출력에는 `reference/host-style.css`를 적용했다. 원본 header도 Bootstrap CSS를 참조하지만 저장소에는 해당 실사이트 파일의 버전 확정 자료가 없으므로, **실사이트 전체 CSS를 확보한 비교가 아닌 Bootstrap 규칙의 명시적 대조 환경**이다. 다운로드한 CSS·실행 스크립트는 /tmp에만 두었다.
+
+외부 이미지 응답은 동일한 로컬 100×80 SVG로 대체했다. 폭은 360·600·800·1100·1300px이며 DOM의 실제 표시 여부·display·글 요소 위치를 측정했다. fallback인 출력은 정상 출력인 것처럼 비교하지 않았다.
+
+## Important
+
+### I-1. 대표 폭 0·800·1100만 검사해 sm/xl 구간의 실제 표시 변경을 누락
+
+**위치:** `packages/core/src/parse/common.ts:75`~`:77`, `:90`~`:94`; 이 결과로 only를 정하는 pairImages와 같은 판정을 쓰는 segments 경로.
+
+**재현 입력 — 직접 실행:** 아래 전체 입력을 convertDocument에 전달했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner"><div class="cms-visual">
+    <img src="https://example.com/image.png" alt="" class="d-block d-xl-none">
+  </div></div></section>
+</div>
+```
+
+이미지 class만 `d-block d-sm-none d-md-block`으로 바꾼 입력도 실행했다.
+
+**실제:** 두 입력 모두 success, diagnostics `[]`, fallback 0, only 없음. 출력에는 원본의 표시 구간이 남지 않고 이미지가 모든 폭에 표시된다.
+
+| 입력 class | Chromium 확인 폭 | 원본 | 출력 |
+|---|---:|---|---|
+| d-block d-xl-none | 1300px | display:none | 표시 |
+| d-block d-sm-none d-md-block | 600px | display:none | 표시 |
+
+원본은 첫 입력에서 1200px 이상, 두 번째 입력에서 576~767px만 숨긴다. 이 구간은 새 모바일/태블릿/PC 세 분류 안에 실제로 존재하지만, 각 분류의 대표 폭에서는 모두 보이는 것으로 나온다.
+
+**기대:** 지원하는 breakpoint의 표시 변화가 출력 모델로 표현되지 않으면 적어도 그 변화를 검출해 원본을 보존해야 한다. 대표 폭 밖에서 원본이 숨긴 이미지가 나타나는데 무경고 success가 되어서는 안 된다.
+
+**원인 — 정적 판독:** BREAKPOINT에는 sm=576, xl=1200이 있지만 ownVisibility는 mo=0, tablet=800, pc=1100에서만 규칙을 평가한다. sm의 중간 숨김과 xl 이후 숨김이 결과 세 값에 들어가지 않는다. only와 순서 검사 모두 같은 축약 결과를 쓰므로 두 경로가 동시에 손실을 놓친다. 세 화면 비교를 도입한 것만으로 그 화면 범위 안의 모든 Bootstrap 표시 상태가 검증되는 것은 아니다.
+
+### I-2. 같은 breakpoint의 표시 우선순위를 CSS 선언 순서 대신 HTML 클래스 나열 순서로 결정해 정상 입력을 fallback
+
+**위치:** `packages/core/src/parse/common.ts:86`~`:92`.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner"><div class="cms-visual">
+    <img src="https://example.com/image.png" alt="" class="d-block d-none">
+  </div></div></section>
+</div>
+```
+
+대조 입력은 class 토큰 순서만 바꾼 `d-none d-block`이다. 별도로 `d-none d-lg-block d-lg-none`와 `d-none d-lg-none d-lg-block`도 대조했다.
+
+**실제 — 직접 실행:**
+
+| 원본 class | 변환 결과 |
+|---|---|
+| d-block d-none | failed·LOSSY_PARSE·fallback 1 |
+| d-none d-block | success·무경고·fallback 0 |
+| d-none d-lg-block d-lg-none | failed·LOSSY_PARSE·fallback 1 |
+| d-none d-lg-none d-lg-block | success·무경고·fallback 0 |
+
+fallback 사유는 원본에 없는 이미지가 출력에 있다는 것이다. Chromium의 Bootstrap 4.6.2 원본은 첫 입력이 전 폭에서 block, 세 번째 입력이 1100/1300px에서 block이다. Bootstrap CSS에서 같은 specificity의 block 규칙이 none 규칙보다 나중에 선언되므로, HTML class 토큰을 나열한 순서와 무관하게 같은 결과여야 한다.
+
+**기대:** CSS 표시 결과가 같은 두 입력은 같은 표시 판정·변환 결과가 되어야 한다. 클래스 순서만으로 정상 원본이 손실 위험 입력으로 바뀌어서는 안 된다. 상충하는 표시 이름이 있더라도 HTML이 무효인 것은 아니며 CSS가 승자를 결정한다.
+
+**원인 — 정적 판독:** classes.map으로 HTML 토큰 순서를 유지한 뒤 at 값으로만 정렬하고 마지막 규칙을 선택한다. breakpoint가 같은 규칙 사이에는 CSS 선언 순위가 없어서, 입력 문자열 뒤쪽 토큰이 승자가 된다. 이는 I-1의 대표 폭 누락과 별개의 우선순위 계산 문제다.
+
+### I-3. 줄을 나누지 않는 em 서식 경계 하나로 제목·본문 역전이 다시 통과
+
+**위치:** `packages/core/src/convert/convert-document.ts:247`~`:251` (모든 인라인 요소 경계를 soft 자리로 기록), `:292`~`:296` (그 자리에서 원본 덩어리 합침 허용); 실제 재배치는 `packages/core/src/types/type10.ts:85`~`:87`.
+
+**재현 입력 — 직접 실행:** 지난 입력의 제목 두 번째 단어에 em만 추가했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type10"><div class="cms-inner">
+    <ol class="cms-figure-list"><li class="cms-list-item">
+      <div class="cms-description-box">
+        <p class="cms-description">검사</p>
+        <p class="cms-description">검사</p>
+      </div>
+      <div class="cms-figure-text"><p class="cms-title">검사<em>검사</em></p></div>
+    </li></ol>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics `[]`, fallback 0. 원본 `본문 검사 → 본문 검사 → 제목 검사검사`가 출력 `strong.mig-title 검사<em>검사</em> → p.mig-desc 검사<br>검사`로 바뀐다. em을 제거한 원래 입력은 이번 수정대로 fallback 1이다.
+
+**Chromium — 직접 실행:** 1100px에서 원본 본문 둘 y=50/98 다음 제목 y=128, 출력은 제목 y=65 다음 본문 y=123이다. 360/600/800/1300px에서도 같은 역할 역전이다. em은 글자 서식만 바꾸며 제목을 두 줄이나 두 문단으로 나누지 않는다. 출력 본문은 실제 br로 두 줄이다.
+
+**기대:** 정상 머리글 span+strong 합침이나 본문 br 합침을 허용하더라도, 제목 안 임의 서식 경계가 본문 두 문단을 제목과 대응시키는 근거가 되어서는 안 된다. 역할·출처를 보존해 비교하거나 이처럼 모호한 대응은 원본을 보존해야 한다.
+
+**원인 — 정적 판독:** 제목의 em 시작 위치가 글자 오프셋 2의 soft가 된다. matcher는 원본 본문 `[검사, 검사]`를 이 경계에서 합쳐 출력 제목과 대응시키고, 남은 원본 제목을 출력 본문과 대응시킨다. 글자·링크 값은 같아 통과한다. **구분 자리에 한정한다는 새 규칙 자체는 충족하지만**, 시각적 줄 구분이나 글 역할을 보장하지 않는 인라인 서식 경계까지 같은 근거로 사용해 실제 역전을 놓친다. 원래 입력은 해결됐으나 의미 있는 분리와 단순 서식의 차이가 남는다.
+
+## 실제 페이지·기존 입력 대조 — 직접 실행
+
+- 703개 파일을 5f2b966과 현재 코드 양쪽으로 변환해 파일 상태와 섹션 type/fallback을 대조했다. 변화 0개. success 320 / partial 368 / failed 15 유지.
+- 순서 사유 fallback 9개 고정 목록 검사도 통과했다. 새 정상 원본이 이 703페이지에서 추가로 fallback된 사례는 없다.
+- 기존 28타입 × 4변형(공백·이미지 없음·인라인 서식·문단 블록) 총 112개 입력은 모두 fallback 0이며 이전 출력 HTML과 byte 단위로 같다.
+- type01 원본 제목 위치 복원과 과거 검사 예외 제거는 유지된다. 이번 변경 범위에 type01 renderer 변경은 없고 관련 기존 테스트가 통과했다.
+- 사이트 전용 이름은 보유 CSS에서 실제 표시 규칙을 확인할 수 있는 범위를 넘어서 전부 검증했다고 주장하지 않는다. 위 판정은 버전을 명시해 직접 대조한 Bootstrap 클래스와 구분 자리 입력에 근거한다.
+
+## 실행 결과
+
+다음 명령을 4014df5에서 직접 실행했고 모두 종료 코드 0이었다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 33 files / 876 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 4 files / 192 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 703 / success 320 / partial 368 / failed 15 |
+| 추가 최소 입력·Chromium 검사 | 위 재현·정상 대조, 360/600/800/1100/1300px |
+
+자동 테스트 통과와 위 세 검수 지적을 구분한다. 아래는 이전 원문 보관이며 현재 판정 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — 0efc580 및 그 이전 기록</summary>
+
 # 실제 원본·703페이지 7차 재검수 — 0efc580
 
 - 검수일: 2026-11-17 (KST).
@@ -1058,6 +1212,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
