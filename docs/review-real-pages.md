@@ -1,3 +1,137 @@
+# 실제 원본·703페이지 7차 재검수 — 0efc580
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `0efc580`, 범위: `5e1d49b..0efc580`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 두 장 및 `docs/review-request-real-pages.md` 14장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 복사본을 준비했다. cms/는 gitignore 대상으로 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았고 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 재현 입력들은 해결됐으며 type01도 사용자 결정대로 실제 제목 위치가 복원됐다. 다만 표시 클래스의 의미를 잘못 해석해 이미지를 숨기는 회귀와, 연속 덩어리 합침이 제목/본문 역전을 허용하는 회귀를 직접 재현했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 2 | I-1 표시 클래스 판정과 only의 잘못된 숨김/노출, I-2 역할을 구분하지 않는 덩어리 합침의 순서 변경 누락 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+두 지적은 **추가 최소 입력**이다. 실제 703페이지에서 같은 결함이 새로 발생했다고 주장하지 않는다. type01의 과거 배치 예외는 이제 적용하지 않고 원본 순서 복원 여부를 검사했다.
+
+## 이전 입력 재확인 — 직접 실행
+
+| 입력 | 현재 결과 |
+|---|---|
+| type10 `본문 검사<br>검사 → 제목 검사` | LOSSY_PARSE·fallback 1. 앞선 줄바꿈 우회 입력 해결 |
+| type16 `독립 아이콘 목록 → 큰 이미지` | PC 순서 불일치로 LOSSY_PARSE·fallback 1. 연속 이미지 정렬로 역전을 지우던 문제 해결 |
+| MO 먼저인 type23 쌍, 각각 /mobile·/desktop 링크 | success·무경고·fallback 0, 각 이미지의 링크 보존. 서로 다른 링크 때문에 거부하던 오탐 해결 |
+| 기존 type33 `ol start="3"` | success·fallback 0, ordered=true/start=3 유지 |
+| 이전 type29 비교 표시 충돌 / type28 이미지·강조 글 역전 | 계속 LOSSY_PARSE·fallback으로 보존 |
+
+## Important
+
+### I-1. d-lg-block 단독을 PC 전용으로 오판해 원래 보이던 모바일 이미지를 숨기고, 같은 판정으로 검사도 통과
+
+**위치:** `packages/core/src/parse/common.ts:69`~`:77` 및 `:119`~`:121`; `packages/core/src/helpers/image.ts:44`~`:48`; 검사도 같은 판정을 쓰는 곳은 `packages/core/src/convert/convert-document.ts:229`~`:230`이다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner"><div class="cms-visual">
+    <img src="https://example.com/image.png" alt="" class="d-lg-block">
+  </div></div></section>
+</div>
+```
+
+**실제:** success, diagnostics `[]`, fallback 0. 모델 image.only가 pc가 되고 출력 이미지가 common-display-pc 안에 들어간다. 5e1d49b의 같은 입력은 success·무경고이며 only가 없어서 모든 화면에 표시한다. 현재 변경으로 모바일 이미지가 사라진 **새 회귀**다.
+
+**Chromium — 직접 실행:** 원본 cms.css에 Bootstrap 표시 클래스의 표준 규칙을 보충하고, 출력에는 host-style.css를 적용했다. 이미지 응답은 동일한 로컬 100×80 SVG로 대체했다.
+
+| 입력 이미지의 class | 모델 only | 1100px 원본 → 출력 | 800px 원본 → 출력 | 360px 원본 → 출력 |
+|---|---|---|---|---|
+| d-lg-block | pc | 표시 → 표시 | 표시 → 숨김 | 표시 → 숨김 |
+| d-none d-lg-inline-block | 없음 | 표시 → 표시 | 숨김 → 표시 | 숨김 → 표시 |
+| d-none d-md-block d-lg-none | pc | 숨김 → 표시 | 표시 → 숨김 | 숨김 → 숨김 |
+
+세 입력 모두 success·무경고·fallback 0이다. 두 번째 행은 지원되지 않는 표시 클래스 조합의 기존 노출 문제를 새 화면별 검사도 놓치는 사례이고, 첫 번째 행이 이번 only 도입으로 확인한 명확한 신규 손실이다. 세 번째 행은 여러 breakpoint 클래스의 우선순위를 반영하지 못한다. 원본에 보충한 규칙은 d-none/d-block, 768px 이상 d-md-block, 992px 이상 d-lg-block/d-lg-none/d-lg-inline-block이다. 실제 운영 사이트 전체 CSS를 확보한 비교로 주장하지 않는다.
+
+**기대:** d-lg-block은 큰 화면에서 display:block을 지정할 뿐, 작은 화면을 숨기는 규칙이 아니다. d-none 등과의 조합으로 실제 표시 범위를 판단해야 한다. 표현 가능한 PC/MO 전용은 보존하고, 중간 폭 전용처럼 only 두 값으로 표현할 수 없는 조합은 무경고로 다른 화면에 표시하지 말고 fallback 등으로 보존해야 한다.
+
+**원인 — 정적 판독:** ownDevice는 PC_MARK 중 하나라도 있으면 무조건 pc를 반환한다. 기본 display, breakpoint별 덮어쓰기, block 이외 표시 값을 반영하지 않는다. pairImages가 이를 only로 기록하고, 순서 검사도 동일 함수로 원본 모바일 이미지를 제외한다. 따라서 출력과 비교 기준 양쪽에서 같은 오판이 발생해 손실을 검출하지 못한다. 파일명 추정과 표시 근거를 나눈 것은 맞지만, 표시 클래스 자체의 의미를 조합해 해석하는 단계가 부족하다.
+
+**정상 대조 — 직접 실행:** d-none d-lg-block은 only=pc, d-block d-lg-none은 only=mo로 기록되고 1100/360px에서 원본·출력 표시가 맞는다. 표시 클래스 없이 image_m.png인 입력은 mo 칸에 배정되지만 only는 없으며 두 화면에 모두 표시된다. 파일명만으로 숨기지 않는 방어는 작동한다.
+
+### I-2. 출력 제목이 앞선 두 본문 덩어리를 합친 글과 같으면 실제 역할 역전이 새 비교를 통과
+
+**위치:** `packages/core/src/convert/convert-document.ts:189`~`:190` (역할 없는 Segment), `:273`~`:281` (연속 글 합침); 실제 재배치는 `packages/core/src/types/type10.ts:64`~`:68`, `:85`~`:87`이다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type10"><div class="cms-inner">
+    <ol class="cms-figure-list"><li class="cms-list-item">
+      <div class="cms-description-box">
+        <p class="cms-description">검사</p>
+        <p class="cms-description">검사</p>
+      </div>
+      <div class="cms-figure-text"><p class="cms-title">검사검사</p></div>
+    </li></ol>
+  </div></section>
+</div>
+```
+
+**실제:** 5e1d49b에서는 새 경계 불일치로 LOSSY_PARSE·fallback 1이었다. 현재는 success, diagnostics `[]`, fallback 0이다. 원본 `본문 검사 → 본문 검사 → 제목 검사검사`가 출력 `strong.mig-title 검사검사 → p.mig-desc 검사<br>검사`로 바뀐다. 제목과 본문의 역할 및 눈에 보이는 줄 순서가 뒤집힌다.
+
+**Chromium — 직접 실행:** 원본 cms.css / 출력 host-style.css 적용. 1100px 원본은 두 본문 y=74/122 다음 제목 y=168, 출력은 제목 y=65 다음 본문 y=123이다. 360px에서도 원본 두 본문 y=64/91.5 다음 제목 y=127, 출력 제목 y=60.94 다음 본문 y=116.16으로 같은 역전이다. 원본의 본문 두 줄과 한 줄 제목이 앞뒤를 바꾸는 실제 출력 차이를 확인했다.
+
+**기대:** 원본의 본문 둘을 출력 본문 하나로 합치는 것은 허용하더라도, 그 본문 둘을 제목과 대응시키고 뒤의 제목을 본문과 대응시켜 실제 역전을 정상으로 판정하면 안 된다. 역할을 보존해 비교하거나 모호한 대응은 원본을 보존해야 한다.
+
+**원인 — 정적 판독:** 원본 글 덩어리는 `[검사, 검사, 검사검사]`, 출력은 `[검사검사, 검사검사]`다. matcher는 첫 출력 제목을 앞의 두 원본 본문과 매칭하고, 두 번째 출력 본문을 원본 제목과 매칭하여 전부 소비한다. **새 연속 합침 규칙 자체는 충족하지만**, 역할 정보가 없어 잘못된 대응을 구분하지 못한다. 출력 본문의 br도 덩어리를 나누지 않으므로 실제 줄 배치 차이가 비교에 남지 않는다. 이전의 줄바꿈 입력 한 개는 해결됐으나 덩어리 합침으로 다른 역할의 재배치를 가리는 경우가 남았다. type01과 무관하다.
+
+## type01 원본 순서 복원 — 직접 실행과 정적 판독 구분
+
+**직접 실행:**
+
+| 원본 형태 | 현재 출력·결과 |
+|---|---|
+| 제목 TITLE → 이미지 → 설명 BODY, 기존 머리글 없음 | success·fallback 0. 제목은 header.mig-header로, 이미지 위에 표시 |
+| 작은 글 EYEBROW + 머리글 HEADING이 있고 TITLE → 이미지 | success·fallback 0. 기존 머리글 유지, TITLE은 이미지 바로 위 별도 mig-text-wrap |
+| 이미지 → 제목 TITLE → 설명 BODY | success·fallback 0, titleAfterImage=true. 제목은 이미지 뒤 유지 |
+| 이미지 없음, TITLE → BODY | success·fallback 0. 기존 글 묶음 안 제목/설명 유지 |
+| TITLE → 설명 BEFORE → 이미지 | 계속 LOSSY_PARSE·fallback 1. 별도의 설명 이동은 허용하지 않음 |
+
+Chromium 1100/360px에서 머리글 없는 첫 입력의 제목 y는 각각 40/36, 이미지 y는 125.80/97.67로 제목이 실제 이미지 위다. 이미지 선행 입력은 두 폭 모두 이미지가 제목보다 앞이다. 머리글 있음·이미지 없음 두 입력은 변환 HTML 구조로 확인했다.
+
+**정적 판독:** type01 render가 ctx.orderCheck를 쓰지 않고 실제 출력 자체를 바꾼다. hasImage, titleAfterImage, 기존 heading/eyebrow 유무로 배치한다. 순서 검사에는 type01 전용 우회가 없다. 과거의 617개 배치 예외를 현재 승인 근거로 쓰지 않았다.
+
+## 실제 페이지·기존 출력 대조 — 직접 실행
+
+- 703개 파일을 5e1d49b와 현재 코드로 각각 변환해 파일 상태 및 섹션 type/fallback을 대조했다. 변화 0개. success 320 / partial 368 / failed 15 유지.
+- 순서 사유 fallback 9개(type01 8, type10 1) 고정 목록 테스트도 통과했다. I-1·I-2는 이 표본 밖의 최소 입력에서 찾은 사례다.
+- output/data의 only는 기록대로 세 이미지이며 모두 type24의 pc다: `06/caries.html#3`, `03/painTreatment.html#4`, `13259/03_통증치료.html#4` (cms/contents 기준).
+- 기존 29타입 × 4모드 총 116개 입력 중 HTML 차이는 type01 네 모드뿐이다. 나머지 112개는 byte 단위로 같다. type01의 차이는 이번 사용자 결정에 따른 제목 위치 변경과 구분해 검토했다.
+- 기존 28타입 × 4변형(공백·이미지 없음·인라인 서식·문단 블록) 총 112개 입력은 fallback 0이고 이전 HTML과 같다. 이번 추가 검사에서 위 두 항목 외의 정상 입력 오탐은 확정하지 않았다.
+
+## 실행 결과
+
+아래 명령을 0efc580에서 직접 실행했고 모두 종료 코드 0이었다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 33 files / 870 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 4 files / 192 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 703 / success 320 / partial 368 / failed 15 |
+| 추가 최소 입력·Chromium 검사 | 표시 조합 1100/800/360px, 역할 역전, type01 배치·대조 입력 확인 |
+
+자동 테스트 통과와 위 두 검수 지적은 구분한다. 아래는 이전 원문 보관이며 현재 판정 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — 37773d8 및 그 이전 기록</summary>
+
 # 실제 원본·703페이지 6차 재검수 — 37773d8
 
 - 검수일: 2026-11-16 (KST).
@@ -924,6 +1058,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
