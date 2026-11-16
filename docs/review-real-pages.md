@@ -1,3 +1,142 @@
+# 실제 원본·703페이지 2차 재검수 — b5ae00b
+
+- 검수일: 2026-11-16 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `b5ae00b5b02ac8d3466366375773bd98ddbf83e3`.
+- 범위: `f2e48e4..b5ae00b`. 기준: 반영 기록 마지막 장 및 검수 요청서 8장.
+- reference/cms-original의 로컬 cms/ 복사본을 사용했다. cms/는 gitignore이며 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않고 이 문서만 갱신했다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 입력과 type15 정책 변경은 반영됐다. 다만 새 순서 검사에서 작성된 숫자를 생성 순번으로 오인하는 오탐과, 같은 글을 가진 버튼/문단의 위치 변경을 통과시키는 잔여 사례를 확인했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 2 | I-1 작성된 숫자까지 비교에서 제거, I-2 동일 글 버튼/문단의 구조적 순서 변경 통과 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+두 건은 추가 최소 입력이며 실제 703페이지에서 같은 문제가 발생했다고 주장하지 않는다. 기본 원본과 일반 변형의 대조 결과는 아래에 별도로 적었다.
+
+## 이전 지적·정책 변경 확인 — 직접 실행
+
+| 이전 입력 | 현재 실제 결과 | 판정 |
+|---|---|---|
+| type26 width=80%, style=width:20 | success, 첫 열 80% 보존 | 이전 R-I-1 수정 확인 |
+| type29 FIRST→BUTTON→LAST | LOSSY_PARSE, 섹션 fallback 1, 원본 순서 보존 | 이전 원문 R-I-2 수정 확인 |
+| type15 CARD→EXTRA_PARA 문단→BULLET | LOSSY_PARSE, 섹션 fallback 1 | 사용자 지정 새 정책과 일치 |
+
+type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예전의 목록→문단 정규화 허용을 이번에는 적용하지 않고, 명시된 fallback 정책으로 판단했다.
+
+## Important
+
+### I-1. type24의 원본 숫자 span까지 생성 순번으로 지워 정상 입력을 fallback함
+
+**위치:** `packages/core/src/convert/convert-document.ts:199`. type24 출력 전체에서 특정 span 문자열을 일괄 제거한다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type24"><div class="cms-inner">
+    <ol class="cms-ordered-list">
+      <li class="cms-list-item"><div class="cms-description-box">
+        <p class="cms-title">YEAR</p>
+        <p class="cms-description"><span class="mig-num">2026</span> BODY</p>
+      </div></li>
+    </ol>
+  </div></section>
+</div>
+```
+
+이 span은 작성된 본문 서식 요소이며, 항목 밖에서 렌더러가 생성하는 순번이 아니다. 원본 도구의 기본 fixture가 이 클래스를 생성한다는 주장은 아니고, 허용되는 class/span 서식을 가진 추가 입력이다.
+
+**이전 실제 결과:** f2e48e4는 success, 경고 없음, fallback 0. Chromium 출력은 자동 순번 1 외에 원래 YEAR·2026 BODY를 그대로 표시했다.
+
+**현재 실제 결과:** status failed, LOSSY_PARSE, fallback 1. 사유는 `원본과 글 순서가 다름: …YEAR2026BODY`이다. 비교 직전 정상 renderer는 2026을 포함하지만, 비교용 출력에서 본문 숫자 2026이 지워져 원본과 다르다고 오판한다.
+
+**대조 — 직접 실행:** span의 클래스만 제거하거나 cms-num으로 바꾸면 현재도 success다. 글·요소 순서가 동일해도 정확히 class=mig-num인 숫자 span에서만 fallback된다. 실제 Chromium에서도 원본은 YEAR / 2026 BODY, 현재 출력은 미지원 fallback이다.
+
+**기대:** 합의된 생성 순번만 비교에서 제외하고, 원본에서 읽은 숫자는 비교에 남겨야 한다. 원래 글 순서가 보존되는 이 입력을 거부해서는 안 된다.
+
+**원인 — 정적 판독:** 정규식은 생성 순번의 위치·출처를 확인하지 않고 `<span class="mig-num">숫자</span>`과 일치하는 모든 출력 노드를 지운다. rich allowlist는 본문의 같은 class를 허용하므로 충돌할 수 있다. 이 문제는 원본 글이 최종 renderer에서 빠진 것이 아니라, 비교 자료를 잘못 만들면서 생긴 오탐이다.
+
+### I-2. 버튼과 뒤 문단의 글이 같으면 위치가 바뀌어도 순서 검사를 통과함
+
+**위치:** `packages/core/src/convert/convert-document.ts:189`, `:200`~`:202`; 순서를 바꾸는 경로는 `packages/core/src/types/type29.ts:55`~`:62`, `:68`~`:72`.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type29"><div class="cms-inner">
+    <div class="cms-description-box">
+      <p class="cms-description">FIRST</p>
+      <p class="cms-button-wrap"><a class="cms-square-button" href="/go">예약</a></p>
+      <p class="cms-description">예약</p>
+    </div>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics [], fallback 0. 파서는 계속 문단과 버튼을 별도 배열로 모으고 모든 문단 다음에 버튼을 출력한다. Chromium에서 본문 p의 실제 순서를 확인했다.
+
+| 순서 | 원본 | 출력 |
+|---|---|---|
+| 1 | FIRST 일반 글 | FIRST 일반 글 |
+| 2 | 예약, /go 링크 있음 | 예약, 링크 없음 |
+| 3 | 예약, 링크 없음 | 예약, /go 링크 있음 |
+
+문자열만 보면 양쪽 모두 FIRST예약예약이다. **글자열은 같지만 버튼과 문단의 구조적 순서는 달라지고, 클릭 가능한 예약의 위치가 바뀐다.** 이를 글자 누락이나 서로 다른 글자열의 변경으로 주장하는 것은 아니다. 이전 R-I-2의 문단/버튼 위치 문제를 같은 글이라는 이유로 계속 허용하는 경우다.
+
+**대조 — 직접 실행:** 마지막 문단 글만 다른문단으로 바꾸면 새 순서 검사가 fallback시킨다. 같은 글일 때만 기존 위치 변경이 무경고로 통과한다.
+
+**기대:** 지원하지 않는 문단/버튼 교차 배치는 원본의 역할·순서를 유지하거나 fallback으로 보존해야 한다. 같은 표시 글이라도 링크인 요소와 일반 글의 위치를 교환한 결과를 동일한 것으로 취급하면 안 된다.
+
+**원인 — 정적 판독:** squashText는 DOM 역할·링크 정보를 지우고 글자열만 비교한다. 따라서 같은 글을 가진 서로 다른 역할의 요소가 바뀌면 검사 결과가 같다. 타입별 순서 보존 없이 이 비교만으로 이전 문단/버튼 순서 문제 전체를 막을 수는 없다.
+
+## 정상 원본 및 일반 입력 오탐 대조 — 직접 실행
+
+이전 f2e48e4를 임시 디렉터리에 펼쳐 현재 코드와 대조했다. 저장소 코드는 바꾸지 않았다.
+
+| 입력군 | 결과 |
+|---|---|
+| 기본 fixture 기반 29개 타입(type01 포함) × 원본/무배경/이미지 배경/색 배경 116조합 | 출력 HTML 전부 동일 |
+| P2 이후 기본 fixture 28타입 × 공백/이미지 제거/인라인 서식/문단 변형 112조합 | 출력 HTML 전부 동일, 모두 fallback 0 |
+| 실제 703파일 이전/현재 비교 | 파일별 status 및 섹션별 변환 타입/fallback 여부 모두 동일 |
+
+일반 변형은 기존 검수와 같은 공백·탭 추가, img 제거, 첫 해당 글 strong/br/em 서식, 첫 p.cms-description을 div.cms-description > p+p로 바꾸는 방식이다. 해당 문단 요소가 없는 타입은 그 변형에서 원본을 비교했다. type33은 별도 fixtures/original 파일이 없어 이 fixture 조합에는 넣지 않았고, 실제 페이지 및 공식 검사 범위에 포함된다.
+
+따라서 기본 자료에서 새 오탐이 발생했다는 결과는 없지만, I-1의 본문 숫자 span 입력은 별도로 실패했다. 일반 서식·공백 변형 전부를 보증하는 판정은 아니다.
+
+## 실제 페이지 및 실행 결과
+
+| 직접 실행한 검사 | 결과 |
+|---|---|
+| npm test(PLAYWRIGHT_BROWSERS_PATH 임시 경로 사용) | 종료 0, **804 passed**, 건너뜀 0, 33파일 통과 |
+| npm run test:browser | 종료 0, **180 passed**, 4파일 통과 |
+| npm run lint | 종료 0 |
+| npm run typecheck | 종료 0 |
+| npm run convert -- --all | 종료 0, **success 314 / partial 374 / failed 15** |
+| 실제 파일 이전/현재 독립 비교 | 703파일의 status·섹션 타입/fallback 변화 0 |
+| 최소 재현·대조 | I-1·I-2 및 이전 원문·type15 확인 |
+| 실제 Chromium | I-1 오탐과 I-2의 링크 위치 변경, 이전 입력의 fallback 확인 |
+
+- 전체 테스트에 브라우저 검사가 포함되므로 804와 180을 합산하지 않는다.
+- 로컬 cms/는 reference/cms-original 복사본이며 gitignore임을 확인했다. 자료와 코드·테스트는 수정하지 않았다.
+- Linux, Node v24.22.1, Chromium 156.0.8078.79 사용. 저장소 런처는 바꾸지 않았다. Windows·외부 링크 접속 성공·전수 시각 등급 비교는 실행하지 않았다.
+- 이번 별도 브라우저 재현은 DOM 글·링크 역할 순서 검사이며, 웹 편집기 저장/가져오기 흐름은 다시 실행하지 않았다.
+- 임시 입력·스크립트·관측값은 /tmp/real3-review, 공식 검사 로그는 /tmp/real3-*.log에 있다. 핵심 입력과 실제 결과는 위에 기재했다.
+
+**최종 판정: 수정 후 재확인 필요.**
+
+## 이전 재검수 원문 보존
+
+아래는 f497c31의 과거 검수 원문(보고 커밋 f2e48e4)과 그 안의 이전 기록이다. 과거 원문 입력은 수정 확인됐으며, 현재 지적은 위 I-1·I-2다.
+
+<details>
+<summary>이전 재검수 원문 — f497c31</summary>
+
 # 실제 원본·703페이지 재검수 결과 — f497c31
 
 - 검수일: 2026-11-16 (KST).
@@ -291,5 +430,7 @@
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
