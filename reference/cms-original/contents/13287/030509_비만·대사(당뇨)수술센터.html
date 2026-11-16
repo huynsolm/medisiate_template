@@ -1,0 +1,364 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: { inlineMath: [['$$', '$$']], displayMath: [['$$$', '$$$']] }
+    });
+</script>
+<script src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<style>
+    .ProfileMemo > div.doc-cont-text.type02.content-none {display:none;}
+    .doc-cont-table {display:none;}
+    .doctor-container-area p {display:none;}
+    .text-brown {color:#b1926a}
+    .text-red {color:#ff3030}
+    .bottom-list {margin:80px 0 0 0;}
+    .cms-container .cms .cms-description-box.em-box.left-box {-webkit-box-flex:0;-ms-flex: 0 0 76.66666666666667%;flex:0 0 76.66666666666667%;max-width:76.66666666666667%;text-align:left;margin-right:0.8%;}
+    .cms-container .cms .cms-description-box.em-box.right-box {-webkit-box-flex:0;-ms-flex: 0 0 22.5%;flex:0 0 22.5%;max-width:22.5%;border:1px solid #aa8c7b;background:#fff;text-align:left;}
+    .cms-container .cms .cms-description-box.em-box.right-box.type1 {-webkit-box-flex:0;-ms-flex: 0 0 100%;flex:0 0 100%;max-width:100%;border:1px solid #aa8c7b;background:#fff;text-align:left;}
+    .cms-container .cms .cms-description-box.em-box.right-box a {color:#aa8c7b;font-weight:400;line-height:1.5;font-size:1.188rem;}
+    .cms-container .cms .cms-description-box.em-box.right-box .cms-description {position:relative}
+    .cms-container .cms .cms-description-box.em-box.right-box .cms-description:before {content:"";display:block;background:url(https://fxfile.drline.net/local/13287/cms/arrow_btn.png) no-repeat;width:52px;height:15px;position:absolute;right:0;top:50%;transform:translateY(-50%);}
+    .cms-container .cms .cms-figure-list.text-type-3 .cms-figure-text .cms-eyebrow {font-size:1.125rem;border:none} 
+    .cms-container .cms .cms-figure-list.text-type-3 .cms-figure-text .cms-description {font-size:3.25rem;}
+    .cms-container .cms .cms-figure-list.text-type-3 .cms-figure-text .cms-description span {font-size:1.875rem;font-weight:300;}
+    .cms-container .cms .cms-figure-list.item-between-plus>.cms-list-item.minus:before {display:none;}
+    .small-text {font-size:70%;}
+    .border-t-lr {border-top:3px dashed #aa8c7b}
+    .border-t-lr th {border-left:3px dashed #aa8c7b}
+    .border-t-lr td {border-right:3px dashed #aa8c7b !important}
+    .border-lr th {border-left:3px dashed #aa8c7b}
+    .border-lr td {border-right:3px dashed #aa8c7b !important}
+    .border-b-lr {border-bottom:3px dashed #aa8c7b}
+    .border-b-lr th {border-left:3px dashed #aa8c7b}
+    .border-b-lr td {border-right:3px dashed #aa8c7b !important}
+
+	.cms-container .cms .cms-table tbody th .text-fix{position:relative}
+	.cms-container .cms .cms-table tbody th .text-fix .small-text{position:Absolute;top:0;left:150%;width:100%;}
+
+
+    @media(max-width:991px){
+        .cms-container .cms .cms-description-box.em-box.left-box {-webkit-box-flex:0;-ms-flex: 0 0 100%;flex:0 0 100%;max-width:100%;text-align:center;margin-right:0;}
+        .cms-container .cms .cms-description-box.em-box.right-box {-webkit-box-flex:0;-ms-flex: 0 0 100%;flex:0 0 100%;max-width:100%;text-align:center;margin-top:10px}
+        .cms-container .cms .cms-description-box.em-box.right-box.type1 {-webkit-box-flex:0;-ms-flex: 0 0 100%;flex:0 0 100%;max-width:100%;text-align:center;margin-top:10px}
+        .cms-container .cms .cms-description-box.em-box.right-box.type1 a span {display:inline-block}
+        .cms-container .cms .cms-figure-list.text-type-3 .cms-figure-text .cms-eyebrow {font-size:1.063rem;} 
+        .cms-container .cms .cms-figure-list.text-type-3 .cms-figure-text .cms-description {font-size:2.125rem;}
+        .cms-container .cms .cms-figure-list.text-type-3 .cms-figure-text .cms-description span {font-size:1.875rem;font-weight:300;}
+        .cms-container .cms .cms-description-box.em-box.right-box .cms-description:before  {display:none;}
+        .cms-container .cms .cms-description-box.em-box.right-box a span {position:relative;padding-right:50px;}
+        .cms-container .cms .cms-description-box.em-box.right-box a span:before {content:"";display:block;width:40px;height:18px;background:url(https://fxfile.drline.net/local/13287/cms/arrow_btn_m.png) no-repeat;background-size:cover;position:absolute;right:0;top:50%;transform:translateY(-50%);}
+        .bottom-list {margin:5% 0 0 0;}
+    }
+    @media(max-width:479px){
+        .cms-container .cms .cms-description-box.em-box.right-box a {font-size:0.813rem}
+        .cms-container .cms .cms-figure-list.text-type-3 .cms-figure-text .cms-eyebrow {font-size:0.75rem;} 
+        .cms-container .cms .cms-figure-list.text-type-3 .cms-figure-text .cms-description {font-size:1.5rem;}
+        .cms-container .cms .cms-figure-list.text-type-3 .cms-figure-text .cms-description span {font-size:1rem;font-weight:300;}
+        .cms-container .cms .cms-description-box.em-box.right-box a span {position:relative;padding-right:30px;}
+        .cms-container .cms .cms-description-box.em-box.right-box a span:before {content:"";display:block;width:27px;height:12px;}
+    }
+</style>
+<div class="cms-container">
+    <!-- contents area [s] -->
+    <section class="cms type00">
+        <div class="cms-inner">
+            <div class="cms-header bottom-border">
+                <p class="cms-page-title">비만·대사(당뇨)수술센터</p>
+            </div>
+        </div>
+    </section>
+    <section class="cms type01">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header">
+                <p class="cms-thin-title">비만대사 수술은 최후의 수단이 아닌<br><em>최선의 선택</em>입니다.</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-visual">
+                <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0101.jpg" alt="" class="img-fluid d-none d-lg-block m-auto">
+                <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0101_m.jpg" alt="" class="w-100 d-block d-lg-none">
+            </div>
+            <div class="cms-description-box">
+                <p class="cms-description larger">비만대사 수술은 미용 목적이 아닌 삶의 질 개선과 생명 연장을 위한 수술입니다. 체중감량과 대사성질환을 함께 개선하며 약물치료보다 체중감량 및 <strong class="text-red">유지</strong>에 효과적입니다.</p>
+            </div>
+            <div class="cms-description-box em-box right-box type1">
+                <p class="cms-description"><a href="https://cafe.naver.com/ksobesity" target="_blank"><span>네이버카페 KS병원 비만당뇨수술센터</span></a></p>
+            </div>
+            <div class="cms-description-box em-box right-box type1">
+                <p class="cms-description"><a href="https://form.naver.com/response/3zMjtIHnKk0L7V8MIfa57Q" target="_blank"><span>온라인접수(설문)</span></a></p>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type25 doctor-list d-none"></section>
+    <section class="cms type18 pb-3">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">비만수술</p>
+                <p class="cms-title">보험적용 기준</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <!-- <div class="cms-list-wrap">
+                <ol class="cms-img-list text-type-3 row">
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0201.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0201_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-visual-text">
+                            <p class="cms-eyebrow">01</p>
+                            <p class="cms-description">체질량지수(BMI)가<br /><strong>35kg/𝑚^2 이상</strong>인 환자</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0202.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0202_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-visual-text">
+                            <p class="cms-eyebrow">02</p>
+                            <p class="cms-description">체질량지수(BMI)가 <strong>30kg/𝑚^2 이상</strong>이면서 당뇨, 고혈압 등 <strong>대사성질환이 동반</strong>되어 있는 환자</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0203.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0203_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-visual-text">
+                            <p class="cms-eyebrow">03</p>
+                            <p class="cms-description">체질량지수(BMI)가 <strong>27.5kg/𝑚^2 이상 30kg/𝑚^2 이하</strong>면서 <strong>제2형 당뇨환자</strong></p>
+                        </div>
+                    </li>
+                </ol>
+            </div> -->
+            <div class="row bottom-list">
+                <div class="cms-description-box em-box left-box">
+                    <p class="cms-description">나의 체질량지수(BMI)는?<br>Ex) 키 170cm에 체중이 90kg이라면? $$\frac{(체중(𝑘𝑔))}{(키(𝑚^2))} = \frac{90}{(1.7)^2}$$ = 31.14</p>
+                </div>
+                <div class="cms-description-box em-box right-box">
+                    <p class="cms-description"><a href="https://health.seoulmc.or.kr/healthCareInfo/myBMIPopup.do" target="_blank"><span>체질량지수(BMI)<br class="d-none d-lg-block">계산 바로가기</span></a></p>
+                </div>
+            </div>
+            <div class="mt-3 mt-lg-5">
+                <div class="cms-visual">
+                    <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0601.jpg" alt="" class="img-fluid d-none d-lg-block m-auto">
+                    <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0601_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                </div>
+                <div class="cms-description-box mt-3">
+                    <p class="cms-description text-right">(체지방지수 27.5부터 본인부담율에 해당됩니다.)</p>
+                </div>
+                <!-- <table class="cms-table">
+                    <caption class="sr-only">테이블 제목</caption>
+                    <colgroup>
+                        <col style="width:50%">
+                        <col style="width:50%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th scope="col">분류</th>
+                            <th scope="col">체지방지수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">저체중</th>
+                            <td>18.5 이하</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">정상</th>
+                            <td>18.5~24.9 이하</td>
+                        </tr>
+                        <tr class="border-t-lr">
+                            <th scope="row">과체중</th>
+                            <td>25~29.9 이하</td>
+                        </tr>
+                        <tr class="border-lr">
+                            <th scope="row">비만</th>
+                            <td>30~34.9 이하</td>
+                        </tr>
+                        <tr class="border-b-lr">
+                            <th scope="row"><span class="text-fix">고도비만<span class="small-text text-red">*수술적응증</span></span></th>
+                            <td>35 이상</td>
+                        </tr>
+                    </tbody>
+                </table> -->
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type27">
+        <div class="cms-inner">
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap d-none d-lg-block">
+                <ol class="cms-figure-list item-between-plus item-even-bg text-type-3 row justify-content-center">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-4">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <p class="cms-eyebrow">본인부담율</p>
+                                <p class="cms-description">20<span>%</span></p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-4">
+                        <div class="cms-figure circletype1">
+                            <div class="cms-figure-text">
+                                <p class="cms-eyebrow">본인부담율</p>
+                                <p class="cms-description">80<span>%</span></p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+                <ul class="row cms-figure-list justify-content-center">
+                    <li class="cms-list-item col-4">
+                        <div class="cms-description-box">
+                            <p class="cms-description text-center">1. 체질량지수(BMI)가 <strong>$$35kg/𝑚^2$$</strong> 이상인 환자</p>
+                            <p class="cms-description text-center">2. 체질량지수(BMI)가 <strong>$$30kg/𝑚^2$$ 이상</strong>이면서 당뇨, 고혈압 등 <strong>대사성질환이 동반되어</strong> 있는 환자</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-4">
+                        <div class="cms-description-box">
+                            <p class="cms-description m-0 text-center">1. 체질량지수(BMI)가 <strong>$$27.5kg/𝑚^2 이상 30kg/𝑚^2 이하$$</strong>이면서 <strong>제2형 당뇨환자</strong></p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="cms-list-wrap d-block d-lg-none">
+                <div class="cms-figure-list item-between-plus item-even-bg text-type-3 row justify-content-center align-items-center">
+                    <li class="cms-list-item col-4">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <p class="cms-eyebrow">본인부담율</p>
+                                <p class="cms-description">20<span>%</span></p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-8">
+                        <div class="cms-description-box mt-0">
+                            <p class="cms-description text-left">1. 체질량지수(BMI)가 <strong>35kg/𝑚^2</strong> 이상인 환자</p>
+                            <p class="cms-description text-left">2. 체질량지수(BMI)가 <strong>30kg/𝑚^2 이상</strong>이면서 당뇨, 고혈압 등 <strong>대사성질환이 동반되어</strong> 있는 환자</p>
+                        </div>
+                    </li>
+                </div>
+                <div class="cms-figure-list item-between-plus item-even-bg text-type-3 row justify-content-center mt-3 align-items-center">
+                    <li class="cms-list-item col-4">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <p class="cms-eyebrow">본인부담율</p>
+                                <p class="cms-description">80<span>%</span></p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-8">
+                        <div class="cms-description-box mt-0">
+                            <p class="cms-description text-left">1. 체질량지수(BMI)가 <strong>27.5kg/𝑚^2 이상 30kg/𝑚^2 이하</strong>이면서 <strong>제2형 당뇨환자</strong></p>
+                        </div>
+                    </li>
+                </div>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type23">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">비만으로 인한</p>
+                <p class="cms-title">대사성질환</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-visual">
+                <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0301.jpg" alt="" class="img-fluid d-none d-lg-block">
+                <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0301_m.jpg" alt="" class="w-100 d-block d-lg-none">
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type03">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">대표적인</p>
+                <p class="cms-title">수술방법</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <!-- 지그재그 방향 뒤집으려면 reverse 클래스 추가 -->
+                <ol class="cms-tile-list array-zigzag text-type-1">
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0401.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0401_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow type-number">01</p>
+                                <p class="cms-title">위소매절제술</p>
+                                <p class="cms-description">위 일부분을 절제하여 바나나 모양의 튜브형태로 만드는 수술로 위의 부피를 줄여 음식섭취를 제한합니다. 25~30% 정도의 체중감량과 수술 5년 후 66%의 당뇨병 완치율이 보고되고 있습니다. 이물질을 삽입하지 않고, 해부학적 변형이 없어 내시경을 통한 위암의 조기 진단에 제약이 없습니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0402.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0402_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow type-number">02</p>
+                                <p class="cms-title">루와이 위우회술</p>
+                                <p class="cms-description">위의 최상부에 최소 30cc 정도 용적을 가진 위주머니를 만들고 나머지 위와 분리시킨 후, 소장을 우회시켜 영양흡수를 제한합니다. 제2형 당뇨병 환자에서 혈당 개선 효과가 위소매절제술 보다 크다고 알려져 있으나 장기적인 영양관리가 필요하며 남은 위의 내시경 검사가 어렵습니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type31">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">비만대사 수술에 대한</p>
+                <p class="cms-title">궁금증</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap mt-5">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">체중은 얼마나 감량되나요?</dt>
+                    <dd class="cms-description">수술 1년 후 BMI $$25kg/m^2$$ 에 해당하는 체중을 목표로 합니다. 수술 후 6개월 이내에 급속하게 나타나고 꾸준한 식단관리와 운동을 통해 체중감량 및 유지를 이어나갈 수 있습니다</dd>
+                </dl>
+                <dl class="cms-list-item">
+                    <dt class="cms-title">요요현상이 있나요?</dt>
+                    <dd class="cms-description">일반적인 요요현상은 없으나, 약 5%의 환자에서 불충분한 체중 감소 또는 목표 체중 도달 후 약간의 체중 증가를 보일 수 있습니다. 수술은 비만대사질환 치료의 시작일 뿐입니다. 수술 후에도 의지를가지고 정기적으로 병원에 방문하여 식사, 영양, 운동, 생활습관 등을 관리해야 합니다.</dd>
+                </dl>
+                <dl class="cms-list-item">
+                    <dt class="cms-title">혈압약과 당뇨약을 계속 먹어야 하나요?</dt>
+                    <dd class="cms-description">제2형 당뇨병 환자의 약 77%에서, 고혈압 환자의 60~70%에서 약을 완전히 끊을 수 있습니다. 그렇기 때문에 저혈당 및 저혈압을 수시로 확인하면서 약을 조절해야 합니다.</dd>
+                </dl>
+                <dl class="cms-list-item">
+                    <dt class="cms-title">수술 후 일상생활은 언제부터 가능한가요?</dt>
+                    <dd class="cms-description">수술 후 약 1주일 정도면 일상활동 및 직장생활, 가벼운 운동까지도 가능합니다. 때문에 보통 수술 하루 전날 입원하여 수술 후 3~7일 이내에 퇴원할 수 있습니다.</dd>
+                </dl>
+            </div>
+            <div class="cms-visual mt-5">
+                <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0501.jpg" alt="" class="img-fluid d-none d-lg-block">
+                <img src="https://fxfile.drline.net/local/13287/cms/sub030509_img_0501_m.jpg" alt="" class="w-100 d-block d-lg-none">
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <!-- contents area [e] -->
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

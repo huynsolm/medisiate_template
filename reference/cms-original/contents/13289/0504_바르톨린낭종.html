@@ -1,0 +1,282 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style>
+    .cms-container .cms .cms-header .cms-thin-title {background:#323d59;padding:45px 0;font-size:2.5rem;line-height:1.25;;color:#fff}
+    .cms-container .cms em {color:#feef9c !important;font-weight:700}
+    .cms-container .cms .cms-description-box .cms-eyebrow.type-number.type01 {width:auto;}
+    .cms-graybox {background:#f3f3f3;padding:80px 70px;}
+    .cms-graybox .cms-text-box {padding:0 40px 0 0;}
+    .cms-graybox .cms-text-box .cms-title {font-size:3rem;font-weight:500;letter-spacing:-0.05rem;color:#f55e89}
+    .cms-graybox .cms-text-box .cms-copy {font-family:"Montserrat";font-size:3rem;font-weight:400;line-height:2.75rem;letter-spacing:-0.05rem;color:#f55e89}
+    .cms-graybox .cms-text-box .cms-description {font-size:1.063rem;font-weight:300;line-height:1.688rem;color:#444446;margin-top:40px;}
+    .cms-graybox .visual {padding:0;}
+    .cms-container .cms .cms-header .cms-title {font-weight:700;}
+    .cms-container .cms .cms-list-item .cms-figure-text .cms-icon {display:flex;display:-ms-flexbox;min-height:55px;-webkit-box-pack:center;-ms-flex-pack: center;justify-content:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center}
+    .cms-container .cms .cms-header .cms-title.cms-type01 {font-size:3.125rem;}
+    .cms-container .cms .cms-header .cms-title.cms-type01 em {color:#ff6e86 !important;position:relative;}
+    .cms-container .cms .cms-header .cms-title.cms-type01 em span {position:relative;z-index:2;}
+    .cms-container .cms .cms-header .cms-title.cms-type01 em:after {content:"";display:inline-block;width:100%;height:13px;background:#ffdce2;position:absolute;left:0;bottom:7px;z-index:0;}
+    .cms-container .cms .cms-table thead tr:first-child th:first-child {background:#ffd4e0;color:#a6405d}
+    .cms-container .cms .cms-table thead tr:first-child th {background:#ffd4e0;color:#a6405d}
+    .cms-container .cms .cms-table tbody th:first-child {background:#f55e89;color:#fff;}
+    .cms-container .cms .cms-table tbody td {position:relative}
+    .cms-container .cms .cms-table tbody td.circle span {position:absolute !important;width:1px;height:1px;overflow:hidden;clip:rect(1px 1px 1px 1px); /* IE6, IE7 */clip:rect(1px, 1px, 1px, 1px);}
+    .cms-container .cms .cms-table tbody td.circle::before {content:"";display:block;width:17px;height:17px;background:#f55e89;position:absolute;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);}
+    .cms-container .cms .cms-description-box.type-01 {display:inline-block;font-weight:300;margin-left:20px;vertical-align:bottom}
+    .cms-container .cms .cms-header .cms-title-type01 {background:#323d59;color:#fff;font-size:1.75rem;display:inline-block;padding:0 50px;border-radius:30px;}
+    @media (max-width:991px){
+        .cms-container .cms .cms-header .cms-thin-title {font-size:1.625rem;padding:5% 0;}
+        .cms-graybox {padding:6.25%;}
+        .cms-graybox .cms-text-box {padding:0;}
+        .cms-graybox .cms-text-box .cms-title {font-size:1.719rem;letter-spacing:-0.05rem;text-align:center;}
+        .cms-graybox .cms-text-box .cms-copy {font-size:1.563rem;line-height:1.875rem;letter-spacing:-0.05rem;text-align:center;}
+        .cms-graybox .cms-text-box .cms-description {font-size:1.063rem;line-height:1.688rem;margin-top:4%;text-align:center;}
+        .cms-graybox .visual {margin-top:5%;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon {min-height:45px;padding: 0 10px;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon img {zoom:.5;-moz-transform:scale(0.5);}
+        .cms-container .cms .cms-header .cms-title.cms-type01 {font-size:2.188rem;line-height:2.563rem;}       
+        .cms-container .cms .cms-table tbody td.circle::before {width:13px;height:13px;}
+        .cms-container .cms .cms-description-box.type-01 {margin-left:0;font-size:14px;margin-top:3%;}
+    }
+    @media (max-width:479px){
+        .cms-container .cms .cms-header .cms-thin-title {font-size:1.083rem;}
+        .cms-graybox {padding:6.25%;}
+        .cms-graybox .cms-text-box {padding:0;}
+        .cms-graybox .cms-text-box .cms-title {font-size:1.146rem;letter-spacing:-0.05rem;}
+        .cms-graybox .cms-text-box .cms-copy {font-size:1.042rem;line-height:1.25rem;letter-spacing:-0.05rem;}
+        .cms-graybox .cms-text-box .cms-description {font-size:0.708rem;line-height:1.146rem;}
+        .cms-graybox .visual {margin-top:5%;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon {min-height:40px;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon img {zoom:.33;-moz-transform:scale(0.33);}
+        .cms-container .cms .cms-header .cms-title.cms-type01 {font-size:1.458rem;line-height:1.708rem;}
+        .cms-container .cms .cms-table tbody td.circle::before {width:10px;height:10px;}
+        .cms-container .cms .cms-description-box.type-01 {font-size:12px;}
+        .cms-container .cms.sub0401 .cms-column-list {margin:0;}
+        .cms-container .cms.type15.sub0401 .cms-column-list {margin:0}
+    }
+</style>
+<div class="cms-container">
+    <!-- contents area [s] -->
+    <section class="cms type00">
+        <div class="cms-inner">
+            <div class="cms-header bottom-border">
+                <p class="cms-page-title">바르톨린낭종</p>
+            </div>
+        </div>
+    </section>
+    <section class="cms type01">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header">
+                <p class="cms-thin-title"><em>초기치료가 중요한</em> 회음부 종기</p>
+            </div> <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-visual">
+                <div class="visual">
+                    <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_01.jpg" alt="" class="img-fluid d-none d-lg-block">
+                    <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_01_m.jpg" alt="" class="w-100 d-block d-lg-none">    
+                </div>
+            </div>
+            <div class="cms-description-box">
+                <p class="cms-description larger">바르톨린낭종이란 여러 이상증세를 동반하는 외음부에 생긴 종기입니다. 맑은 점액성 분비물을 분비하여 질입구를 미끄럽게 하는 역할을 하는 바르톨린샘의 입구가 막히면서 분비물이 빠져나가지 못하여 부풀어 오름에 따라 균이 들어가 고름이 만들어지면서 발생합니다.</p>
+            </div>
+        </div>
+    </section>  
+
+    <section class="cms type15 sub0401">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">바르톨린낭종</p>
+                <p class="cms-title">원인</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-column-list text-type-1 row">
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0201.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0201_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">잦은 성관계 혹은 외상</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0202.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0202_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">세균 감염</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0203.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0203_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">청결하지 못한 습관</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type02 type-bg">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">바르톨린낭종</p>
+                <p class="cms-title">증상</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-figure-list text-type-1 row justify-content-center">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-figure pentagon">
+                            <svg class="cms-figure-svg" width="286" height="274" viewBox="0 0 286 274">
+                                <g transform="translate(-378 -1390)">
+                                    <path id="path" class="cls-1" d="M513.454,1398.61L390.626,1488.2a13.745,13.745,0,0,0-4.968,15.34l46.916,144.96a13.679,13.679,0,0,0,13,9.49H597.4a13.679,13.679,0,0,0,13-9.49l46.916-144.96a13.746,13.746,0,0,0-4.967-15.34l-122.829-89.59A13.618,13.618,0,0,0,513.454,1398.61Z"/>
+                                </g>
+                            </svg>
+                            <div class="cms-figure-text">
+                                <p class="cms-eyebrow">01</p>
+                                <p class="cms-description">염증발생 시<br />고름</p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description">낭종에 감염이 일어나면 안에 고름집에 생기고 차게 되면서 크기가 커지게 됩니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-figure pentagon">
+                            <svg class="cms-figure-svg" width="286" height="274" viewBox="0 0 286 274">
+                                <g transform="translate(-378 -1390)">
+                                    <path id="path" class="cls-1" d="M513.454,1398.61L390.626,1488.2a13.745,13.745,0,0,0-4.968,15.34l46.916,144.96a13.679,13.679,0,0,0,13,9.49H597.4a13.679,13.679,0,0,0,13-9.49l46.916-144.96a13.746,13.746,0,0,0-4.967-15.34l-122.829-89.59A13.618,13.618,0,0,0,513.454,1398.61Z"/>
+                                </g>
+                            </svg>
+                            <div class="cms-figure-text">
+                                <p class="cms-eyebrow">02</p>
+                                <p class="cms-description">자궁 내 이물감</p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description">회음부 종기에 따라 성관계 시 자궁 내 이물감을 느끼게 됩니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-figure pentagon">
+                            <svg class="cms-figure-svg" width="286" height="274" viewBox="0 0 286 274">
+                                <g transform="translate(-378 -1390)">
+                                    <path id="path" class="cls-1" d="M513.454,1398.61L390.626,1488.2a13.745,13.745,0,0,0-4.968,15.34l46.916,144.96a13.679,13.679,0,0,0,13,9.49H597.4a13.679,13.679,0,0,0,13-9.49l46.916-144.96a13.746,13.746,0,0,0-4.967-15.34l-122.829-89.59A13.618,13.618,0,0,0,513.454,1398.61Z"/>
+                                </g>
+                            </svg>
+                            <div class="cms-figure-text">
+                                <p class="cms-eyebrow">03</p>
+                                <p class="cms-description">통증</p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description">회음부 종기 크기에 따라 앉거나, 걷거나 뛸 때 통증을 느끼며 성관계 시 통증이 더욱 심해집니다.</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type17">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">바르톨린낭종</p>
+                <p class="cms-title">치료방법</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-row-list text-type-1">
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-2 text-center">항생제 복용</p>
+                            <p class="cms-description col">증상이 심하지 않을 경우 항생제를 복용하면서 따뜻한 물로 좌욕을 해줌으로써 증상을 완화시킬 수 있습니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-2 text-center">조대술</p>
+                            <p class="cms-description col">종기의 크기, 깊이, 고름등을 파악하고 시술 부위에 국소 마취를 한 후 1~2CM 정도를 레이저를 통하여 절개하여 배농이 원활하도록 녹는 봉합사를 이용하여 봉합한 이후 배액관을 설치하게 됩니다. 비교적 짧은 시간 이내에 진행되며, 바르톨린낭종 치료의 가장 효과적인 방법입니다.</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type04">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">바르톨린낭종 </p>
+                <p class="cms-title">조대술 치료</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-tile-list between-arrow text-type-2">
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0301.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0301_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow">Step 1</p>
+                                <p class="cms-title">바르톨린 낭종 소독</p>
+                                <p class="cms-description">치료할 부위를 소독하며 종기의 크기, 깊이, 고름등을 파악합니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0302.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0302_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow">Step 2</p>
+                                <p class="cms-title">마취</p>
+                                <p class="cms-description">치료 부위에 국소마취를 시행하며, 통증에 예민한 경우는 수면마취하에 시행합니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0303.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0504_img_0303_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow">Step 3</p>
+                                <p class="cms-title">절개 및 봉합</p>
+                                <p class="cms-description">1-2  cm 정도 레이저를 이용해 절개한 다음, 녹는 봉합사를 이용하여 5군데정도 봉합후 배액관 설치합니다. 시술시간은 일반적으로10-20분 으로 진행되나, 수면마취로 진행한 경우는 30분- 1시간정도 회복경과 확인후 귀가가 진행됩니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

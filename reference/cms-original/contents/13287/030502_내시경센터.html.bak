@@ -1,0 +1,466 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style>
+    .cms-container
+    .cms
+    .cms-column-list.text-type-2
+    .cms-list-item
+    .cms-description-box
+    .cms-title {
+    font-size: 33px;
+    display: inline-block;
+    padding: 10px 20px;
+  }
+  .cms-container
+    .cms
+    .cms-column-list.text-type-2
+    .cms-list-item
+    .cms-description-box
+    .cms-title
+    span {
+    color: #333;
+    font-size: 26px;
+    font-weight: 300;
+  }
+  .cms-container .cms .cms-header .cms-stitle {
+    font-size: 40px;
+    text-align: left;
+    font-weight: 500;
+  }
+  @media (max-width: 991px) {
+    .cms-container
+      .cms
+      .cms-column-list.text-type-2
+      .cms-list-item
+      .cms-description-box
+      .cms-title {
+      font-size: 24px;
+    }
+    .cms-container
+      .cms
+      .cms-column-list.text-type-2
+      .cms-list-item
+      .cms-description-box
+      .cms-title
+      span {
+      font-size: 19px;
+    }
+   .cms-container .cms .cms-header .cms-stitle {
+        font-size: 27px;
+    }
+  }
+  @media (max-width: 479px) {
+    .cms-container
+      .cms
+      .cms-column-list.text-type-2
+      .cms-list-item
+      .cms-description-box
+      .cms-title {
+      font-size: 18px;
+    }
+    .cms-container
+      .cms
+      .cms-column-list.text-type-2
+      .cms-list-item
+      .cms-description-box
+      .cms-title
+      span {
+      font-size: 13px;
+    }
+    .cms-container .cms .cms-header .cms-stitle {
+        font-size: 18px;
+    }
+  }
+</style>
+<div class="cms-container">
+  <!-- contents area [s] -->
+  <section class="cms type00">
+    <div class="cms-inner">
+      <div class="cms-header bottom-border">
+        <p class="cms-page-title">내시경센터</p>
+      </div>
+    </div>
+  </section>
+  <section class="cms type01">
+    <div class="cms-inner">
+      <!-- 제목 영역 [s] -->
+      <div class="cms-header">
+        <p class="cms-thin-title">
+          <em>전문 의료진의 내시경 진단과 치료<br /></em>보다 안전하고 편안한
+          진료환경
+        </p>
+      </div>
+      <!-- 제목 영역 [e] -->
+      <!-- 콘텐츠 영역 [s] -->
+      <div class="cms-visual">
+        <img
+          src="https://fxfile.drline.net/local/13287/cms/sub030502_img_0101.jpg"
+          alt=""
+          class="img-fluid d-none d-lg-block m-auto"
+        />
+        <img
+          src="https://fxfile.drline.net/local/13287/cms/sub030502_img_0101_m.jpg"
+          alt=""
+          class="w-100 d-block d-lg-none"
+        />
+      </div>
+      <div class="cms-description-box">
+        <p class="cms-description larger">
+          우리나라는 암 발병률 관련하여 특히 위암과 대장이 많은 부위를 차지하고
+          있어 더욱 예방에 집중을 합니다. 건강증진센터가 그 역할을 충실히
+          이행하고 있으나 내시경센터도 무시할 수 없는 역할을 수행합니다.
+        </p>
+        <p class="cms-description larger">
+          KS병원의 내시경센터는 내시경적 점막하박리술과 내시경역행
+          췌담관조영술(ERCP) 시술을 시행하고 있으며, 정확한 진단과 치료를 위하여
+          오랜 의료경험을 갖춘 소화 내시경 전문의로 운영되고 있습니다. 모든
+          환자분에게 안전한 진료환경을 조성하여 편하게 진료를 받을 수 있도록
+          노력합니다.
+        </p>
+      </div>
+      <!-- 콘텐츠 영역 [e] -->
+    </div>
+  </section>
+
+  <!-- <section class="cms type25 doctor-list d-none"></section> -->
+  <section class="cms type25">
+    <div class="cms-inner">
+      <!-- 제목 영역 [s] -->
+      <div class="cms-header top-border">
+        <p class="cms-eyebrow">내시경센터</p>
+        <p class="cms-title">의료진소개</p>
+      </div>
+      <!-- 제목 영역 [e] -->
+      <div class="cms-header">
+        <p class="cms-stitle">소화기내과</p>
+      </div>
+      <!-- 콘텐츠 영역 [s] -->
+      <div class="cms-list-wrap">
+        <ul class="cms-column-list text-type-2 row">
+          <li class="cms-list-item col-4">
+            <div class="cms-visual">
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EC%9D%B4%EC%98%81%EC%B2%A0.jpg"
+                alt=""
+                class="w-100 d-none d-lg-block"
+              />
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EC%9D%B4%EC%98%81%EC%B2%A0.jpg"
+                alt=""
+                class="w-100 d-block d-lg-none"
+              />
+            </div>
+            <div class="cms-description-box">
+              <p class="cms-title">이영철 <span>대표원장</span></p>
+            </div>
+          </li>
+          <li class="cms-list-item col-4">
+            <div class="cms-visual">
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EC%9D%B4%ED%98%B8%EC%84%B1%EC%9B%90%EC%9E%A5%EB%8B%98.png"
+                alt=""
+                class="w-100 d-none d-lg-block"
+              />
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EC%9D%B4%ED%98%B8%EC%84%B1%EC%9B%90%EC%9E%A5%EB%8B%98.png"
+                alt=""
+                class="w-100 d-block d-lg-none"
+              />
+            </div>
+            <div class="cms-description-box">
+              <p class="cms-title">이호성 <span>원장</span></p>
+            </div>
+          </li>
+          <li class="cms-list-item col-4">
+            <div class="cms-visual">
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EB%85%B8%ED%98%95%EC%A4%80.jpg"
+                alt=""
+                class="w-100 d-none d-lg-block"
+              />
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EB%85%B8%ED%98%95%EC%A4%80.jpg"
+                alt=""
+                class="w-100 d-block d-lg-none"
+              />
+            </div>
+            <div class="cms-description-box">
+              <p class="cms-title">노형준 <span>원장</span></p>
+            </div>
+          </li>
+          <li class="cms-list-item col-4">
+            <div class="cms-visual">
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%ED%95%98%EC%83%81%EC%9C%A4.jpg"
+                alt=""
+                class="w-100 d-none d-lg-block"
+              />
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%ED%95%98%EC%83%81%EC%9C%A4.jpg"
+                alt=""
+                class="w-100 d-block d-lg-none"
+              />
+            </div>
+            <div class="cms-description-box">
+              <p class="cms-title">하상윤 <span>원장</span></p>
+            </div>
+          </li>
+          <li class="cms-list-item col-4">
+            <div class="cms-visual">
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EA%B0%95%EC%9D%80%EB%AF%B8_%EB%82%B4%EA%B3%BC(%EB%82%B4%EC%8B%9C%EA%B2%BD)(1).jpg"
+                alt=""
+                class="w-100 d-none d-lg-block"
+              />
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EA%B0%95%EC%9D%80%EB%AF%B8_%EB%82%B4%EA%B3%BC(%EB%82%B4%EC%8B%9C%EA%B2%BD)(1).jpg"
+                alt=""
+                class="w-100 d-block d-lg-none"
+              />
+            </div>
+            <div class="cms-description-box">
+              <p class="cms-title">강은미 <span>원장</span></p>
+            </div>
+          </li>
+          <li class="cms-list-item col-4">
+            <div class="cms-visual">
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EB%82%B4%EA%B3%BC_%EA%B9%80%EA%B4%91%ED%83%9D.png"
+                alt=""
+                class="w-100 d-none d-lg-block"
+              />
+              <img
+                src="https://fxfile.drline.net/local/13287/doctor/%EB%82%B4%EA%B3%BC_%EA%B9%80%EA%B4%91%ED%83%9D.png"
+                alt=""
+                class="w-100 d-block d-lg-none"
+              />
+            </div>
+            <div class="cms-description-box">
+              <p class="cms-title">김광택 <span>원장</span></p>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <!-- 콘텐츠 영역 [e] -->
+    </div>
+  </section>
+
+  <section class="cms type07 type-bg bg-color-3">
+    <div class="cms-inner">
+      <!-- 제목 영역 [s] -->
+      <div class="cms-header top-border">
+        <p class="cms-eyebrow">내시경센터의</p>
+        <p class="cms-title">장점</p>
+      </div>
+      <!-- 제목 영역 [e] -->
+      <!-- 콘텐츠 영역 [s] -->
+      <div class="cms-column-wrap box-type row">
+        <div class="cms-visual col-12 col-lg-6">
+          <img
+            src="https://fxfile.drline.net/local/13287/cms/sub030502_img_0201.jpg"
+            alt=""
+            class="img-fluid d-none d-lg-block"
+          />
+          <img
+            src="https://fxfile.drline.net/local/13287/cms/sub030502_img_0201_m.jpg"
+            alt=""
+            class="w-100 d-block d-lg-none"
+          />
+        </div>
+        <div class="cms-list-wrap col-12 col-lg-6">
+          <ul class="cms-bullet-list list-style-1 cms-spread-list">
+            <li class="cms-list-item">
+              <div class="cms-description-box">
+                <p class="cms-description">
+                  소화관 출혈이나 용종을 제거할 수 있는 내시경 장비와 각종
+                  부속기구가 완벽하게 마련되어 있으며, 검사 시 감염예방을 위하여
+                  공기청정기, 초음파세척기, 자동세척 소독기를 구비하고 있으므로
+                  안전하게 검사를 받으실 수 있습니다.
+                </p>
+              </div>
+            </li>
+            <li class="cms-list-item">
+              <div class="cms-description-box">
+                <p class="cms-description">
+                  전문의료인 상주 : 소화기내과 전문의, 가정의학과 전문의
+                </p>
+              </div>
+            </li>
+            <li class="cms-list-item">
+              <div class="cms-description-box">
+                <p class="cms-description">
+                  검사시간의 자율 : 내시경 검사는 고객중심으로 예약시행
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- 콘텐츠 영역 [e] -->
+    </div>
+  </section>
+  <section class="cms type10">
+    <div class="cms-inner">
+      <!-- 제목 영역 [s] -->
+      <div class="cms-header top-border">
+        <p class="cms-eyebrow">내시경센터의</p>
+        <p class="cms-title">대표적 치료</p>
+      </div>
+      <!-- 제목 영역 [e] -->
+      <!-- 콘텐츠 영역 [s] -->
+      <div class="cms-visual mobile-expanded">
+        <img
+          src="https://fxfile.drline.net/local/13287/cms/sub030502_img_0301.jpg"
+          alt=""
+          class="img-fluid d-none d-lg-block"
+        />
+        <img
+          src="https://fxfile.drline.net/local/13287/cms/sub030502_img_0301_m.jpg"
+          alt=""
+          class="w-100 d-block d-lg-none"
+        />
+      </div>
+      <div class="cms-list-wrap">
+        <ol class="cms-figure-list text-type-1">
+          <li class="cms-list-item">
+            <div class="row align-items-center">
+              <div class="cms-figure hexagon col-lg-auto">
+                <svg
+                  class="cms-figure-svg"
+                  width="276"
+                  height="244"
+                  viewBox="0 0 276 244"
+                >
+                  <g transform="translate(-297.031 -11866)">
+                    <path
+                      id="path"
+                      class="cls-1"
+                      d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"
+                    ></path>
+                  </g>
+                </svg>
+                <div class="cms-figure-text">
+                  <p class="cms-eyebrow">01</p>
+                  <p class="cms-description">내시경 용종절제술</p>
+                </div>
+              </div>
+              <div class="cms-description-box col-lg">
+                <p class="cms-eyebrow">how to</p>
+                <p class="cms-description">
+                  대부분의 용종은 내시경을 통해 철사로 된 올가미를 이용하여
+                  잘라내며 전기소작을 하기도 합니다. 통증이 거의 없으며 조직검사
+                  결과는 보통 1주일 이내에 알 수 있습니다.
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="cms-list-item">
+            <div class="row align-items-center">
+              <div class="cms-figure hexagon col-lg-auto">
+                <svg
+                  class="cms-figure-svg"
+                  width="276"
+                  height="244"
+                  viewBox="0 0 276 244"
+                >
+                  <g transform="translate(-297.031 -11866)">
+                    <path
+                      id="path"
+                      class="cls-1"
+                      d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"
+                    ></path>
+                  </g>
+                </svg>
+                <div class="cms-figure-text">
+                  <p class="cms-eyebrow">02</p>
+                  <p class="cms-description">내시경역행 췌담관조영술(ERCP)</p>
+                </div>
+              </div>
+              <div class="cms-description-box col-lg">
+                <p class="cms-eyebrow">how to</p>
+                <p class="cms-description">
+                  특수내시경과 방사선투시기를 동시에 이용한 시술로 담낭, 담도,
+                  췌담관, 총담관, 유두부를 관찰하는 검사로 황달, 우상복부통증 및
+                  불편감 등이 있는 경우 시행합니다.
+                </p>
+              </div>
+            </div>
+          </li>
+          <li class="cms-list-item">
+            <div class="row align-items-center">
+              <div class="cms-figure hexagon col-lg-auto">
+                <svg
+                  class="cms-figure-svg"
+                  width="276"
+                  height="244"
+                  viewBox="0 0 276 244"
+                >
+                  <g transform="translate(-297.031 -11866)">
+                    <path
+                      id="path"
+                      class="cls-1"
+                      d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"
+                    ></path>
+                  </g>
+                </svg>
+                <div class="cms-figure-text">
+                  <p class="cms-eyebrow">03</p>
+                  <p class="cms-description">내시경적 점막하박리술</p>
+                </div>
+              </div>
+              <div class="cms-description-box col-lg">
+                <p class="cms-eyebrow">how to</p>
+                <p class="cms-description">
+                  소화관 악성종양(암) 및 양성종양(선종)의 치료법으로 숙련된
+                  전문의에 의해 시행되는 고난이도의 내시경적 절제술입니다.
+                </p>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+      <!-- 콘텐츠 영역 [e] -->
+    </div>
+  </section>
+  <section class="cms type30 type-bg">
+    <div class="cms-inner">
+      <!-- 제목 영역 [s] -->
+      <div class="cms-header top-border">
+        <p class="cms-eyebrow">KS병원의</p>
+        <p class="cms-title">내시경 장비</p>
+      </div>
+      <!-- 제목 영역 [e] -->
+      <!-- 콘텐츠 영역 [s] -->
+      <div class="cms-list-wrap">
+        <ol class="cms-img-list text-type-3 row">
+          <li class="cms-list-item">
+            <div class="cms-visual">
+              <img
+                src="https://fxfile.drline.net/local/13287/cms/sub030502_img_0401.jpg"
+                alt=""
+                class="img-fluid d-none d-lg-block"
+              />
+              <img
+                src="https://fxfile.drline.net/local/13287/cms/sub030502_img_0401_m.jpg"
+                alt=""
+                class="w-100 d-block d-lg-none"
+              />
+            </div>
+            <div class="cms-visual-text">
+              <p class="cms-eyebrow">CV-290<br />올림푸스 내시경</p>
+              <p class="cms-line">&nbsp;</p>
+              <p class="cms-description">
+                가장 가늘어진 내시경으로 속이 편하고 고해상도의 내시경으로
+                발견하기 어려운 병변이나 육안으로 확인하기 어려운 조직 등도
+                문제없이 진단가능하며, 내시경 검사를 하고 용종절제술로 치료까지
+                가능합니다.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </div>
+      <!-- 콘텐츠 영역 [e] -->
+    </div>
+  </section>
+  <!-- contents area [e] -->
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

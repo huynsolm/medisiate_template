@@ -1,0 +1,241 @@
+<html lang="ko"><head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no">
+	<title>서울본브릿지병원</title>
+	<!------------------------------------------- 공통 START		---------------------------------------------->
+	<!-- jQuery -->
+	<script src="http://fx-hcs-05.sharebrain.co.kr/Module/packages/jquery/jquery-3.3.1.min.js"></script>
+	<!-- jQuery UI -->
+	<script src="http://fx-hcs-05.sharebrain.co.kr/Module/packages/jquery-ui/jquery-ui.min.js"></script>
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/packages/jquery-ui/jquery-ui.min.css">
+	<!------------------------------------------- 공통 End		---------------------------------------------->
+	<link rel="stylesheet" type="text/css" href="http://fxfile.drline.net/cms/public/css/cms.css">
+	<!-- font css -->
+	<link rel="stylesheet" type="text/css" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/fonts/NotoSansKR/NotoSansKR.css">
+	<link rel="stylesheet" type="text/css" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/fonts/Gotham/Gotham.css">
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/fonts/ionicons/css/ionicons.min.css">
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/fonts/fontawesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/fonts/flaticon/font/flaticon.css">
+	<link href="https://fonts.googleapis.com/css?family=Nanum+Myeongjo:400,700&amp;display=swap" rel="stylesheet">
+
+	<!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/css/bootstrap.css">
+	<!-- Custom styles for this template -->
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/css/common_module.css">
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/css/common_size.css">
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/css/animate.css">
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/css/slick.css">
+	<link rel="stylesheet" href="http://fx-hcs-05.sharebrain.co.kr/Module/resources/css/bootstrap-dropdownhover.min.css">
+	<!-- Custom -->
+	<!-- <link rel="stylesheet" href="/Resources/css/skin05.css">
+	<link rel="stylesheet" href="/Resources/css/skin05-sub.css"> --><!-- sub only stylesheet -->
+
+<style type="text/css">
+.top-visual{display:table;width:100%;height:200px;background:url(../img/sub01/sub01_intro_img01.jpg) no-repeat center center;background-size:cover;}
+.top-visual .txt-box{display:table-cell;vertical-align:middle;text-align:center;}
+.top-visual h2{font-size:40px;font-weight:500;color:#fff;}
+.top-visual .sub-txt{font-size:18px;color:#fff;}
+
+.type-intro .inner{width:100%;margin:0 auto;padding:0 15px;}
+.type-intro.sect01{background:#fff;}
+.type-intro.sect01 .inner{padding:100px 15px 60px;}
+.type-intro.sect01 .cms-description-box .cms-description.smaller{font-size:14px;}
+.type-intro.sect01 .cms-title{margin-top:100px;font-size:32px;font-weight:500;color:#b1926a;}
+.type-intro.sect01 .cms-sub-title{margin:25px 0 0;font-size:18px;font-weight:700;line-height:30px;color:#444446;}
+.type-intro.sect01 .cms-list-wrap .cms-row-list{list-style-type:none;}
+.type-intro.sect01 .cms-list-wrap .cms-row-list .cms-list-item{list-style:none;}
+.type-intro.sect01 .cms-list-wrap .cms-row-list .cms-list-item .cms-table{margin-top:10px;border:1px solid #e0e0e0;}
+.type-intro.sect01 .cms-list-wrap .cms-row-list .cms-list-item .cms-table thead tr:first-child th{border-right:1px solid #fff;background:#b1926a;}
+.type-intro.sect01 .cms-list-wrap .cms-row-list .cms-list-item .cms-table thead tr:first-child th:last-child{border-right:none;}
+.type-intro.sect01 .cms-list-wrap .cms-row-list .cms-list-item .cms-table thead tr:first-child th:first-child{background:#b1926a;}
+.type-intro.sect01 .cms-box{padding:25px 35px;margin-top:10px;border:1px solid #e0e0e0;background:#f5f5f5;}
+.type-intro.sect01 .cms-box .cms-list{padding-left:0;margin:0;list-style-type:none;}
+.type-intro.sect01 .cms-box .cms-list .cms-list-item{list-style:none;font-size:18px;line-height:32px;color:#444446;}
+.type-intro.sect01 .cms-box .cms-list .cms-list-item ul{padding-left:20px;list-style-type:none;}
+.type-intro.sect01 .cms-box .cms-list .cms-list-item ul li{list-style:none;font-size:14px;line-height:26px;color:#444446;}
+.type-intro.sect01 .cms-bullet-list .cms-list-item{font-size:18px;}
+.type-intro.sect01 .cms-bullet-list.margin-type-1{margin:25px 0 0;}
+.type-intro.sect01 .cms-bullet-list.margin-type-1 .cms-list-item{margin:10px 0 0;}
+@media(max-width: 479px) {
+	.top-visual h2{font-size:24px;}
+	.top-visual .sub-txt{font-size:14px;}
+	.type-intro.sect01 .cms-title{margin-top:30px;font-size:24px;}
+	.type-intro.sect01 .cms-sub-title{margin:15px 0 0;}
+	.type-intro.sect01 .cms-box{padding:15px 20px;}
+	.type-intro.sect01 .cms-box .cms-list .cms-list-item{font-size:14px;line-height:24px;}
+	.type-intro.sect01 .cms-box .cms-list .cms-list-item ul{padding-left:10px;}
+	.type-intro.sect01 .cms-box .cms-list .cms-list-item ul li{font-size:12px;line-height:20px}
+	.type-intro.sect01 .cms-bullet-list.margin-type-1{margin:15px 0 0;}
+	.type-intro.sect01 .cms-bullet-list.margin-type-1 .cms-list-item{margin:5px 0 0;font-size:14px;line-height:24px;}
+}
+</style>
+</head>
+<body class="sub">
+
+<div id="header-wrap">
+	<img src="../img/temp_header.png" alt="" class="img-fluid w-100">
+</div>
+
+<!-- contents area [s]    여기부터 코딩 해주시면 됩니다..............................코딩영역은 cms-container 감싸는 section영역 부분입니다........................................ -->
+<div class="cms-container">
+	<!-- contents area [s] -->
+	<section class="cms type00">
+		 <div class="cms-inner">
+				<div class="cms-header bottom-border">
+					 <p class="cms-page-title">서울본브릿지 ｜ 입퇴원안내</p>
+				</div>
+		 </div>
+	</section>
+	<div class="top-visual">
+		<div href="javascript:;" class="txt-box">
+			<h2>입·퇴원, 병원생활 안내</h2>
+			<p class="sub-txt">“입원해계실 동안 최선을 다하여 빠른 회복을 돕겠습니다.”</p>
+		</div>
+	</div>
+
+	<section class="cms type-intro sect01">
+		<div class="cms-inner">
+			 <!-- 제목 영역 [s] -->
+			 <div class="cms-header top-border">
+					<h3 class="cms-thin-title">입원 안내사항</h3>
+			 </div>
+			 <!-- 제목 영역 [e] -->
+			 <!-- 콘텐츠 영역 [s] -->
+			 <h4 class="cms-title">병원운영 시간안내</h4>
+			 <div class="cms-list-wrap">
+				 <ol class="cms-row-list">
+					 <li class="cms-list-item">
+						 <p class="cms-sub-title">1.진료시간</p>
+						 <table class="cms-table">
+							 <caption class="sr-only">진료시간</caption>
+							 <!-- 테이블 셀 너비는 colgroup으로 설정 -->
+							 <colgroup>
+								 <col style="width:33%">
+								 <col style="width:34%">
+								 <col style="width:33%">
+							 </colgroup>
+							 <thead>
+								 <tr>
+									 <th scope="col">월요일</th>
+									 <th scope="col">화요일 ~ 금요일</th>
+									 <th scope="col">토요일</th>
+								 </tr>
+							 </thead>
+							 <tbody>
+								 <tr>
+									 <td>오전 09:00 ~ 오후 08:00</td>
+									 <td>오전 09:00 ~ 오후 06:00</td>
+									 <td>오전 09:00 ~ 오후 01:00</td>
+								 </tr>
+							 </tbody>
+						 </table>
+					 </li>
+					 <li class="cms-list-item">
+						 <p class="cms-sub-title">2.입원시간</p>
+						 <div class="cms-description-box">
+							 <p class="cms-description">진료시간 이후 전문의 선생의 부재중시에는 입원처리가 불가할 수 있습니다.</p>
+						 </div>
+					 </li>
+					 <li class="cms-list-item">
+						 <p class="cms-sub-title">3.면회시간</p>
+						 <div class="cms-description-box">
+							 <p class="cms-description">환우님의 안정을 위해 면회는 오후 9시 이후에는 불가능합니다. 다은 환우 분들의 안정을 위해 꼭 지켜주십시오.</p>
+						 </div>
+					 </li>
+					 <li class="cms-list-item">
+						 <p class="cms-sub-title">4.회진시간</p>
+						 <div class="cms-description-box">
+							 <p class="cms-description">본원은 환우님의 빠른 회복을 위해 오전, 오후 하루 2회 담당 원장의 회진이 있으며 개인별 별도의 시간이 적용됩니다.</p>
+						 </div>
+					 </li>
+					 <li class="cms-list-item">
+						 <p class="cms-sub-title">5.식사시간</p>
+						 <table class="cms-table">
+							 <caption class="sr-only">진료시간</caption>
+							 <!-- 테이블 셀 너비는 colgroup으로 설정 -->
+							 <colgroup>
+								 <col style="width:33%">
+								 <col style="width:34%">
+								 <col style="width:33%">
+							 </colgroup>
+							 <thead>
+								 <tr>
+									 <th scope="col">조식</th>
+									 <th scope="col">중식</th>
+									 <th scope="col">석식</th>
+								 </tr>
+							 </thead>
+							 <tbody>
+								 <tr>
+									 <td>오전 07:30</td>
+									 <td>오후 12:00</td>
+									 <td>오후 05:30</td>
+								 </tr>
+							 </tbody>
+						 </table>
+					 </li>
+				 </ol>
+			 </div>
+
+				<h4 class="cms-title">입원 시 금식여부</h4>
+				<div class="cms-list-wrap">
+					<ol class="cms-row-list">
+						<li class="cms-list-item">
+							<p class="cms-sub-title">1.시술</p>
+							<div class="cms-description-box">
+								<p class="cms-description">금식 필요 없음 (간단히 식사)</p>
+							</div>
+						</li>
+						<li class="cms-list-item">
+							<p class="cms-sub-title">2. 수술 전 입원</p>
+							<div class="cms-description-box">
+								<p class="cms-description">내원 전 4시간 공복 유지 후 내원해주세요. 검사결과가 조금 더 정확할 수 있습니다. (검사 후 식사가능)</p>
+							</div>
+						</li>
+						<li class="cms-list-item">
+							<p class="cms-sub-title">3. 당일 수술</p>
+							<div class="cms-description-box">
+								<p class="cms-description">입원 전날 밤 12시부터 금식하셔야 합니다.<br>물도 드시면 안되고, 혈압약이나 심장약의 경우에만 물 한모금과 약을 복용하십시오.</p>
+								<p class="cms-description smaller">* 수술 예정인 환우님은 꼭 보호자를 동반하셔야 합니다.</p>
+							</div>
+						</li>
+					</ol>
+				</div>
+
+				<h4 class="cms-title">입원 생활안내</h4>
+				<p class="cms-sub-title">입원 시 준비물</p>
+				<div class="cms-box">
+					<ol class="cms-list">
+						<li class="cms-list-item">① 입원 준비물 : 세면도구, 실내화, 물통, 물컵, 티슈 등</li>
+						<li class="cms-list-item">② 수술인 경우 : 빨대 달린 물컵, 가제, 손수건, 물티슈(매니큐어 및 장신구는 제거해주세요)
+							<ul>
+					    	<li>* 환자 신분증 지참 / 미성년자의 경우 보호자 동반 및 보호자 신분증 지참</li>
+					    	<li>* 검사 결과에서 이상소견이 있으면 미리 연락을 드리고, 경우에 따라 수술 일정이 조정될 수 있습니다.</li>
+							</ul>
+						</li>
+					</ol>
+				</div>
+				<ul class="cms-bullet-list margin-type-1">
+          <li class="cms-list-item cms-description">입원 시 입, 퇴원계 수속 후 외래 간호팀으로 가십시오.</li>
+					<li class="cms-list-item cms-description">수술을 위한 입원환자는 수술 전 7일부터 혈전용해제(아스피린 등) 복용을 중지하십시오.</li>
+					<li class="cms-list-item cms-description">다른 복용중인 약과 처방전은 입원 시 가지고 오십시오.</li>
+					<li class="cms-list-item cms-description">각 병실의 냉·난방기는 온도조절이 가능합니다. 간호사실에 문의해주세요.</li>
+					<li class="cms-list-item cms-description">린넨물 교환 주 2~3회 교환 시간이 있습니다. 간호사실로 문의해주세요. 베개, 이불은 환자 1인당 1개 제공됩니다. 보호자 분 담요 및 베개는 준비해주세요.</li>
+					<li class="cms-list-item cms-description">전자레인지는 탕비실을 이용해주세요. 음식 데울 때만 사용합니다.</li>
+					<li class="cms-list-item cms-description">침대에서 떨어질 우려가 있으니 침대 옆 보조난간을 꼭 올려서 사용해 주십시오.</li>
+					<li class="cms-list-item cms-description">고가의 귀중품은 보호자 또는 자택에서 관리하시기 바랍니다. 분실 시 병원에서 책임지지 않습니다.</li>
+					<li class="cms-list-item cms-description">금연 본원은 전 지역이 금연구역입니다. 적극적인 협조 부탁드립니다. 적발 시 국민건강증진법 34조에 의거 300만원 이하의 과태료가 부과됩니다.</li>
+					<li class="cms-list-item cms-description">거즈 등은 지정된 폐기물 전용 용기 안에 버려주세요.</li>
+	      </ul>
+			 <!-- 콘텐츠 영역 [e] -->
+		 </div>
+	</section>
+	<!-- contents area [e] -->
+</div>
+
+<div id="footer-wrap">
+	<img src="../img/temp_footer.png" alt="" class="img-fluid w-100">
+</div>
+
+
+</body></html>

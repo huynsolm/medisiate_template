@@ -1,0 +1,361 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style>
+    .cms-bg-box {background:#f3f3f3;margin-top:70px;}
+    .cms-bg-box .cms-content-txt .cms-title {font-size:2.375rem;font-weight:500;color:#a38052;padding:0;margin:0;letter-spacing:-0.05rem;}
+    .cms-bg-box .cms-content-txt .cms-description {font-size:1.125rem;font-weight:500;color:#444446;margin:25px 0 0 0;padding:0;letter-spacing:-0.05rem}
+    .cms-container .cms.type31 .cms-list-wrap .cms-list-item .cms-title {background:url(https://fxfile.drline.net/local/13287/cms/bullet_icon.jpg) center left no-repeat;color:#2c2e3a;padding-left:25px;}
+    .cms-box-type {margin:0;padding:0;}
+    .cms-box-type .cms-box {list-style:none;position:relative;}
+    .cms-box-type .cms-box:before {content: "";display:block;position:absolute;top:50%;left:0;width:7px;height:7px;border-right:1px solid #b79b77;border-top: 1px solid #b79b77;transform:rotate(45deg) translate(100%, -175%);}
+    .cms-box-type .cms-box:after {content: "";display:block;position:absolute;top:50%;left:-5px;width:43px;height:0;border-top: 1px solid #b79b77;transform: translate(-40%, -50%);}
+    .cms-box-type li:first-child.cms-box:before {display:none;}
+    .cms-box-type li:first-child.cms-box:after {display:none;}
+    .cms-box-type .cms-box .cms-figure {height:100%;}
+    .cms-box-type .cms-box .cms-figure .cms-box-text {border:1px solid #dad8d7;width:82%;margin:0 auto;padding:70px 0;line-height:1;height: 100%;word-wrap:break-word;}
+    .cms-box-type .cms-box .cms-figure .cms-box-text .cms-description {margin:0;text-align:center;color:#b1926a;font-size:120%;}
+    .cms-box-type .cms-box .cms-figure .cms-small-text {position:absolute;top:25%;left:-40px;font-size:1.125rem;}
+    .cms-container .cms.type31 .cms-list-wrap+.cms-list-wrap {margin-top:50px}
+    .und-r {text-decoration:underline;text-decoration-color: red;}
+    @media (max-width:991px){
+        .cms-bg-box .cms-content-txt .cms-title {font-size:1.563rem;text-align:center}
+        .cms-bg-box .cms-content-txt .cms-description {font-size:0.938rem;text-align:center;margin-top:3%}
+        .cms-bg-box .cms-visual {max-width:21%;margin-top:3%}
+        .cms-container .cms.type31 .cms-list-wrap .cms-list-item .cms-title {background-size:16px 16px;padding-left:20px;}
+        .cms-box-type .cms-box:before {width:7px;height:7px;transform:rotate(45deg) translate(-0%, -70%);}
+        .cms-box-type .cms-box:after {width:20px;transform:translate(-20%, -50%);}
+        .cms-box-type .cms-box .cms-figure .cms-box-text {padding:50px 10px;}
+        .cms-box-type .cms-box .cms-figure .cms-small-text {font-size:0.875rem;left:-30px;}
+        .cms-container .cms.type31 .cms-list-wrap+.cms-list-wrap {margin-top:7%}
+    }
+    @media (max-width:479px){
+        .cms-bg-box .cms-content-txt .cms-title {font-size:1rem;}
+        .cms-bg-box .cms-content-txt .cms-description {font-size:0.625rem;}
+        .cms-container .cms.type31 .cms-list-wrap .cms-list-item .cms-title {background-size:12px 12px;padding-left:15px;}
+        .cms-box-type .cms-box:before {width:7px;height:7px;transform:rotate(45deg) translate(-65%, -10%);}
+        .cms-box-type .cms-box:after {width:20px;transform:translate(-40%, -50%);}
+        .cms-box-type .cms-box .cms-figure .cms-box-text .cms-description {font-size:0.688rem}
+        .cms-box-type .cms-box .cms-figure .cms-small-text {font-size:0.688rem}
+    }
+</style>
+<div class="cms-container">
+    <!-- contents area [s] -->
+    <section class="cms type00">
+        <div class="cms-inner">
+            <div class="cms-header bottom-border">
+                <p class="cms-page-title">공단건강검진</p>
+            </div>
+        </div>
+    </section>
+    <section class="cms type01 p-lg-0">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header">
+                <p class="cms-thin-title">20세 이상이라면<br><em>2년마다 무료로 가능한 국가검진</em></p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-visual">
+                <img src="https://fxfile.drline.net/local/13287/cms/sub0403_img_01.jpg" alt="" class="img-fluid d-none d-lg-block m-auto">
+                <img src="https://fxfile.drline.net/local/13287/cms/sub0403_img_01_m.jpg" alt="" class="w-100 d-block d-lg-none">
+            </div>
+            <div class="cms-description-box">
+                <p class="cms-description larger">그 해의 대상이 되는 국민이라면 본인부담금 없이, 혹은 적은 비용으로 검진 가능한 국가검진( 건강보험가입자는 공단 전액 부담 / 의료급여수급권자는 국가 및 지자체에서 부담)은 국민건강보험공단을 통해 실시하므로 공단검진이라고도 불립니다.</p>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type31 type01 p-lg-0">
+        <div class="cms-inner">
+            <div class="cms-list-wrap">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">대상자 선정(국민건강보험공단)</dt>
+                    <dd class="cms-description">일반건강검진 대상자는 지역세대주, 직장가입자, 만 20세 이상 세대원과 피부양자, 만 19세 ~ 64세 의료급여 수급권자</dd>
+                    <dd class="cms-description cms-list-item">매 2년 마다 1회, 비사무직은 매년 실시</dd>
+                </dl>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type26 type31 p-0">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-title">일반검진</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-table-wrap">
+                <div class="cms-list-wrap">
+                    <dl class="cms-list-item">
+                        <dt class="cms-title">검사항목</dt>
+                    </dl>
+                </div>
+                <table class="cms-table">
+                    <caption class="sr-only">테이블 제목</caption>
+                    <!-- 테이블 셀 너비는 colgroup으로 설정 -->
+                    <colgroup>
+                        <col style="width:30%">
+                        <col style="width:70%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th scope="col">구분</th>
+                            <th scope="col">세부항목</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">공통 검사항목</th>
+                            <td class="text-left">
+                                <ol>
+                                    <li>진찰, 상담, 신장, 체중, 허리둘레, 체질량지수, 시력, 청력, 혈압측정</li>
+                                    <li>AST(SGOT), ALT(SGPT), 감마지티피</li>
+                                    <li>공복혈당</li>
+                                    <li>요단백, 혈청, 크레아티닌, 혈색소, 신사구체여과율(e-GFR)</li>
+                                    <li>흉부방사선 촬영</li>
+                                    <li>구강검진</li>
+                                </ol>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">성·연령별 검사항목</th>
+                            <td class="text-left">
+                                <ol>
+                                    <li>이상지질혈증(총콜레스테롤, HDL 콜레스테롤, LDL 콜레스테롤, 트리글리세라이드)<br /> * 남자 만 24세 이상, 여자 만 40세 이상 / 4년마다</li>
+                                    <li>B형간염검사(만 40세, 보균자 및 면역자는 제외)</li>
+                                    <li>치면세균막검사(만 40세)</li>
+                                    <li>골다공증(만 54세, 66세 여성)</li>
+                                    <li>정신건강검사 – 우울증(만 20, 30, 40, 50, 60, 70세)</li>
+                                    <li>생활습관평가(만 40, 50, 60,70세)</li>
+                                    <li>노인신체기능검사(만 66, 70, 80세)</li>
+                                    <li>인지기능장애검사(만 66세 이상 / 2년에 1회)</li>
+                                </ol>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="cms-list-wrap mt-5">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">일반검진 전 주의사항</dt>
+                    <dd class="cms-description">검진 전 날 저녁 9시 이후에는 금식하시기 바랍니다.</dd>
+                    <dd class="cms-description">검진 당일 아침 식사는 물론 물, 커피, 우유, 담배, 주스, 껌 등 일체의 음식을 삼가야 합니다.</dd>
+                    <dd class="cms-description">되도록 오전 중에 검진을 받되, 오후에 검진받으실 분은 검사 전 최소 8시간 이상의 공복상태를 유지해야 합니다.</dd>
+                    <dd class="cms-description cms-list-item">공복이 아닌 상태에서 검진 시 정확한 검사가 어렵습니다.</dd>
+                </dl>
+            </div>
+            <div class="cms-list-wrap mt-5">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">비용부담(<span class="und-r">본인부담 없음</span>)</dt>
+                    <dd class="cms-description">건강보험가입자 : <span class="und-r">공단 전액 부담</span></dd>
+                </dl>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type31">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-title">암검진</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">위암검진</dt>
+                    <dd class="cms-description">만 40세 이상의 남녀는 증상이 없어도 2년마다 위 내시경 검사를 받습니다. (위내시경 검사가 어려운 경우, 위장조영 검사 선택 가능)</dd>
+                    <dd class="cms-description cms-list-item">위암 산정특례적용자는 검진대상에서 유예합니다. (본인 검진 희망 시 대상 추가 등록 가능)</dd>
+                </dl>
+            </div>
+            <div class="cms-list-wrap mt-5">
+                <ol class="row justify-content-center between-arrow cms-box-type">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="col-4 cms-box">
+                        <div class="cms-figure">  
+                            <div class="cms-box-text">
+                                <p class="cms-description">대상자</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-4 cms-box">
+                        <div class="cms-figure">
+                            <div class="cms-box-text">
+                                <p class="cms-description">위내시경검사</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-4 cms-box">
+                        <div class="cms-figure">
+                            <div class="cms-box-text">
+                                <p class="cms-description">조직검사</p>
+                            </div>
+                            <div class="cms-small-text">유소견</div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <div class="cms-list-wrap sub0403">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">대장암검진</dt>
+                    <dd class="cms-description">만 50세 이상의 남녀는 1년마다 분변잠혈검사(FOBT)를 받은 후 양성판정자는 대장내시경 검사를 받습니다.</dd>
+                    <dd class="cms-description cms-list-item">대장암 산정특례적용자 및 국가대장암검진 대장내시경 검사 수검자는 검진 대상에서 5년간 유예합니다. (본인 검진 희망 시 대상 추가 등록 가능)</dd>
+                </dl>
+            </div>
+            <div class="cms-list-wrap mt-lg-5">
+                <ol class="row justify-content-center between-arrow cms-box-type">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="col-3 cms-box">
+                        <div class="cms-figure">  
+                            <div class="cms-box-text">
+                                <p class="cms-description">대상자</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-3 cms-box">
+                        <div class="cms-figure">
+                            <div class="cms-box-text">
+                                <p class="cms-description">분변잠혈검사</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-3 cms-box">
+                        <div class="cms-figure">
+                            <div class="cms-box-text">
+                                <p class="cms-description">대장내시경검사</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-3 cms-box">
+                        <div class="cms-figure">
+                            <div class="cms-box-text">
+                                <p class="cms-description">조직검사</p>
+                            </div>
+                            <div class="cms-small-text">유소견</div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <div class="cms-list-wrap sub0403">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">간암검진</dt>
+                    <dd class="cms-description">만 40세 이상 남녀 중 간암발생 고위험군에 해당되는 아래 대상자는 상반기 1회, 하반기 1회로 6개월 마다 간 초음파검사와 혈액검사(혈청알파태아단백검사)를 받습니다.</dd>
+                    <dd class="cms-description">고위험군 기준 : 해당년도 이전 2개년도 보험급여 내역 중 간암 발생 고위험군(간경변증, B형 간염 바이러스항원 양성, C형 간염 바이러스 항체 양성, B형 또는 C형 간염 바이러스에 의한 만성 간질환 환자) / 과거년도 일반건강검진 결과 B형 간염 바이러스 표면항원 양성자 또는 C형 간염 바이러스 항체 양성자</dd>
+                    <dd class="cms-description cms-list-item">간암 산정특례적용자는 검진대상에서 5년간 유예합니다. (본인 검진 희망  시 대상 추가 등록 가능)</dd>
+                </dl>
+            </div>
+            <div class="cms-list-wrap mt-lg-5">
+                <ol class="row justify-content-center between-arrow cms-box-type">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="col-4 cms-box">
+                        <div class="cms-figure">  
+                            <div class="cms-box-text">
+                                <p class="cms-description">대상자</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-8 cms-box">
+                        <div class="cms-figure">
+                            <div class="cms-box-text">
+                                <p class="cms-description">간 초음파 검사<br>+<br>혈액검사(혈청알파태아단백검사)</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <div class="cms-list-wrap sub0403">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">유방암검진</dt>
+                    <dd class="cms-description">만 40세 이상 여성은 2년마다 유방촬영 검사를 받습니다</dd>                    
+                    <dd class="cms-description cms-list-item">유방암 산정특례적용자는 검진대상에서 유예합니다. (본인 검진 희망 시 대상 추가 등록 가능)</dd>
+                </dl>
+            </div>
+            <div class="cms-list-wrap mt-lg-5">
+                <ol class="row justify-content-center between-arrow cms-box-type">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="col-4 cms-box">
+                        <div class="cms-figure">  
+                            <div class="cms-box-text">
+                                <p class="cms-description">대상자</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-8 cms-box">
+                        <div class="cms-figure">
+                            <div class="cms-box-text">
+                                <p class="cms-description">유방촬영</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <div class="cms-list-wrap sub0403">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">자궁경부암검진</dt>
+                    <dd class="cms-description">만 20세 이상 여성은 2년마다 자궁경부세포 검사를 받습니다. (자궁경부암 검사 시에 자궁적출술을 받았거나 성경험이 없으신 분은 사전에 검진의사와 상의하시기 바랍니다.) </dd>                    
+                    <dd class="cms-description cms-list-item">자궁 경부암 산정특례적용자는 검진대상에서 유예합니다. (본인 검진 희망 시 대상 추가 등록 가능)</dd>
+                </dl>
+            </div>
+            <div class="cms-list-wrap mt-lg-5">
+                <ol class="row justify-content-center between-arrow cms-box-type">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="col-4 cms-box">
+                        <div class="cms-figure">  
+                            <div class="cms-box-text">
+                                <p class="cms-description">대상자</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="col-8 cms-box">
+                        <div class="cms-figure">
+                            <div class="cms-box-text">
+                                <p class="cms-description">자궁경부세포검사</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <div class="cms-list-wrap sub0403">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">폐암</dt>
+                    <dd class="cms-description">만 54세부터 만74세 중 30갑년 이상의 흡연력을 가진 흡연자로써 2년주기로 저선량 흉부 CT촬영 및 사후 결과상담으로 진행됩니다.</dd>
+                </dl>
+            </div>
+            <div class="cms-list-wrap sub0403">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">암검진 전 주의사항</dt>
+                    <dd class="cms-description">내시경검사 대상 : 질환으로 복용중인 약은 예약시 직원에게 반드시 말씀해주세요.</dd>
+                    <dd class="cms-description">수면내시경시 대중교통 이용 또는 보호자 동행을 부탁드립니다.<br />본인의 안전이 최우선입니다.</dd>
+                    <dd class="cms-description">암검진 종류에 따라 안내가 달라지니 유선 예약 후 내원 부탁드립니다.</dd>
+                </dl>
+            </div>
+            <div class="cms-list-wrap sub0403">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">비용부담</dt>
+                    <dd class="cms-description">공단 90%, 수검자 10% 부담 (단, 대장암 및 자궁경부암은 전액 공단 부담)</dd>
+                    <dd class="cms-description">국가암검진사업 대상자, 의료급여수급권자는 수검자 부담 없음</dd>
+                    <dd class="cms-description">수면내시경시 수면비는 별도로 발생합니다.</dd>
+                </dl>
+            </div>
+            <div class="cms-list-wrap sub0403">
+                <dl class="cms-list-item">
+                    <dt class="cms-title">결과통보(검진기관)</dt>
+                    <dd class="cms-description">검진 결과는 검진기관에서 15일 이내에 발송해드립니다.</dd>                    
+                </dl>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <!-- contents area [e] -->
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

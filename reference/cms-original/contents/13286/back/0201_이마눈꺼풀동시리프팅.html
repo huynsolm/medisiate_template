@@ -1,0 +1,849 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style type="text/css">
+	.cms-container .cms.type-bg.sub0201-bg {background:url(https://fxfile.drline.net/local/13286/cms/sub0201_img_bg01.jpg) no-repeat;background-size:cover}
+    .cms-container .cms.sub0201-bg .cms-header.top-border:before {background:#fff}
+    .cms-container .cms.sub0201-bg .cms-header .cms-eyebrow {color:#fff;}
+    .cms-container .cms.sub0201-bg .cms-header .cms-title {color:#fff}
+    .cms-container .cms.sub0201-bg .cms-column-list.text-type-1 .cms-list-item .cms-visual {margin-bottom:0;}
+    .cms-container .cms.sub0201-bg .cms-column-list.text-type-1 .cms-list-item .cms-description-box {margin-top:0;background:#fff;text-align:center;padding-bottom:40px;}
+    .cms-container .cms.type15.sub0201-bg .cms-column-list .cms-list-item {background:#fff;padding:0;margin-left:25px;margin-right:25px}
+    .cms-container .cms.sub0201-bg .cms-column-list.text-type-1 .cms-list-item .cms-description-box .cms-title {text-align:center;color:#1e223d;font-size:2rem;margin-top:40px;font-weight:700;}
+    .cms-container .cms.sub0201-bg .cms-description-box .cms-description {text-align:center;background:#94a9b5;display:inline-block;width:59%;margin:10px auto 0;border-radius:3px;color:#fff;padding:20px 0;}
+    .cms-container .cms.sub0201-bg .cms-description-box .cms-description.type-01 {background:#a88180}
+    .cms-container .cms.type30.sub0201 .cms-description-box .cms-eyebrow.type-number {width:auto;height:auto;}
+    .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box{background:#e8eef5}
+    .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-eyebrow.type-number {font-size:1rem;color:#192a3a;line-height:1;font-family:"jost",sans-serif;position:relative;z-index:1}
+    .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-eyebrow.type-number span {font-size:1.666rem;font-weight:500;}
+    .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-eyebrow.type-number:before {content:"";display:block;position:absolute;top:50%;left:50%;width:72px;height:72px;transform:translate(-50%,-50%);background:#fff;z-index:-1;border-radius:50%;}
+    .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-description {font-size:1.125rem;color:#192a3a;line-height:1.5;margin-top:30px;}
+    .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-description:before {content:"";display:block;width:1px;height:27px;background:#192a3a;margin:0 auto 15px;}
+    .cms-container .cms .cms-table tbody td span.star_on {position:relative;width:22px;display:inline-block;text-indent:-9999rem}
+    .cms-container .cms .cms-table tbody tr.type01 td span.star_on {position:relative;width:27px;}
+    .cms-container .cms .cms-table tbody td span.star_on:before {content:"";display:block;background:url(https://fxfile.drline.net/local/13286/cms/sub0201_icon_01.jpg) no-repeat;width:22px;height:21px;position:absolute;top:0;left:0;}
+    .cms-container .cms .cms-table tbody tr.type01 td span.star_on:before {content:"";display:block;background:url(https://fxfile.drline.net/local/13286/cms/sub0201_icon_03.jpg) no-repeat;width:27px;height:25px;position:absolute;top:0;left:0;}
+    .cms-container .cms .cms-table tbody td span.star_off {position:relative;width:22px;display:inline-block;text-indent:-9999rem}
+    .cms-container .cms .cms-table tbody td span.star_off:before {content:"";display:block;background:url(https://fxfile.drline.net/local/13286/cms/sub0201_icon_02.jpg) no-repeat;width:22px;height:21px;position:absolute;top:0;left:0;}
+    .cms-container .cms .cms-table tbody tr.type01 th:first-child {color:#81a7bd;font-size:1.563rem;}
+    .cms-container .cms .cms-table tbody tr.type01 td {background:#ecf5fb}
+    @media(max-width:991px){
+        .cms-container .cms.type15.sub0201-bg .cms-column-list {margin:0;}
+        .cms-container .cms.type15.sub0201-bg .cms-column-list .cms-list-item {margin-left:1%;margin-right:1%;margin-bottom:0;}
+        .cms-container .cms.type15.sub0201-bg .cms-column-list .cms-list-item.col-6 {-webkit-box-flex:0;-ms-flex:0 0 48%;flex:0 0 48%;max-width:48%;}
+        .cms-container .cms.type15.sub0201-bg .cms-column-list .cms-list-item .cms-visual {max-width:100%;}
+        .cms-container .cms.sub0201-bg .cms-column-list.text-type-1 .cms-list-item .cms-description-box .cms-title {font-size:1.406rem;margin-top:12%;}
+        .cms-container .cms.sub0201-bg .cms-description-box .cms-description {padding:8% 0;font-size:1rem;margin:1.5% auto 0;width:73%}
+        .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-eyebrow.type-number {font-size:0.781rem}
+        .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-eyebrow.type-number span {font-size:1.406rem;}
+        .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-description:before {display:none;}
+        .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-description {font-size:1rem;margin-top:13%}
+		.cms-container .cms .cms-table tbody tr.type01 th:first-child {font-size:1.253rem;}
+		.cms-container .cms .cms-table tbody td span.star_on {width:18px;}
+		.cms-container .cms .cms-table tbody tr.type01 td span.star_on {width:20px}
+		.cms-container .cms .cms-table tbody td span.star_on:before {width:100%;background-size:contain}
+		.cms-container .cms .cms-table tbody tr.type01 td span.star_on:before {width:100%;background-size:contain}
+		.cms-container .cms .cms-table tbody td span.star_off {width:18px;}
+		.cms-container .cms .cms-table tbody td span.star_off:before {width:100%;background-size:contain}
+    }
+    @media(max-width:479px){
+        .cms-container .cms.sub0201-bg .cms-column-list.text-type-1 .cms-list-item .cms-description-box .cms-title {font-size:0.938rem;}
+        .cms-container .cms.sub0201-bg .cms-description-box .cms-description {font-size:0.667rem;}
+        .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box {padding:5%;}
+        .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-eyebrow.type-number:before  {width:40px;height:40px;}
+        .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-eyebrow.type-number {margin-top:5%;font-size:0.521rem;}
+        .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-eyebrow.type-number span {font-size:0.938rem;}
+        .cms-container .cms.type30.sub0201 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-description {font-size:0.667rem;margin-top:5%}
+		.cms-container .cms .cms-table tbody tr.type01 th:first-child {font-size:0.938rem;}
+		.cms-container .cms .cms-table tbody td span.star_on {width:33%;}
+		.cms-container .cms .cms-table tbody tr.type01 td span.star_on {width:33%;}
+		.cms-container .cms .cms-table tbody td span.star_off {width:33%;}
+    }
+    .cms-container .cms .cms-description-box ul {padding: 0;list-style: none;}
+	.cms-container .cms .cms-tile-list.text-type-2 .cms-description-box p.type-number,
+	.cms-container .cms .cms-tile-list.text-type-2 .cms-description-box p.cms-lt-text {display:inline-block;vertical-align:top;}
+	.cms-container .cms .cms-tile-list.text-type-2 .cms-description-box .cms-lt-text {width:calc(100% - 92px);padding-left: 10px;}
+	.cms-container .cms.type-bg.bg-image-1{background: url(https://fxfile.drline.net/cms/public/images/contents/cms/corset_14.jpg) no-repeat 50% 50%;background-size: cover;}
+	.cms-container .cms.sub0201.type07 .cms-bullet-list.list-style-1 .cms-list-item:before {display:none;}
+	.cms-container .cms.sub0201.type07 .cms-bullet-list.list-style-1 .cms-list-item {padding-left:0;}
+	.cms-container .cms.sub0201.type07 .cms-bullet-list.list-style-1 .cms-description-box p.cms-lt-text {display:inline-block;vertical-align:top;}
+	.cms-container .cms.sub0201.type07 .cms-bullet-list.list-style-1 .cms-description-box .cms-lt-text {width:calc(100% - 92px);padding-left: 10px;}
+	@media (max-width:479px) {
+		.cms-container .cms .cms-tile-list.text-type-2 .cms-description-box .cms-lt-text {font-size: 13px;}
+	}
+
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box{position:relative;padding:50px 50px 40px;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-header{padding:0;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-header .cms-title{font-size:20px;font-weight:500;color:#fff;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box{margin-top:10px;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-title{font-size:24px;font-weight:500;color:#fff;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-title.eng{font-size:28px;line-height:1;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box a{display:block;width:170px;height:48px;margin:0 auto;font-size:18px;font-weight:500;line-height:46px;text-align:center;color:#4a5e69;background:#e6eef3;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box dl{display:flex;flex-wrap:wrap;margin:0;font-size:16px;font-weight:300;line-height:1.5;;text-align:left;color:#fff;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box dl dt{width:30%;margin:0;font-weight:300;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box dl dd{width:70%;margin:0;font-weight:300;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box ul li{font-size:16px;font-weight:300;line-height:1.5;color:#ffdcc2;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(1) .cms-inner-box{background:#6A84A6;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(2) .cms-inner-box{background:#97C3C9;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(3) .cms-inner-box{background:#fbd45d;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(3) .cms-inner-box  .cms-header .cms-title,
+	.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(3) .cms-description-box .cms-title{color:#2c2e3a;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(3)  .cms-description-box a{color:#fbd45d;background:#3a1c1c;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .mark{display:block;position:absolute;font-size:13px;font-weight:300;text-transform:uppercase;opacity:.3;color:#fff;background:none;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(1) .cms-inner-box .mark{top:12px;left:12px;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(2) .cms-inner-box .mark{top:50%;left:12px;transform:rotate(-90deg) translateX(-50%) translateX(-0.3px);transform-origin:0 0;}
+	.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(3) .cms-inner-box .mark{top:12px;right:-100px;color:#3a1c1c;transform:rotate(90deg);;transform-origin:0 0;}
+    .cms-container .cms .cms-description-box .cms-eyebrow.type-number {width:auto;height:auto;line-height:1;border-radius:20px;padding:10px 20px;}
+	.cms-container .cms .cms-column-list.text-type-2 .cms-list-item .cms-description-box {text-align:left;}
+	.cms-container .cms .cms-column-list.text-type-2 .cms-list-item .cms-description-box .cms-title  {display:inline-block;margin:0;padding:10px 23px;background:#b09572;font-weight:400;font-size:13px;line-height:1;color:#fff;border-radius:23px;text-transform: uppercase;}
+	.cms-container .cms .cms-column-list.text-type-2 .cms-list-item .cms-description-box .cms-title+.cms-description {margin-top:20px;}
+	@media (max-width:991px) {
+		.cms-container .cms.type-bg.bg-image-1{background: url(https://fxfile.drline.net/cms/public/images/contents/cms/corset_14_m.png) no-repeat 50% 50%;background-size: cover;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box{padding:30px 50px 25px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-header .cms-title{font-size:18px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-title{font-size:26px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-title.eng{font-size:27px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box a{width:160px;height:50px;font-size:18px;line-height:48px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box dl{font-size:18px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box ul li{font-size:16px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .mark{font-size:12px;}
+		.cms-container .cms .cms-column-list.text-type-2 .cms-list-item .cms-description-box .cms-title  {padding:10px 23px;font-size:12px;border-radius:23px;}
+		.cms-container .cms .cms-column-list.text-type-2 .cms-list-item .cms-description-box .cms-title+.cms-description {margin-top:3%;}
+	}
+
+	@media (max-width:425px) {
+		.cms-container .cms.type15 .cms-column-list .cms-list-item{padding:0 25px;}
+		.cms-container .cms.type15 .cms-column-list .cms-list-item .cms-description-box{max-width:100%;}
+	}
+	@media (max-width:479px) {
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box{padding:20px 50px 20px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-header .cms-title{font-size:12px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box{margin-top:5px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-title{font-size:17px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-title.eng{font-size:18px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box a{width:107px;height:33px;font-size:12px;line-height:31px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box dl{font-size:12px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box ul li{font-size:11px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item .cms-inner-box .mark{font-size:11px;}
+		.cms-container .cms.type34 .cms-column-list .cms-list-item:nth-child(3) .cms-inner-box .mark{top:12px;right:-81px;color:#3a1c1c;transform:rotate(90deg);;transform-origin:0 0;}
+		.cms-container .cms .cms-column-list.text-type-2 .cms-list-item .cms-description-box .cms-title {font-size:11px;padding:5px 15px;}
+    }
+	.cms-container .cms .cms-figure-list.item-between-border>.cms-list-item:before {display:none}
+	.cms-container .cms .cms-figure-list .cms-figure.circle{border:none;padding-top:100%}
+</style>
+<div class="cms-container">
+	<!-- contents area [s] -->
+	<section class="cms type00">
+		<div class="cms-inner">
+			<div class="cms-header bottom-border">
+				<p class="cms-page-title">이마거상 + 상안검</p>
+			</div>
+		</div>
+	</section>
+	<section class="cms type01">
+		<div class="cms-inner">
+			<!-- 제목 영역 [s] -->
+			<div class="cms-header">
+				<p class="cms-thin-title"><em>이마거상 + 상안검</em>이란?</p>
+			</div>
+			<!-- 제목 영역 [e] -->
+			<!-- 콘텐츠 영역 [s] -->
+			<div class="cms-visual">
+				<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_01.jpg" alt="" class="img-fluid d-none d-lg-block">
+				<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_01_m.jpg" alt="" class="w-100 d-block d-lg-none">
+			</div>
+			<div class="cms-description-box">
+				<p class="cms-description larger">상안면부의 노화는 복합적으로 나타납니다.<br />이마 거상술만 할 경우엔 안검하수와 피부 절제가 불가능하며 상안검 수술만 할 경우엔 눈썹 처짐이 해결되지 않아 강한 인상이 될 수 있습니다.<br />이마거상 + 상안검은 상안면부의 노화를 근본적으로 해결할 수 있는 방법입니다.</p>
+			</div>
+			<!-- 콘텐츠 영역 [e] -->
+		</div>
+	</section>
+    <section class="cms type22">
+        <div class="cms-inner">
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-img-list text-bottom text-type-2 row">
+                    <li class="cms-list-item col-6 col-lg-3">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0201.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0201_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-visual-text">
+                            <p class="cms-title">눈썹 처짐</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-3">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0202.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0202_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-visual-text">
+                            <p class="cms-title">안검하수</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-3">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0203.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0203_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-visual-text">
+                            <p class="cms-title">눈두덩이 꺼짐</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-3">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0204.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0204_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-visual-text">
+                            <p class="cms-title">피부 늘어짐</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type26">
+        <div class="cms-inner">
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-table-wrap">
+                <table class="cms-table">
+                    <caption class="sr-only">테이블 제목</caption>
+                    <!-- 테이블 셀 너비는 colgroup으로 설정 -->
+                    <colgroup>
+                        <col style="width:20%">
+                        <col style="width:20%">
+                        <col style="width:20%">
+                        <col style="width:20%">
+                        <col style="width:20%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">눈썹 처짐 개선</th>
+                            <th scope="col">안검하수 개선</th>
+                            <th scope="col">눈두덩이 꺼짐 개선</th>
+                            <th scope="col">피부 늘어짐 개선</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">이마거상</th>
+                            <td><span class="star_on">별</span><span class="star_on">별</span><span class="star_on">별</span></td>
+                            <td><span class="star_on">별</span><span class="star_off">빈별</span><span class="star_off">빈별</span></td>                            
+                            <td><span class="star_off">빈별</span><span class="star_off">빈별</span><span class="star_off">빈별</span></td>
+                            <td><span class="star_on">별</span><span class="star_on">별</span><span class="star_off">빈별</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">상안검</th>
+                            <td><span class="star_off">빈별</span><span class="star_off">빈별</span><span class="star_off">빈별</span></td>
+                            <td><span class="star_on">별</span><span class="star_on">별</span><span class="star_on">별</span></td>
+                            <td><span class="star_on">별</span><span class="star_on">별</span><span class="star_on">별</span></td>
+                            <td><span class="star_on">별</span><span class="star_on">별</span><span class="star_off">빈별</span></td>
+                        </tr>
+                        <tr class="type01">
+                            <th scope="row">동시 리프팅</th>
+                            <td><span class="star_on">별</span><span class="star_on">별</span><span class="star_on">별</span></td>
+                            <td><span class="star_on">별</span><span class="star_on">별</span><span class="star_on">별</span></td>
+                            <td><span class="star_on">별</span><span class="star_on">별</span><span class="star_on">별</span></td>
+                            <td><span class="star_on">별</span><span class="star_on">별</span><span class="star_on">별</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+	<section class="cms type15 type-bg sub0201-bg">
+		<div class="cms-inner">
+			<!-- 제목 영역 [s] -->
+			<div class="cms-header top-border">
+				<p class="cms-eyebrow">초이성형외과 동시 리프팅!</p>
+				<p class="cms-title">주름 개선과 젊은 인상으로 한번에!</p>
+			</div>
+			<!-- 제목 영역 [e] -->
+			<!-- 콘텐츠 영역 [s] -->
+			<div class="cms-list-wrap">
+                <ul class="cms-column-list text-type-1 row">
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0301.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0301_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">상안검 성형술</p>
+                            <p class="cms-description">눈처짐 현상 원인 해결</p>
+                            <p class="cms-description">눈썹&눈꺼풀 처짐 개선</p>
+                            <p class="cms-description">안검하수 교정</p>
+							<p class="cms-description">선명한 눈매</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0302.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0302_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">내시경 이마거상술</p>
+                            <p class="cms-description type-01">눈썹 처짐 개선</p>
+                            <p class="cms-description type-01">미간 주름개선</p>
+                            <p class="cms-description type-01">눈가 주름개선</p>
+                            <p class="cms-description type-01">이마 주름개선</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+			<!-- 콘텐츠 영역 [e] -->
+		</div>
+	</section>
+
+	<section class="cms type30 sub0201">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">이마거상 + 상안검</p>
+                <p class="cms-title">수술 대상</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-column-list item-color-box row">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-6 col-lg-4">
+                    <div class="cms-inner-box">
+                        <div class="cms-description-box">
+                        <p class="cms-eyebrow type-number">CASE<br /><span>01</span></p>
+                        <p class="cms-description">이마를 써서 눈을 떠도<br />눈뜨는 게 불편한 경우</p>
+                        </div>
+                    </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                    <div class="cms-inner-box">
+                        <div class="cms-description-box">
+                        <p class="cms-eyebrow type-number">CASE<br /><span>02</span></p>
+                        <p class="cms-description">눈두덩이가<br />너무 꺼져 보이는 경우</p>
+                        </div>
+                    </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                    <div class="cms-inner-box">
+                        <div class="cms-description-box">
+                        <p class="cms-eyebrow type-number">CASE<br /><span>03</span></p>
+                        <p class="cms-description">눈썹 하수와 안검하수가<br />동반된 경우</p>
+                        </div>
+                    </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-inner-box">
+                            <div class="cms-description-box">
+                            <p class="cms-eyebrow type-number">CASE<br /><span>04</span></p>
+                            <p class="cms-description">이마, 미간, 눈가 주름을 개선하면서<br />눈도 또렷해지고 싶은 경우</p>
+                            </div>
+                        </div>
+                        </li>
+                        <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-inner-box">
+                            <div class="cms-description-box">
+                            <p class="cms-eyebrow type-number">CASE<br /><span>05</span></p>
+                            <p class="cms-description">자연스럽게<br />젊어지고 싶은 경우</p>
+                            </div>
+                        </div>
+                        </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+	<section class="cms type25">
+		<div class="cms-inner">
+			<!-- 제목 영역 [s] -->
+			<div class="cms-header top-border">
+				<p class="cms-eyebrow">이마거상 + 상안검</p>
+				<p class="cms-title">수술 방법</p>
+			</div>
+			<!-- 제목 영역 [e] -->
+			<!-- 콘텐츠 영역 [s] -->
+			<div class="cms-list-wrap">
+				<ul class="cms-column-list text-type-2 row">
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0401.jpg" alt="" class="w-100 d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0401_m.jpg" alt="" class="w-100 d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">STEP 1</p>
+							<p class="cms-description">이마거상으로 눈썹이 올라간 경우를 가정하여 필요한 피부절제량을 디자인합니다.</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0402.jpg" alt="" class="w-100 d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0402_m.jpg" alt="" class="w-100 d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">STEP 2</p>
+							<p class="cms-description">피부를 절제하고 안검하수를 교정합니다.</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0403.jpg" alt="" class="w-100 d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0403_m.jpg" alt="" class="w-100 d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">STEP 3</p>
+							<p class="cms-description">지방주머니를 재배치하거나 지방이 절대적으로 부족한 경우 지방을 이식합니다.</p>
+						</div>
+					</li>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0404.jpg" alt="" class="w-100 d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0404_m.jpg" alt="" class="w-100 d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">STEP 4</p>
+							<p class="cms-description">원하는 크기의 쌍꺼풀을 만들고 피부를 봉합합니다.</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0405.jpg" alt="" class="w-100 d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0405_m.jpg" alt="" class="w-100 d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">STEP 5</p>
+							<p class="cms-description">두피에 4개의 작은 절개창을 만들고 눈가부터 눈썹 뼈를 따라 박리합니다.</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0406.jpg" alt="" class="w-100 d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0406_m.jpg" alt="" class="w-100 d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">STEP 6</p>
+							<p class="cms-description">추미근, 눈썹내림근, 비금근을 절개, 절제합니다.</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0407.jpg" alt="" class="w-100 d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0407_m.jpg" alt="" class="w-100 d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">STEP 7</p>
+							<p class="cms-description">눈썹을 적절한 위치로 이동시켜 두개골에 녹는 실로 고정합니다.</p>
+						</div>
+					</li>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0408.jpg" alt="" class="w-100 d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0408_m.jpg" alt="" class="w-100 d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">STEP 8</p>
+							<p class="cms-description">시간이 지나며 두개골과 골막이 유착되어 반영구적인 효과를 누릴 수 있습니다.</p>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<!-- 콘텐츠 영역 [e] -->
+		</div>
+	</section>
+
+	<section class="cms type33 type-bg bg-color-2">
+		<div class="cms-inner">
+			<!-- 제목 영역 [s] -->
+			<div class="cms-header top-border">
+                <p class="cms-eyebrow">이마거상 + 상안검</p>
+				<p class="cms-title">수술 정보</p>
+			</div>
+			<!-- 제목 영역 [e] -->
+			<!-- 콘텐츠 영역 [s] -->
+			<div class="cms-list-wrap">
+				<ol class="cms-figure-list item-between-border text-type-3 row justify-content-center">
+					<!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+					<!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+					<!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-figure-text">
+									<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+										<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_01.png" alt="" class="d-none d-lg-block m-auto">
+										<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_01_m.png" alt="" class="d-block d-lg-none m-auto">
+									</div>
+									<p class="cms-eyebrow">수술 시간</p>
+									<p class="cms-description">3시간</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-figure-text">
+									<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+										<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_02.png" alt="" class="d-none d-lg-block m-auto">
+										<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_02_m.png" alt="" class="d-block d-lg-none m-auto">
+									</div>
+									<p class="cms-eyebrow">마취 방법</p>
+									<p class="cms-description">수면마취</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-figure-text">
+									<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+										<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_03.png" alt="" class="d-none d-lg-block m-auto">
+										<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_03_m.png" alt="" class="d-block d-lg-none m-auto">
+									</div>
+									<p class="cms-eyebrow">입원여부</p>
+									<p class="cms-description">불필요</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-figure-text">
+									<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+										<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_05.jpg" alt="" class="d-none d-lg-block m-auto">
+										<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_05_m.jpg" alt="" class="d-block d-lg-none m-auto">
+									</div>
+									<p class="cms-eyebrow">실밥제거</p>
+									<p class="cms-description">실밥제거 5-7일 후</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-figure-text">
+									<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+										<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_04.png" alt="" class="d-none d-lg-block m-auto">
+										<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_04_m.png" alt="" class="d-block d-lg-none m-auto">
+									</div>
+									<p class="cms-eyebrow">회복기간</p>
+									<p class="cms-description">1주</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-figure-text">
+									<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+										<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_06.jpg" alt="" class="d-none d-lg-block m-auto">
+										<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_06_m.jpg" alt="" class="d-block d-lg-none m-auto">
+									</div>
+									<p class="cms-eyebrow">내원치료</p>
+									<p class="cms-description">2~3회</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-figure-text">
+									<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+										<img src="https://fxfile.drline.net/local/13286/cms/type33_icon_07.jpg" alt="" class="d-none d-lg-block m-auto">
+										<img src="https://fxfile.drline.net/local/13286/cms/type33_icon_07_m.jpg" alt="" class="d-block d-lg-none m-auto">
+									</div>
+									<p class="cms-eyebrow">기타서비스</p>
+									<p class="cms-description">수술 후 샴푸</p>
+								</div>
+							</div>
+						</div>
+					</li>
+				</ol>
+			</div>
+			<!-- 콘텐츠 영역 [e] -->
+		</div>
+	</section>
+    
+	<!-- <section class="cms type07 sub0201">
+		<div class="cms-inner">
+			<div class="cms-header top-border">
+				<p class="cms-eyebrow">이마 눈꺼풀 동시 리프팅</p>
+				<p class="cms-title">수술 방법</p>
+			</div>
+			<div class="cms-column-wrap box-type row">
+				<div class="cms-visual col-lg-4">
+					<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_04.jpg" alt="" class="img-fluid d-none d-lg-block">
+					<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_04_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+				</div>
+				<div class="cms-list-wrap col-lg-8">
+					<ul class="cms-bullet-list list-style-1 cms-spread-list">
+						<li class="cms-list-item">
+							<div class="cms-description-box">
+								<p class="cms-eyebrow type-number">STEP 1</p>
+								<p class="cms-lt-text">이마 리프팅으로 눈썹이 올라간 경우를 가정하여 필요한 피부절제량을 디자인합니다.</p>
+							</div>
+						</li>
+						<li class="cms-list-item">
+							<div class="cms-description-box">
+								<p class="cms-eyebrow type-number">STEP 2</p>
+								<p class="cms-lt-text">피부를 절제하고 안검하수를 교정합니다.</p>
+							</div>
+						</li>
+						<li class="cms-list-item">
+							<div class="cms-description-box">
+								<p class="cms-eyebrow type-number">STEP 3</p>
+								<p class="cms-lt-text">지방주머니를 재배치하거나 지방이 절대적으로 부족한 경우 지방을 이식합니다.</p>
+							</div>
+						</li>
+						<li class="cms-list-item">
+							<div class="cms-description-box">
+								<p class="cms-eyebrow type-number">STEP 4</p>
+								<p class="cms-lt-text">원하는 크기의 쌍꺼풀을 만들고 피부를 봉합합니다.</p>
+							</div>
+						</li>
+						<li class="cms-list-item">
+							<div class="cms-description-box">
+								<p class="cms-eyebrow type-number">STEP 4</p>
+								<p class="cms-lt-text">원하는 크기의 쌍꺼풀을 만들고 피부를 봉합합니다.</p>
+							</div>
+						</li>
+						<li class="cms-list-item">
+							<div class="cms-description-box">
+								<p class="cms-eyebrow type-number">STEP 5</p>
+								<p class="cms-lt-text">두피에 4개의 작은 절개창을 만들고 눈가부터 눈썹 뼈를 따라 박리합니다.</p>
+							</div>
+						</li>
+						<li class="cms-list-item">
+							<div class="cms-description-box">
+								<p class="cms-eyebrow type-number">STEP 7</p>
+								<p class="cms-lt-text">눈썹을 적절한 위치로 이동시켜 두개골에 녹는 실로 고정합니다.</p>
+							</div>
+						</li>
+						<li class="cms-list-item">
+							<div class="cms-description-box">
+								<p class="cms-eyebrow type-number">STEP 8</p>
+								<p class="cms-lt-text">시간이 지나며 두개골과 골막이 유착되어 반영구적인 효과를 누릴 수 있습니다.</p>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</section>
+    <section class="cms type17">
+        <div class="cms-inner">
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">이마 눈꺼풀 동시 리프팅</p>
+                <p class="cms-title">사후 관리</p>
+            </div>
+            <div class="cms-list-wrap">
+                <ol class="cms-row-list text-type-1">
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-3">수술 당일</p>
+                            <p class="cms-description col">멍&부기 예방 홈 케어 세트 증정(아이스팩&시네크 캡슐&멍크림)</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-3">수술 1일 차</p>
+                            <p class="cms-description col">수술 부위 체크 및 소독, 메디컬 샴푸서비스, 개인별 맞춤 수액 케어</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-3">수술 5일 차</p>
+                            <p class="cms-description col">수술 부위 체크 및 실밥 제거, 개인별 맞춤 부기 케어</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-3">수술 7일 차</p>
+                            <p class="cms-description col">수술 부위 체크 및 실밥 제거, 개인별 맞춤 부기 케어 (힐라이트, LDM), 흉터 케어(흉터연고처방)</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-3">수술 1개월 차</p>
+                            <p class="cms-description col">집도의 1:1 경과 상담</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-3">수술 3개월 차</p>
+                            <p class="cms-description col">집도의 1:1 경과 상담</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-3">수술 6개월 차</p>
+                            <p class="cms-description col">집도의 1:1 경과 상담</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </section> -->
+    
+	<section class="cms type15">
+		<div class="cms-inner">
+			<!-- 제목 영역 [s] -->
+			<div class="cms-header top-border">
+				<p class="cms-eyebrow">초이성형외과만의</p>
+				<p class="cms-title">의료 시스템</p>
+			</div>
+			<!-- 제목 영역 [e] -->
+			<!-- 콘텐츠 영역 [s] -->
+			<div class="cms-list-wrap">
+				<ul class="cms-column-list text-type-1 row">
+					<li class="cms-list-item col-12 col-lg-4">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0501.jpg" alt="" class="img-fluid d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0501_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">1인 원장 시스템</p>
+							<p class="cms-description">대표 원장이 상담부터 수술 후 관리까지 모든 과정을 직접 관리</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-12 col-lg-4">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0502.jpg" alt="" class="img-fluid d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0502_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">초음파 검사</p>
+							<p class="cms-description">수술 전 정확한 진단과 수술 후 합병증을 최소화 하기 위해 초음파 검사 실시</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-12 col-lg-4">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0503.jpg" alt="" class="img-fluid d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0503_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">최신 의료 장비</p>
+							<p class="cms-description">안전하고 효과적인 만족도가 높은 최첨단 의료장비를 보유하고 있습니다.</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-12 col-lg-4">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0504.jpg" alt="" class="img-fluid d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0504_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">철저한 사후 관리 시스템</p>
+							<p class="cms-description">부기 완화, 멍, 통증을 최소화하는 시네크 캡슐, 힐라이트, LDM 등의 지속적인 사후관리</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-12 col-lg-4">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0505.jpg" alt="" class="img-fluid d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0505_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">최상의 서비스</p>
+							<p class="cms-description">수술 환자의 보호자도 편하게 기다리실 수 있도록 1인 회복실 환경을 제공합니다.</p>
+						</div>
+					</li>
+					<li class="cms-list-item col-12 col-lg-4">
+						<div class="cms-visual">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0506.jpg" alt="" class="img-fluid d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/sub0201_img_0506_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+						</div>
+						<div class="cms-description-box">
+							<p class="cms-title">응급 시스템 완비</p>
+							<p class="cms-description">응급 상황에 대비한 안전 시스템 완비</p>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<!-- 콘텐츠 영역 [e] -->
+		</div>
+	</section>
+	<section class="cms type34 type-bg bg-image-1 text-white">
+		<div class="cms-inner">
+			<!-- 콘텐츠 영역 [s] -->
+			<div class="cms-list-wrap">
+				<ul class="cms-column-list item-bg-box text-type-1 row">
+					<!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+					<!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+					<!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+					<li class="cms-list-item col-12 col-lg-4">
+						<div class="cms-inner-box">
+							<div class="cms-header">
+								<p class="cms-title">대표번호</p>
+							</div>
+							<div class="cms-icon">
+								<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_15.png" alt="" class="d-none d-lg-block">
+								<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_15_m.png" alt="" class="d-block d-lg-none">
+							</div>
+							<div class="cms-description-box">
+								<p class="cms-title eng">02.543.7781</p>
+								<p class="cms-description">
+									<a href="tel:02-543-7781">전화걸기</a>
+								</p>
+							</div>
+							<span class="mark">CHOI happycall</span>
+						</div>
+					</li>
+					<li class="cms-list-item col-12 col-lg-4">
+						<div class="cms-inner-box">
+							<div class="cms-header">
+								<p class="cms-title">진료시간</p>
+							</div>
+							<div class="cms-icon">
+								<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_16.png" alt="" class="d-none d-lg-block">
+								<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_16_m.png" alt="" class="d-block d-lg-none">
+							</div>
+							<div class="cms-description-box">
+								<dl>
+									<dt>월, 수, 목</dt>
+									<dd>10:00 ~ 19:00</dd>
+									<dt>화, 금</dt>
+									<dd>10:00 ~ 21:00 (야간진료)</dd>
+									<dt>토요일</dt>
+									<dd>10:00 ~ 17:00</dd>
+								</dl>
+								<ul>
+									<li>*야간진료는 예약제로 운영됩니다</li>
+									<li>*일요일 공휴일 휴진</li>
+								</ul>
+							</div>
+							<span class="mark">surgery hours</span>
+						</div>
+					</li>
+					<li class="cms-list-item col-12 col-lg-4">
+						<div class="cms-inner-box">
+							<div class="cms-header">
+								<p class="cms-title">카톡상담</p>
+							</div>
+							<div class="cms-icon">
+								<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_17.png" alt="" class="d-none d-lg-block">
+								<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_17_m.png" alt="" class="d-block d-lg-none">
+							</div>
+							<div class="cms-description-box">
+								<p class="cms-title">@초이성형외과의원</p>
+								<p class="cms-description">
+									<a href="https://pf.kakao.com/_jxehxes/chat" target="_blank">바로가기</a>
+								</p>
+							</div>
+							<span class="mark">chio kakaotalk </span>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<!-- 콘텐츠 영역 [e] -->
+		</div>
+	</section>
+	<!-- contents area [e] -->
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->
