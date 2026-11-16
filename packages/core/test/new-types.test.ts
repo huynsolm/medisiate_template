@@ -162,3 +162,30 @@ describe('type33 · 원 안의 아이콘·작은 글·값 (실제 페이지 형�
     expect(result.html).toContain('Q 등급은 높습니다.');
   });
 });
+
+describe('type31 · 제목별 안내 줄 목록 (일반 모드)', () => {
+  it('parses the original component (section 1) and renders host general-mode bullets', async () => {
+    const result = convert(sectionOf('type31', 1));
+    const section = result.page.sections[0]!;
+    expect(section.type).toBe('type31');
+    const groups = (section.data as { groups: Array<{ title?: string; lines: Array<{ kind: string; text: string }> }> }).groups;
+    expect(groups[0]!.title).toBe('입원 수속 안내');
+    expect(groups[0]!.lines.map((l) => l.kind)).toEqual(['item', 'item']);
+    expect(result.html).not.toContain('mig-container');
+    expect(follow(result.html, ['div.mig-content', 'div.mig-content-inner', 'div.mig-title-wrap', 'strong.mig-title']).length).toBe(groups.length);
+    expect(follow(result.html, ['div.mig-content-inner', 'ul.mig-list.type-bullet', 'li.mig-item', 'p.mig-desc']).length).toBeGreaterThan(0);
+    await expect(JSON.stringify(section, null, 2) + '\n').toMatchFileSnapshot(snapshot('type31/component.expected.json'));
+    await expect(result.html).toMatchFileSnapshot(snapshot('type31/component.expected.html'));
+  });
+
+  it('keeps sub titles and * / ※ notes in order (the note marks are drawn as text in the output)', () => {
+    const body = '<section class="cms type31"><div class="cms-inner"><div class="cms-list-wrap"><dl class="cms-list-item"><dt class="cms-title">제목</dt>'
+      + '<dd class="cms-description cms-title">1) 소제목</dd><dd class="cms-description">줄</dd><dd class="cms-description cms-list-item">별표 주석</dd><dd class="cms-description cms-list-item type01">당구장 주석</dd></dl></div></div></section>';
+    const result = convert(body);
+    expect(result.page.sections[0]!.type).toBe('type31');
+    const html = result.html;
+    expect(html.indexOf('1) 소제목')).toBeLessThan(html.indexOf('>줄<'));
+    expect(html).toContain('* 별표 주석');
+    expect(html).toContain('※ 당구장 주석');
+  });
+});

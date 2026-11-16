@@ -98,8 +98,13 @@ type33의 Q&A 아코디언은 호스트 `mig-faq-*`가 맞는데, 이 규칙은 
 - 질문의 아코디언 `button`은 줄 안 요소로 인정(글 유지, 펼치기 동작은 정적 표현).
 - Chromium(호스트 CSS) 확인: Q·A 표시가 그려지고 답이 모두 보인다. 실제 Q&A 섹션 4개 변환(질문 button 허용 후), type33 63% → 70%.
 
+### type31 (일반 모드)
+- 원본: `.cms-list-wrap > dl.cms-list-item > dt(제목) + dd…`. 원본 cms.css는 줄 앞 짧은 선, `dd.cms-title`은 굵은 소제목, `dd.cms-list-item`은 `*`(type01은 `※`) 주석을 CSS로 그린다.
+- 호스트 프리셋이 없어 일반 모드: `.mig-content-inner`(묶음) > `.mig-title-wrap > strong.mig-title` + `ul.mig-list.type-bullet > li.mig-item > p.mig-desc`. 소제목은 굵은 글, 주석은 작은 글에 `*`·`※`를 글로 붙인다(순서 검사용 출력에서는 뺌).
+- 실제 19개 섹션 중 9개 변환(0% → 47%). 나머지는 표·이미지·상자 목록이 섞인 복합 형태라 원본 보존.
+
 ## 8. 남은 일 (다음 순서)
 
 1. 실제 페이지의 손으로 고친 변형(설명 상자 안 소제목·문단 반복, 표 뒤 설명, 한 섹션에 표 여러 개 등) → 공통 "내용 블록" 모델 검토.
-2. type33 Q&A(일반 모드 `mig-faq-*`): 형태별 모드 지원이 필요. 남은 타입 type31(19, 일반 모드 dl 목록), type34(11), type32(5), type08(4).
+2. 남은 타입 type34(11), type32(5), type08(4). type01 제목 위치(이미지 위/아래) 사용자 결정 대기.
 3. 원본 `cms.css`와 추정값 대조(배경 색상표, type24 번호 모양, type23 정렬 등).
