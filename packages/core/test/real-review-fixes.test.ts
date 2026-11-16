@@ -233,3 +233,43 @@ describe('order check v5', () => {
     expect(result.page.sections[0]!.type).toBe('type23');
   });
 });
+
+// ---- 7차 재검수(0efc580) 지적: 표시 클래스 해석, 합치기 자리의 구분 ----
+
+describe('display classes are interpreted like Bootstrap (7th review I-1)', () => {
+  const visual = (cls: string) => convert(`<section class="cms type23"><div class="cms-inner"><div class="cms-visual"><img src="https://example.com/image.png" alt="" class="${cls}"></div></div></section>`);
+  const only = (r: ReturnType<typeof convert>) => (r.page.sections[0]!.data as { image?: { only?: string } }).image?.only;
+
+  it('d-lg-block alone is visible everywhere: not hidden on mobile', () => {
+    const r = visual('d-lg-block');
+    expect(r.page.sections[0]!.type).toBe('type23');
+    expect(only(r)).toBeUndefined();
+    expect(r.html).not.toContain('common-display-pc');
+  });
+
+  it('d-none d-lg-inline-block is PC only', () => {
+    const r = visual('d-none d-lg-inline-block');
+    expect(only(r)).toBe('pc');
+  });
+
+  it('d-none d-lg-block is PC only, d-block d-lg-none is mobile only', () => {
+    expect(only(visual('d-none d-lg-block'))).toBe('pc');
+    expect(only(visual('d-block d-lg-none'))).toBe('mo');
+  });
+
+  it('a tablet-only image (d-none d-md-block d-lg-none) cannot be expressed and is preserved', () => {
+    const r = visual('d-none d-md-block d-lg-none');
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+});
+
+describe('merging blocks needs a real separation at the join (7th review I-2)', () => {
+  it('two description paragraphs cannot be matched to a single unbroken title', () => {
+    const r = convert('<section class="cms type10"><div class="cms-inner"><ol class="cms-figure-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">검사</p><p class="cms-description">검사</p></div><div class="cms-figure-text"><p class="cms-title">검사검사</p></div></li></ol></div></section>');
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('two paragraphs joined with a line break, and an eyebrow + title header, are still fine', () => {
+    expect(convert('<section class="cms type04"><div class="cms-inner"><div class="cms-header top-border"><p class="cms-eyebrow">작은</p><p class="cms-title">제목</p></div><ol class="cms-tile-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">첫 문단</p><p class="cms-description">둘째 문단</p></div></li></ol></div></section>').page.sections[0]!.type).toBe('type04');
+  });
+});

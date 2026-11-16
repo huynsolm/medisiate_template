@@ -69,12 +69,44 @@ export function imageFromElement(el: DomElement): ImageRef {
 const PC_MARK = /^(pc|pc-only|only-pc|show-pc|visible-lg|visible-md|hidden-xs|d-lg-block|d-md-block|img-pc|pc-img)$|[-_]pc$/u;
 const MO_MARK = /^(mo|m|mobile|mo-only|only-mo|show-mo|visible-xs|visible-sm|d-lg-none|d-md-none|img-mo|mo-img|m-img)$|[-_](mo|m|mobile)$/u;
 
-/** 요소 자신의 클래스만 보고 PC 전용·MO 전용 표시를 판정한다(조상은 보지 않음). 글 순서 검사의 화면별 비교에 쓴다 */
-export function ownDevice(el: DomElement): 'pc' | 'mo' | undefined {
+/** 화면 구분: 모바일(768 미만), 태블릿(768~991, 호스트 출력에서는 모바일 쪽), PC(992 이상, 호스트 출력은 1024 이상) */
+export type View = 'mo' | 'tablet' | 'pc';
+export const VIEWS: readonly View[] = ['pc', 'tablet', 'mo'];
+const VIEW_WIDTH: Record<View, number> = { mo: 0, tablet: 800, pc: 1100 };
+const BREAKPOINT: Record<string, number> = { '': 0, sm: 576, md: 768, lg: 992, xl: 1200 };
+const D_CLASS = /^d-(?:(sm|md|lg|xl)-)?(none|inline|inline-block|block|table|table-row|table-cell|flex|inline-flex|grid|inline-grid|contents)$/u;
+
+/**
+ * 요소 자신의 클래스 기준으로 화면마다 보이는지. 표시 클래스가 없으면 undefined(= 모든 화면에서 보임).
+ * - Bootstrap 표시 클래스(d-none, d-md-block, d-lg-none, d-lg-inline-block …)는 기본값 + 화면 폭별 덮어쓰기로 계산한다.
+ *   d-lg-block 하나만 있으면 큰 화면에서 block을 지정할 뿐이라 모든 화면에서 보인다 (7차 재검수 I-1).
+ * - 그 밖의 표시 이름(pc, mo, visible-lg, common-display-pc/mo …)은 PC 전용·모바일(태블릿 포함) 전용으로 본다.
+ */
+export function ownVisibility(el: DomElement): Record<View, boolean> | undefined {
   const classes = classesOf(el);
-  if (classes.some((c) => PC_MARK.test(c))) return 'pc';
-  if (classes.some((c) => MO_MARK.test(c))) return 'mo';
+  const rules = classes.map((c) => D_CLASS.exec(c)).filter((m): m is RegExpExecArray => m !== null)
+    .map((m) => ({ at: BREAKPOINT[m[1] ?? '']!, show: m[2] !== 'none' }));
+  if (rules.length > 0) {
+    const at = (width: number) => {
+      const applicable = rules.filter((r) => r.at <= width).sort((a, b) => a.at - b.at);
+      return applicable.length === 0 ? true : applicable[applicable.length - 1]!.show;
+    };
+    return { mo: at(VIEW_WIDTH.mo), tablet: at(VIEW_WIDTH.tablet), pc: at(VIEW_WIDTH.pc) };
+  }
+  const named = classes.filter((c) => !c.startsWith('d-'));
+  if (named.some((c) => PC_MARK.test(c))) return { mo: false, tablet: false, pc: true };
+  if (named.some((c) => MO_MARK.test(c))) return { mo: true, tablet: true, pc: false };
   return undefined;
+}
+
+/** 요소와 조상들의 표시를 합친 화면별 보임(조상이 숨기면 숨음) */
+export function visibilityOf(el: DomElement): Record<View, boolean> {
+  const out: Record<View, boolean> = { mo: true, tablet: true, pc: true };
+  for (const node of [el, ...ancestors(el)]) {
+    const v = ownVisibility(node);
+    if (v) for (const view of VIEWS) out[view] &&= v[view];
+  }
+  return out;
 }
 
 export function deviceOf(el: DomElement): 'pc' | 'mo' | undefined {
@@ -116,9 +148,12 @@ export function pairImages(images: DomElement[], src: SourceSection, diagnostics
   // 한 장뿐인데 원본에서 한쪽 화면 전용으로 표시돼 있으면 그 화면에서만 보이게 기록한다
   // (예: PC 전용 이미지가 출력에서는 모바일에도 보이던 문제. 6차 재검수 대응 중 화면별 비교로 발견)
   // 화면 전용 여부는 표시 클래스(원본 브라우저가 실제로 숨기는 근거)로만 정한다. 파일 이름(_m.png)은 칸 배정 짐작일 뿐 숨기지 않는다.
+  // 표현할 수 있는 것은 "PC에서만"과 "모바일·태블릿에서만" 둘이다. 그 밖의 조합(태블릿에서만 등)은 only를 두지 않고,
+  // 화면별 글 순서 검사가 화면마다의 차이를 찾아 원본을 보존한다.
   if (images.length === 1 && extra.length === 0) {
-    const device = [images[0]!, ...ancestors(images[0]!)].map(ownDevice).find(Boolean);
-    if (device) pair.only = device;
+    const v = visibilityOf(images[0]!);
+    if (v.pc && !v.tablet && !v.mo) pair.only = 'pc';
+    else if (!v.pc && v.tablet && v.mo) pair.only = 'mo';
   }
   return { pair, extra };
 }

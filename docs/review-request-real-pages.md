@@ -125,3 +125,10 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 한쪽 화면 전용 이미지(`only`) 출력.
 - type01은 사용자 결정에 따라 원본 순서(제목 → 이미지)로 바꿨고 순서 검사 예외는 없앴다.
 - 기대 수치: `npm test` 870 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
+
+## 15. 8차 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `5f2b966..` 이후.
+- 화면 표시 판정을 Bootstrap 규칙대로(세 화면: 모바일·태블릿·PC) 계산하고, 이미지 `only`와 순서 검사가 같은 함수를 쓴다. 덩어리 합치기는 출력의 구분 자리(`<br>`, 요소 경계)에서만 허용한다.
+- 확인 요청: 실제 페이지의 다른 표시 클래스 조합(사이트 전용 이름 포함), 구분 자리 규칙의 우회·오탐.
+- 기대 수치: `npm test` 876 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.

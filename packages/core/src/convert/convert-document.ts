@@ -7,7 +7,7 @@ import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
-import { ownDevice } from '../parse/common.ts';
+import { ownVisibility, VIEWS, type View } from '../parse/common.ts';
 import type { TypeRegistry } from '../types/definition.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
 
@@ -188,7 +188,7 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
 }
 
 type Run = [href: string, text: string];
-type Segment = { kind: 't'; runs: Run[] } | { kind: 'i'; href: string; src: string };
+type Segment = { kind: 't'; runs: Run[]; soft: Set<number> } | { kind: 'i'; href: string; src: string };
 
 const BLOCK_TAGS = new Set(['p', 'div', 'li', 'dt', 'dd', 'td', 'th', 'tr', 'caption', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'section', 'article', 'header', 'footer', 'ul', 'ol', 'dl', 'table', 'figure', 'blockquote', 'pre', 'address', 'aside', 'nav', 'main']);
 
@@ -203,14 +203,19 @@ const BLOCK_TAGS = new Set(['p', 'div', 'li', 'dt', 'dd', 'td', 'th', 'tr', 'cap
  * - 원본 쪽 위험한 링크는 출력에서 링크를 빼므로(UNSAFE_LINK_REMOVED) 링크 없는 글로 본다.
  * - ignore가 고른 원본 요소(호스트 CSS가 다시 그리는 표시)와 주석·script·style·template은 뺀다.
  */
-function segments(node: DomNode, view: 'pc' | 'mo', ignore: ((el: DomElement) => boolean) | undefined, href = '', out: Segment[] = [], state = { open: false }): Segment[] {
+function segments(node: DomNode, view: View, ignore: ((el: DomElement) => boolean) | undefined, href = '', out: Segment[] = [], state = { open: false }): Segment[] {
   const close = () => { state.open = false; };
+  // 열린 글 덩어리 안의 지금 위치를 "구분 자리"로 기록한다(<br>, 줄 안 요소의 시작·끝). 덩어리 합치기는 이 자리에서만 허용된다
+  const mark = () => {
+    const last = out[out.length - 1];
+    if (state.open && last && last.kind === 't') last.soft.add(runText(last.runs).length);
+  };
   if (node.nodeName === '#text') {
     const text = ((node as { value?: string }).value ?? '').replace(/\s+/gu, '');
     if (!text) return out;
     let last = out[out.length - 1];
     if (!state.open || !last || last.kind !== 't') {
-      last = { kind: 't', runs: [] };
+      last = { kind: 't', runs: [], soft: new Set() };
       out.push(last);
       state.open = true;
     }
@@ -226,8 +231,11 @@ function segments(node: DomNode, view: 'pc' | 'mo', ignore: ((el: DomElement) =>
   if ('tagName' in node) {
     const el = node as DomElement;
     if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return out;
-    const device = ownDevice(el);
-    if (device && device !== view) return out;
+    if (ownVisibility(el)?.[view] === false) return out;
+    if (el.tagName === 'br') {
+      mark();
+      return out;
+    }
     if (el.tagName === 'img') {
       close();
       out.push({ kind: 'i', href, src: attr(el, 'src') ?? '' });
@@ -236,8 +244,11 @@ function segments(node: DomNode, view: 'pc' | 'mo', ignore: ((el: DomElement) =>
     if (el.tagName === 'a') link = safeHref(attr(el, 'href')) ?? href;
     block = BLOCK_TAGS.has(el.tagName);
   }
+  const inline = !block && 'tagName' in node;
   if (block) close();
+  if (inline) mark();
   for (const child of node.childNodes as DomNode[]) segments(child, view, ignore, link, out, state);
+  if (inline) mark();
   if (block) close();
   return out;
 }
@@ -278,6 +289,12 @@ function matchSegments(source: Segment[], output: Segment[]): string | undefined
       k++;
     }
     if (!sameRuns(joinRuns(parts), o.runs)) return `원본 ${showSeg(s)} 자리에 출력 ${showSeg(o)}`;
+    // 원본 덩어리 여럿을 합쳤다면, 출력에서 이어 붙인 자리마다 실제 구분(<br>, 요소 경계)이 있어야 한다 (7차 재검수 I-2)
+    let join = 0;
+    for (const part of parts.slice(0, -1)) {
+      join += runText(part).length;
+      if (!o.soft.has(join)) return `원본 덩어리 여럿이 출력 ${showSeg(o)} 안에 구분 없이 합쳐짐`;
+    }
     i = k;
   }
   return i < source.length ? `출력에 없는 원본 ${showSeg(source[i])}` : undefined;
@@ -292,9 +309,9 @@ export function textOrderDiffers(element: DomElement, section: SectionModel, opt
   const rendered = renderPage(single, { registry: options.registry, orderCheck: true });
   if (rendered.fallbackCount > 0) return undefined; // 데이터 검증 실패는 아래 전체 렌더가 INVALID_DATA로 따로 보고한다
   const outputRoot = parseHtmlFragment(rendered.html) as unknown as DomNode;
-  for (const view of ['pc', 'mo'] as const) {
+  for (const view of VIEWS) {
     const problem = matchSegments(segments(element, view, ignore), segments(outputRoot, view, undefined));
-    if (problem) return `원본과 글 순서가 다름(${view === 'pc' ? 'PC' : '모바일'} 화면): ${problem}`;
+    if (problem) return `원본과 글 순서가 다름(${{ pc: 'PC', tablet: '태블릿', mo: '모바일' }[view]} 화면): ${problem}`;
   }
   return undefined;
 }

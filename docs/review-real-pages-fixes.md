@@ -140,3 +140,22 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - `npm test` 870 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음.
 - 스냅샷 변화: `fixtures/types/type01/bg-single.expected.html`의 PC 전용 이미지에 `common-display-pc` 추가(원본 PC 전용).
 - 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(type01 8, type10 1, 변화 없음).
+
+## 7차 재검수(`5f2b966`) 지적 반영
+
+### I-1. 표시 클래스를 하나만 보고 화면 전용으로 판정 → `d-lg-block` 단독 이미지가 모바일에서 사라짐
+- 원인: PC 표시 이름(`d-lg-block` 포함) 중 하나라도 있으면 PC 전용으로 봤다. Bootstrap 표시 클래스는 기본값 + 화면 폭별 덮어쓰기라, `d-lg-block` 하나만으로는 모든 화면에서 보인다. 출력과 순서 검사가 같은 판정을 써서 손실도 검출되지 않았다.
+- 수정(`packages/core/src/parse/common.ts` `ownVisibility`, `visibilityOf`): Bootstrap 표시 클래스(`d-{none,block,inline-block,flex …}`, `d-{sm,md,lg,xl}-…`)를 규칙대로 계산해 **모바일(768 미만)·태블릿(768~991)·PC(992 이상)** 세 폭의 보임을 구한다. 그 밖의 표시 이름(`pc`, `mo`, `common-display-pc/mo` 등)은 PC 전용·모바일(태블릿 포함) 전용. 조상의 숨김도 합친다.
+  - 이미지 `only`: "PC에서만" → `pc`, "모바일·태블릿에서만" → `mo`. 그 밖의 조합(태블릿에서만 등)은 출력으로 표현할 수 없어 `only`를 두지 않고, 화면별 순서 검사가 차이를 찾아 원본을 보존한다.
+  - 순서 검사도 같은 함수로 **세 화면**을 비교한다(출력의 `common-display-mo`는 1024 미만이라 태블릿에서 보임).
+- 검수 표의 세 입력: `d-lg-block` → 모든 화면(only 없음), `d-none d-lg-inline-block` → PC 전용, `d-none d-md-block d-lg-none` → 원본 보존(fallback).
+- 알려진 차이: 원본 PC 경계는 992px, 호스트 출력은 1024px이다(992~1023px에서 출력은 모바일 쪽 내용을 보임). 호스트 규칙이라 그대로 둔다.
+
+### I-2. 덩어리 합치기가 제목·본문 역전을 가림
+- 원인: 출력 덩어리 하나를 원본 연속 덩어리 여럿에 대응시킬 때, 출력에서 이어 붙인 자리에 실제 구분이 있는지 보지 않았다(본문 "검사"+"검사"를 제목 "검사검사"에 대응).
+- 수정: 출력 덩어리 안의 **구분 자리**(`<br>`, 줄 안 요소의 시작·끝)를 기록하고, 원본 덩어리를 합칠 때 이어 붙인 자리마다 구분이 있어야 한다. 문단 둘 → 줄바꿈으로 이은 문단, 머리글 작은 글 + 제목(span + strong)은 통과.
+
+### 검증
+- 새 테스트 6개(Codex 입력·표의 세 행·정상 대조) 중 수정 대상 4개는 수정을 되돌리면 실패.
+- `npm test` 876 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
+- 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음), `only`가 붙은 실제 이미지 3개(모두 PC 전용, 변화 없음).
