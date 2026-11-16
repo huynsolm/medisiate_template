@@ -1,3 +1,152 @@
+# 실제 원본·703페이지 6차 재검수 — 37773d8
+
+- 검수일: 2026-11-16 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `37773d8`, 범위: `e6ed7ae..37773d8`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장, `docs/review-request-real-pages.md` 12장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 복사본을 준비했다. `cms/`는 gitignore 대상이며 커밋하지 않는다. 코드·테스트·원본 자료는 고치지 않았고 이번 커밋은 이 문서만 변경한다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 I-1~I-3의 원래 재현 입력은 모두 수정됐다. 다만 블록 경계가 있는 변형의 제목/본문 역전을 여전히 놓치며, 반응형 이미지 묶음 판정이 독립 이미지의 역전을 새로 허용한다. 새 타입 세 개에서는 이번 검사로 추가 결함을 확정하지 않았다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 2 | I-1 블록 경계 비교의 역할 역전 누락, I-2 반응형 이미지 묶음 판정의 과도한 허용·오탐 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+두 항목은 모두 **추가 최소 입력**이다. 실제 703페이지에서 같은 결함이 발생했다고 주장하지 않는다. type01의 제목 → 이미지 배치 차이는 명시적 예외로 유지하고 결함으로 세지 않았다. type34 보류도 지적하지 않는다.
+
+## 이전 세 입력의 수정 — 직접 실행
+
+| 이전 입력 | 37773d8 결과 |
+|---|---|
+| type10 본문 `검사검사` → 제목 `검사` (줄바꿈 없음) | LOSSY_PARSE·fallback 1. 이전의 무경고 통과는 해결 |
+| type33 답 `<ol start="3"><li>FIRST</li><li>SECOND</li></ol>` | success·무경고·fallback 0. 모델 ordered=true, start=3. Chromium 1100/360px에서 원본·출력 모두 OL/start=3/decimal |
+| MO 먼저인 type23 PC/MO 쌍 (같은 href 또는 둘 다 링크 없음) | success·무경고·fallback 0. 이전 오탐은 해결 |
+
+번호 목록의 `li value="8"`, `ol reversed`, `ol type="a"` 대조 입력은 각각 LOSSY_PARSE·fallback 1이다. 표현하지 않는 번호 속성의 원본 보존 방어도 작동했다.
+
+## Important
+
+### I-1. 본문 안에 줄바꿈이 있으면 제목/본문 역전이 블록 경계 검사까지 통과
+
+**위치:** `packages/core/src/convert/convert-document.ts:248`~`:264`, `:280`~`:286`; 재배치 경로는 `packages/core/src/types/type10.ts:64`~`:68`, `:85`~`:87`.
+
+**재현 입력 — 직접 실행:** 이전 I-1의 본문 `검사검사` 사이에 `<br>` 하나만 추가했다. 아래 전체 입력을 convertDocument에 전달했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type10"><div class="cms-inner">
+    <ol class="cms-figure-list"><li class="cms-list-item">
+      <div class="cms-description-box"><p class="cms-description">검사<br>검사</p></div>
+      <div class="cms-figure-text"><p class="cms-title">검사</p></div>
+    </li></ol>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics `[]`, fallback 0. 원본 `본문(검사↵검사) → 제목(검사)`가 출력 `strong.mig-title(검사) → p.mig-desc(검사<br>검사)`로 바뀐다. Chromium에 원본 cms.css / 출력 host-style.css를 적용해 확인했다. 1100px에서 원본 본문 y=74 / 제목 y=150, 출력 제목 y=65 / 본문 y=123이다. 360px에서도 같은 역전이다. 위에서 확인한 줄바꿈 없는 원래 입력은 현재 정상적으로 fallback한다.
+
+**기대:** 제목·본문 등 서로 다른 역할의 글 블록이 실제로 역전됐으면 원본 순서를 유지하거나 fallback해야 한다. 본문 자체의 정상적인 줄바꿈 유무가 이 방어를 우회하게 해서는 안 된다.
+
+**원인 — 정적 판독:** 글 토큰은 여전히 같은 href의 인접 글을 합친다. textBoundaries는 블록의 역할·시작/끝 구분·중복 횟수 없이 공백 제거 후 문자 오프셋의 Set만 만든다. 위 입력의 원본·출력은 글이 `검사검사검사`, 경계 위치도 모두 `{0, 2, 4, 6}`이다. `<br>` 경계와 제목/본문 경계를 구분하지 못해 extra가 비고 통과한다. 출력에 새 경계만 없으면 허용하는 방식이 역할 보존을 증명하지 못하는 사례이며, 단순히 양쪽 경계 Set을 같게 요구하는 것으로도 이 입력은 해결되지 않는다. type01 예외와 무관하다.
+
+### I-2. 반응형 후보를 DOM 역할 대신 ‘연속 이미지 + 같은 href’로 판정해 독립 이미지 역전은 통과하고 정상 대안 쌍은 거부
+
+**위치:** `packages/core/src/convert/convert-document.ts:230`~`:236`, `:277`~`:278`; 독립 이미지 재배치는 `packages/core/src/types/type16.ts:77`~`:84`.
+
+#### A. 서로 다른 역할의 아이콘·큰 이미지 순서 변경이 새로 success
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type16"><div class="cms-inner">
+    <ul class="cms-column-list"><li class="cms-list-item">
+      <div class="cms-icon"><img src="https://example.com/icon.png" alt="ICON"></div>
+    </li></ul>
+    <div class="cms-visual">
+      <img src="https://example.com/big.png" alt="BIG" class="d-none d-lg-block">
+    </div>
+  </div></section>
+</div>
+```
+
+**실제:** 이전 기준 e6ed7ae에서는 LOSSY_PARSE·fallback 1이었다. 현재는 success, diagnostics `[]`, fallback 0. 원본 `아이콘 목록 → 큰 이미지`가 출력 `큰 이미지 → 아이콘 목록`으로 바뀐다. 두 이미지는 PC/MO 대안이 아니고 PC에서 **동시에 보이는 별도 콘텐츠**다.
+
+**Chromium — 직접 실행:** 두 URL을 각각 같은 100×80 로컬 SVG로 응답하도록 라우팅하고 원본 cms.css / 출력 host-style.css를 적용했다. PC 1100px에서 원본 icon y=63 / big y=148, 출력 big y=40 / icon y=873이다. 크기·장식 차이가 아니라 두 역할의 실제 앞뒤 역전을 지적한다. 이 항목의 화면 판정은 두 이미지가 동시에 보이는 PC 폭을 기준으로 했다.
+
+**기대:** 독립 이미지 역할 간 순서 변경은 계속 검출해야 한다. 명확한 PC/MO 대안 쌍의 나열 순서만 비교에서 정규화해야 한다.
+
+#### B. 실제 PC/MO 쌍도 각기 다른 링크이면 기존 오탐이 남음
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner"><div class="cms-visual">
+    <a href="/mobile"><img src="https://example.com/mo.png" alt="" class="d-block d-lg-none"></a>
+    <a href="/desktop"><img src="https://example.com/pc.png" alt="" class="d-none d-lg-block"></a>
+  </div></div></section>
+</div>
+```
+
+**실제:** failed·LOSSY_PARSE·fallback 1. MO와 PC 이미지의 DOM 순서가 다르다는 사유다. 두 a의 위치만 PC 먼저로 바꾸면 success·무경고·fallback 0이며, 모델은 pc.png → /desktop, mo.png → /mobile을 정확히 보존한다. 따라서 이미지/링크 모델로 표현할 수 없는 입력이 아니다.
+
+**Chromium 대조 — 직접 실행:** MO 먼저인 원본과 PC 먼저인 대조 입력의 정상 출력을 비교했다. 원본 cms.css에 Bootstrap 표시 클래스의 표준 규칙(992px 경계)을 보충하고, 출력은 host-style.css를 적용했다. 1100px에서는 양쪽 모두 pc.png → /desktop, 360px에서는 양쪽 모두 mo.png → /mobile 하나만 표시된다. 외부 이미지는 받지 않고 표시 여부·src·href를 측정했다. 현재 fallback을 정상 출력이라고 측정한 것이 아니며, 운영 사이트 전체 CSS를 확보한 시각 비교로 주장하지 않는다.
+
+**기대:** PC/MO 각 역할에 달린 링크가 보존되고 화면별 활성 이미지·링크가 같으면 정상 변환해야 한다. 두 대안의 링크가 다르다는 이유만으로 DOM 나열 순서에 의미를 부여하면 안 된다.
+
+**공통 원인 — 정적 판독:** normalizeImageRuns는 DOM 컨테이너·PC/MO 표시·서로 배타적으로 보이는지 여부를 보지 않는다. 글 토큰 사이에 있는 같은 href의 모든 이미지 주소를 정렬한다. A에서는 href가 둘 다 빈 문자열이라 별도 역할까지 같은 묶음이 되어 역전을 지운다. 반대로 B에서는 진짜 PC/MO 대안이지만 href가 달라 두 묶음으로 나뉘어 오탐한다. 기존 최소 입력만 통과시키는 href 조건 대신 실제 대안 관계를 구분할 필요가 있다.
+
+## 새 타입·요청한 클래스 판정 확인
+
+**직접 실행:**
+
+- type08: 실제 4개 섹션 모두 fallback 0. 원본 컴포넌트 fixture가 type-08로 출력되며 기존 type07과 함께 쓰는 공통 함수의 회귀도 대조했다.
+- type32: 실제 5개 섹션 모두 fallback 0. fixture의 강조 글·안내·두 원 항목을 보존하고 type-27 카드로 출력한다.
+- type31: 실제 19개 섹션 중 9개 변환·10개 fallback. 문서의 알려진 범위와 일치한다. 남은 사유는 표/상자 등의 미수용 글, 이미지, 글 안의 ul이며 새 순서 오탐으로 집계된 항목은 없다.
+- type32 → type31 → type08 fixture를 한 페이지로 변환·renderPage 호출: fallback 0, blocks는 preset → general → preset. Chromium 1100/360px의 직접 감싸개는 mig-container → inner → mig-container이며 섹션 세 개가 모두 존재한다. fixture의 type08 상대 이미지 주소 때문에 전체 상태는 partial이고 IMAGE_RELATIVE 경고 두 개가 있으며, 모드 변경은 MIXED_MODE_SPLIT 정보 두 개로 기록된다.
+- 같은 혼합 페이지에서 type31 소제목은 strong이고 두 주석에는 `*`가 실제 글로 붙는다. 별도의 기존 자동 테스트가 `※` 표시도 확인한다.
+- 실제 원본 후보의 dd 클래스 조합에서 cms-description, cms-title 동반, cms-list-item 동반, type01/left 동반, bullet-list 동반을 대조했다. 기본 줄·소제목·별표·당구장 표시의 지원 조합에서 새 오분류를 확정하지 않았다.
+- type32 최소 목록에서 cms-figure-list1과 cms-figure-list12는 success·fallback 0. cms-figure-list1-other는 목록으로 잡히지 않고 남은 글 때문에 LOSSY_PARSE·fallback 1이다.
+
+**정적 판독:** type31은 직접 자식 목록 묶음의 dl > dt/dd만 읽고 나머지 글/이미지는 finish가 보존 여부를 검사한다. type32의 정규식은 클래스 토큰 전체와 숫자 접미사에만 일치한다. 목록 안 미지원 글이 무경고로 없어지는 우회는 이번 검사에서 확정하지 못했다. 이는 모든 클래스 조합이나 임의의 목록 구조를 지원한다는 뜻은 아니다.
+
+## type01 예외 및 실제 페이지·회귀 대조
+
+**직접 실행:**
+
+- `제목 TITLE → 이미지 → 설명 BODY`: success·무경고·fallback 0. 명시적 예외 유지.
+- `제목 TITLE → 설명 BEFORE → 이미지`: LOSSY_PARSE·fallback 1. 설명 이동까지 예외로 숨기지 않음.
+- `이미지 → 제목 TITLE → 설명 BODY`: success·무경고·fallback 0, titleAfterImage=true.
+- 703개 파일을 e6ed7ae와 현재 코드 양쪽으로 변환해 파일 상태와 섹션 type/fallback을 대조했다. 16개 파일에서 새 타입 섹션 18개(type31 9, type32 5, type08 4)가 fallback에서 정상 타입으로 바뀌었다. 그 밖의 섹션 type/fallback 변화는 없다.
+- 703페이지: success 312 → 320, partial 376 → 368, failed 15 유지. 순서 사유 fallback은 고정 목록 9개 그대로이며 real-pages 테스트도 통과했다.
+- 기존 29타입 × 4개 모드 총 116개 입력의 출력 HTML이 e6ed7ae와 byte 단위로 같다.
+- 기존 28타입 × 4개 변형(공백·이미지 없음·인라인 서식·문단 블록) 총 112개 입력은 전부 fallback 0이고 이전 출력 HTML과 같다.
+
+위 범위에서 type01 예외가 다른 설명 이동을 가리는 사례는 찾지 못했다. 다만 I-1·I-2는 type01과 무관한 일반 순서 검사의 잔여 문제다. 617개 제목 → 이미지 배치 예외 자체는 이번 판정에서 제외했다.
+
+## 실행 결과
+
+아래 명령은 37773d8의 코드에서 직접 실행했고 모두 종료 코드 0이었다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 33 files / 865 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 4 files / 192 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 703 / success 320 / partial 368 / failed 15 |
+| 추가 최소 입력·Chromium 검사 | 위 재현 및 대조 결과 확인 |
+
+기존 자동 테스트 통과와 위 두 검수 지적을 구분한다. 아래는 이전 보고서의 원문 보관이며 현재 판정 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — cadc0ef 및 그 이전 기록</summary>
+
 # 실제 원본·703페이지 4차 재검수 — cadc0ef
 
 - 검수일: 2026-11-16 (KST).
@@ -775,6 +924,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
