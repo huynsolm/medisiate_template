@@ -43,7 +43,8 @@ describe('type00', () => {
 });
 
 describe('type01', () => {
-  it('follows the host DOM contract: mig-body > mig-content > visual + text-wrap', () => {
+  // 사용자 결정(2026-11-16): 원본 순서(제목 → 이미지 → 설명)를 따른다. 머리글 자리가 비어 있으면 제목은 호스트 머리글로.
+  it('follows the host DOM contract and the original order: header title, then visual, then text-wrap', () => {
     const out = serialize(
       type01.render(
         {
@@ -62,13 +63,28 @@ describe('type01', () => {
     );
     expect(normalizeHtml(out)).toBe(
       normalizeHtml(
-        '<section class="mig-section type-01"><div class="mig-body"><div class="mig-content">' +
+        '<section class="mig-section type-01"><header class="mig-header"><strong class="mig-title">제목</strong></header><div class="mig-body"><div class="mig-content">' +
           '<div class="mig-visual type-wide common-display-pc"><img decoding="async" loading="lazy" src="p.jpg" alt="a" style="border: 0;"></div>' +
           '<div class="mig-visual type-wide common-display-mo"><img decoding="async" loading="lazy" src="m.jpg" alt="a" style="border: 0;"></div>' +
-          '<div class="mig-text-wrap"><strong class="mig-title">제목</strong><p class="mig-desc">설명</p></div>' +
+          '<div class="mig-text-wrap"><p class="mig-desc">설명</p></div>' +
           '</div></div></section>',
       ),
     );
+  });
+
+  it('keeps the title under the image when the original had it after the image, or when there is no image', () => {
+    const img = { pc: { src: 'p.jpg', alt: '', kind: 'relative' as const } };
+    const after = serialize(type01.render({ id: 's1', type: 'type01', variant: 'default', modifiers: {}, data: { image: img, title: '제목', desc: '설명', titleAfterImage: true } }, ctx()));
+    expect(after).not.toContain('mig-header');
+    expect(after.indexOf('mig-visual')).toBeLessThan(after.indexOf('제목'));
+    const noImage = serialize(type01.render({ id: 's1', type: 'type01', variant: 'default', modifiers: {}, data: { image: {}, title: '제목', desc: '설명' } }, ctx()));
+    expect(noImage).toContain('<div class="mig-text-wrap">\n<strong class="mig-title">제목</strong>');
+  });
+
+  it('with an eyebrow + title header, the in-text title goes right above the image', () => {
+    const out = serialize(type01.render({ id: 's1', type: 'type01', variant: 'default', modifiers: {}, data: { eyebrow: '작은 글', heading: '머리 제목', image: { pc: { src: 'p.jpg', alt: '', kind: 'relative' } }, title: '본문 제목', desc: '설명' } }, ctx()));
+    expect(out.indexOf('머리 제목')).toBeLessThan(out.indexOf('본문 제목'));
+    expect(out.indexOf('본문 제목')).toBeLessThan(out.indexOf('mig-visual'));
   });
 
   it('wraps text in mig-highlight-box for the highlight variant', () => {

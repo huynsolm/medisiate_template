@@ -110,3 +110,10 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
   - type34는 보류(실제 사용이 백업 폴더 복사본뿐).
 - 확인 요청: 일반 모드 type31 출력이 프리셋 블록과 섞인 페이지에서 감싸개가 나뉘는지, type31 줄 종류 판정(클래스)이 실제 페이지의 다른 클래스 조합에서 틀리지 않는지, type32 목록 클래스 판정(`cms-figure-list` + 숫자)이 다른 목록을 잘못 잡지 않는지.
 - 기대 수치: `npm test` 865 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
+
+## 13. type01 결정 반영
+
+- 사용자 결정: type01은 원본 순서(제목 → 이미지 → 설명). 반영 기록 `docs/review-real-pages-fixes.md` 마지막 장.
+- 순서 검사의 type01 예외는 없앴다. 이제 예외 없이 검사한다.
+- 확인 요청: 제목을 머리글/이미지 위로 올리는 조건(이미지 있음, 원본에서 제목이 이미지 앞, 머리글 자리 유무)이 실제 페이지 형태에서 틀리는 경우.
+- 기대 수치: `npm test` 867 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.

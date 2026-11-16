@@ -77,29 +77,33 @@ export const type01: TypeDefinition<Type01Data> = {
         : undefined;
     return { data, variant, modifiers, diagnostics, lossless: !fallbackReason && !diagnostics.some((d) => d.level !== 'info'), fallbackReason };
   },
-  render(section, ctx) {
+  render(section) {
     const d = section.data;
     const bg = presetBackground(section.modifiers);
+    const hasImage = Boolean(d.image.pc || d.image.mo);
     /*
-     * 알려진 배치 차이(1단계 결정): 원본 type01은 제목(cms-thin-title) → 이미지 → 설명 순서인데,
-     * 호스트 type-01 프리셋은 글 묶음(제목 + 설명)을 이미지 아래에 둔다(.mig-text-wrap). 내용 손실은 없다.
-     * 실제 617개 섹션이 해당해 fallback으로 돌릴 수 없으므로, 순서 검사용 출력에서만 제목을 이미지 앞에 둔다.
-     * 제목을 이미지 위로 올릴지는 디자인 결정으로 남긴다(docs/review-real-pages-fixes.md).
+     * 원본 type01은 제목(cms-thin-title) → 이미지 → 설명 순서다. 사용자 결정(2026-11-16)에 따라 원본 순서를 따른다:
+     * 이미지가 있고 원본에서 제목이 이미지보다 앞이면 제목을 이미지 위로 올린다.
+     * - 섹션 머리글 자리가 비어 있으면 호스트 머리글(header.mig-header > strong.mig-title)로
+     * - 이미 "작은 글 + 제목" 머리글이 있으면 이미지 바로 위 글 묶음(.mig-text-wrap > strong.mig-title)으로
+     * 원본에서 제목이 이미지 뒤였거나 이미지가 없으면 지금처럼 이미지 아래 글 묶음에 둔다.
      */
-    const titleFirst = ctx.orderCheck && !d.titleAfterImage && !isBlank(d.title) ? h('strong', { class: 'mig-title' }, [rich(d.title)]) : null;
+    const titleOnTop = hasImage && !d.titleAfterImage && !isBlank(d.title);
+    const titleAsHeader = titleOnTop && isBlank(d.heading) && isBlank(d.eyebrow);
+    const titleAboveImage = titleOnTop && !titleAsHeader ? h('div', { class: 'mig-text-wrap' }, [h('strong', { class: 'mig-title' }, [rich(d.title)])]) : null;
     const text =
-      !isBlank(d.title) || !isBlank(d.desc)
+      (!titleOnTop && !isBlank(d.title)) || !isBlank(d.desc)
         ? h('div', { class: 'mig-text-wrap' }, [
-            !titleFirst && !isBlank(d.title) && h('strong', { class: 'mig-title' }, [rich(d.title)]),
+            !titleOnTop && !isBlank(d.title) && h('strong', { class: 'mig-title' }, [rich(d.title)]),
             !isBlank(d.desc) && h('p', { class: 'mig-desc' }, [rich(d.desc)]),
           ])
         : null;
     return h('section', { class: ['mig-section', 'type-01', ...bg.classes].join(' '), ...bg.attrs, style: bg.style }, [
       bg.layer,
-      presetHeader({ eyebrow: d.eyebrow, title: d.heading }),
+      presetHeader(titleAsHeader ? { title: d.title } : { eyebrow: d.eyebrow, title: d.heading }),
       h('div', { class: 'mig-body' }, [
         h('div', { class: 'mig-content' }, [
-          titleFirst,
+          titleAboveImage,
           visualPcMo(d.image, { wide: true }),
           section.variant === 'highlight' && text ? h('div', { class: 'mig-highlight-box' }, [text]) : text,
         ]),

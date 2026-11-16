@@ -105,3 +105,16 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트(5개 중 수정 대상 3개)는 수정을 되돌리면 실패함을 확인.
 - `npm test` 822 passed, `npm run test:browser` 180 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
 - 703페이지: success 312 / partial 376 / failed 15. 순서 사유로 보존되는 섹션은 고정된 9개 그대로(블록 경계 검사로 새로 걸린 정상 섹션 없음).
+
+
+## type01 제목 위치 결정 반영 (사용자 결정: 원본 순서)
+
+- 결정: 원본 type01의 **제목 → 이미지 → 설명** 순서를 따른다(2026-11-16, 선택지 2).
+- 출력: 이미지가 있고 원본에서 제목이 이미지보다 앞이면 제목을 이미지 위로 올린다.
+  - 섹션 머리글 자리가 비어 있으면 호스트 머리글(`header.mig-header > strong.mig-title`)로.
+  - 이미 "작은 글 + 제목" 머리글이 있으면 이미지 바로 위 글 묶음(`.mig-text-wrap > strong.mig-title`)으로.
+  - 원본에서 제목이 이미지 뒤였거나(`titleAfterImage`) 이미지가 없으면 지금처럼 이미지 아래 글 묶음.
+- 순서 검사의 type01 예외(검사용 출력에서만 제목을 앞에 두던 것)를 **없앴다**. 예외 없이 실제 type01 섹션이 모두 순서 검사를 통과한다.
+- 스냅샷 변화는 `fixtures/types/type01/pc-mo.expected.html`의 제목 위치 하나(글 묶음 → 머리글).
+- Chromium 확인(호스트 CSS): 제목이 이미지 위 머리글로, 원본 `<em>` 강조색 유지, 모바일 넘침 없음.
+- 검증: `npm test` 867 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음. 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음).
