@@ -88,3 +88,22 @@ describe('type30 · 장비 소개(이미지·설명 + 단계)', () => {
     expect(follow(result.html, ['section.type-30', 'div.mig-body', 'ul.mig-list', 'li.mig-item', 'span.mig-num'])).toHaveLength(1);
   });
 });
+
+describe('type29 · 이미지 + 가운데 설명 (+ 버튼)', () => {
+  it('parses the original component (section 1) and keeps the button link', async () => {
+    const result = convert(sectionOf('type29', 1));
+    const section = result.page.sections[0]!;
+    expect(section.type).toBe('type29');
+    // 원본 버튼의 빈 화살표 아이콘(<i class="arrow">)도 서식 글에 그대로 남는다
+    expect(section.data).toMatchObject({ buttons: [{ text: '러시아 아바이스크 녹용 자세히 보기<i class="arrow"></i>', link: '#' }] });
+    expect((section.data as { paragraphs: unknown[] }).paragraphs).toHaveLength(1);
+    expect(result.html).toContain('<a href="#">러시아 아바이스크 녹용 자세히 보기<i class="arrow"></i></a>');
+    await expect(JSON.stringify(section, null, 2) + '\n').toMatchFileSnapshot(snapshot('type29/component.expected.json'));
+    await expect(result.html).toMatchFileSnapshot(snapshot('type29/component.expected.html'));
+  });
+
+  it('rejects an unsafe button link from the editor or JSON', async () => {
+    const { defaultRegistry } = await import('../src/types/index.ts');
+    expect(defaultRegistry.get('type29')!.schema.safeParse({ buttons: [{ text: 'x', link: 'javascript:alert(1)' }] }).success).toBe(false);
+  });
+});

@@ -7,7 +7,7 @@ import { loadPlaywright, type Browser } from '../support/browser.ts';
 const repo = path.resolve(import.meta.dirname, '../..');
 const pw = await loadPlaywright();
 // 3단계 P2 + P3, 4단계 P4 + P5 타입
-const TYPES = ['type07', 'type09', 'type10', 'type02', 'type03', 'type26', 'type11', 'type04', 'type25', 'type15', 'type17', 'type18', 'type23', 'type13', 'type06', 'type16', 'type14', 'type19', 'type24', 'type22', 'type20', 'type21', 'type12', 'type05', 'type27', 'type28', 'type30'] as const;
+const TYPES = ['type07', 'type09', 'type10', 'type02', 'type03', 'type26', 'type11', 'type04', 'type25', 'type15', 'type17', 'type18', 'type23', 'type13', 'type06', 'type16', 'type14', 'type19', 'type24', 'type22', 'type20', 'type21', 'type12', 'type05', 'type27', 'type28', 'type29', 'type30'] as const;
 // 원래 크기가 큰 이미지: 호스트 CSS가 이미지 칸을 줄이지 않을 때(flex-shrink: 0) 넘침을 드러낸다.
 const big = (label: string, color: string) =>
   `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="100%" height="100%" fill="${color}"/><text x="40" y="80" font-size="48">${label}</text></svg>`)}`;

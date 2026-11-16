@@ -1,0 +1,41 @@
+{
+  "id": "s1",
+  "type": "type29",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "우리아이는",
+    "heading": "잘 크고 있나요?",
+    "image": {
+      "pc": {
+        "src": "./images/temp/type29_img.jpg",
+        "alt": "",
+        "kind": "relative"
+      },
+      "mo": {
+        "src": "./images/temp/type29_img_m.jpg",
+        "alt": "",
+        "kind": "relative"
+      }
+    },
+    "paragraphs": [
+      {
+        "text": "본원은 세계최고 품질의 녹용산지로 알려진 러시아 아바이스크 농장과 업무제휴를 통하여 좋은 품질의 러시아산 녹용을 사용합니다."
+      }
+    ],
+    "buttons": [
+      {
+        "text": "러시아 아바이스크 녹용 자세히 보기<i class=\"arrow\"></i>",
+        "link": "#"
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type29"
+    ]
+  }
+}
