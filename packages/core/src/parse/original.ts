@@ -52,6 +52,41 @@ export function textOf(root: DomElement | undefined, name: string): string {
   return el ? richFrom(el) : '';
 }
 
+/**
+ * 범위 안의 해당 클래스 글을 모두 읽어 줄바꿈(<br>)으로 잇는다. 실제 페이지는 설명 상자에 같은 클래스 문단을 여러 개 두는 경우가 많다
+ * (원본 템플릿은 하나). 서로 안에 든 요소는 바깥 것만 읽는다. 문단 경계는 줄바꿈으로 지킨다(표 칸과 같은 규칙).
+ */
+export function textsOf(root: DomElement | undefined, name: string): string {
+  if (!root) return '';
+  const found = descendants(root, byClass(name));
+  return found.filter((el) => !found.some((other) => other !== el && descendants(other).includes(el)))
+    .map((el) => richFrom(el)).filter(Boolean).join('<br>');
+}
+
+/**
+ * 본문 앞뒤의 설명 상자(원본 .cms-inner의 직접 자식 .cms-description-box). 실제 페이지는 표·목록 앞에 안내 글을,
+ * 뒤에 주의 글(예: "예약 및 상담전화 …")을 두는 경우가 많다. 본문 요소(content)보다 앞이면 intro, 뒤면 note.
+ */
+export function readNotes(root: DomElement, content: DomElement | undefined): { intro: string; note: string } {
+  const inner = children(root).find(byClass('cms-inner')) ?? root;
+  const kids = children(inner);
+  const at = content ? kids.findIndex((k) => k === content || descendants(k).includes(content)) : -1;
+  const boxes = kids.filter((k) => hasClass(k, 'cms-description-box'));
+  const read = (list: DomElement[]) => list.map((b) => textsOf(b, 'cms-description')).filter(Boolean).join('<br>');
+  if (at < 0) return { intro: '', note: '' };
+  return { intro: read(boxes.filter((b) => kids.indexOf(b) < at)), note: read(boxes.filter((b) => kids.indexOf(b) > at)) };
+}
+
+/**
+ * 목록 항목의 글. 원본 템플릿은 `li > .cms-description-box > p.cms-description`이지만, 실제 컴포넌트·페이지는
+ * `li.cms-list-item.cms-description`처럼 항목 자체에 클래스를 붙이기도 한다. 항목 자체가 해당 클래스면 항목 글 전체,
+ * 아니면 안의 해당 클래스 글들을 읽는다.
+ */
+export function itemText(li: DomElement | undefined, name: string): string {
+  if (!li) return '';
+  return hasClass(li, name) ? richFrom(li) : textsOf(li, name);
+}
+
 /** 값이 있을 때만 { key: value }를 만든다(빈 칸은 데이터에 넣지 않는다). */
 export const optional = <K extends string>(key: K, value: string): Partial<Record<K, string>> =>
   (value ? { [key]: value } : {}) as Partial<Record<K, string>>;

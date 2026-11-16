@@ -19,6 +19,21 @@ export const headerShape = {
   heading: z.string().optional(),
 };
 
+/** 본문 앞뒤 설명(선택). readNotes()로 읽고 withNotes()로 출력한다 */
+export const notesShape = {
+  intro: z.string().optional(),
+  note: z.string().optional(),
+};
+export const notesFields: FieldSpec[] = [
+  { key: 'intro', label: '본문 앞 설명', kind: 'richText' },
+  { key: 'note', label: '본문 뒤 설명', kind: 'richText' },
+];
+/** 본문 앞뒤 설명을 본문 자식 목록 앞뒤에 붙인다 */
+export function withNotes(data: { intro?: string | undefined; note?: string | undefined }, body: Child[]): Child[] {
+  const text = (value: string | undefined) => !isBlank(value) && h('div', { class: 'mig-text-wrap' }, [h('p', { class: 'mig-desc' }, [rich(value)])]);
+  return [text(data.intro), ...body, text(data.note)];
+}
+
 export const headerFields: FieldSpec[] = [
   { key: 'eyebrow', label: '머리 작은 제목', kind: 'richText' },
   { key: 'heading', label: '머리 제목', kind: 'richText' },
@@ -50,7 +65,10 @@ export function presetSection(
 export const HALF = { flex: '1 1 50%', minWidth: '0' } as const;
 
 /** li.mig-item > .mig-content > .mig-visual(반) + .mig-text-wrap(반: 번호·제목·설명) */
-export function imageTextItem(item: { num?: string | undefined; title?: string | undefined; desc?: string | undefined; image: ImagePair }): ElementNode {
+export function imageTextItem(item: {
+  num?: string | undefined; title?: string | undefined; desc?: string | undefined; image: ImagePair;
+  steps?: Array<{ num?: string | undefined; text: string }> | undefined;
+}): ElementNode {
   return h('li', { class: 'mig-item' }, [
     h('div', { class: 'mig-content' }, [
       visualPcMo(item.image, { attrs: { style: HALF } }),
@@ -58,6 +76,9 @@ export function imageTextItem(item: { num?: string | undefined; title?: string |
         !isBlank(item.num) && h('span', { class: 'mig-num' }, [rich(item.num)]),
         !isBlank(item.title) && h('strong', { class: 'mig-title' }, [rich(item.title)]),
         !isBlank(item.desc) && h('p', { class: 'mig-desc' }, [rich(item.desc)]),
+        // 번호 목록: 호스트 지그재그 규칙(.type-03 .mig-list .mig-item)이 후손 선택자라 mig-list/mig-item을 쓰지 않는다
+        item.steps && item.steps.length > 0 && h('ul', { style: LIST_RESET }, item.steps.map((st) =>
+          h('li', {}, [!isBlank(st.num) && h('span', { class: 'mig-num' }, [rich(st.num)]), ' ', h('span', { class: 'mig-desc' }, [rich(st.text)])]))),
       ]),
     ]),
   ]);

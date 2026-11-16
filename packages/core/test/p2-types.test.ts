@@ -62,7 +62,8 @@ describe('type02 · 도형 안의 핵심 글 + 설명 목록', () => {
     const { result, section, data } = check('type02');
     expect(data).toEqual({
       eyebrow: '작은 제목', heading: '제목을 입력해 보세요',
-      items: [1, 2, 3].map((n) => ({ label: `항목 ${n}`, title: '핵심 문구', desc: '설명을 입력해 보세요.' })),
+      items: [1, 2, 3].map((n) => ({ label: `항목 ${n}`, title: '핵심 문구', desc: '설명을 입력해 보세요.', icon: {} })),
+      bottom: [],
     });
     expect(follow(result.html, ['section.type-02', 'div.mig-body', 'div.mig-content', 'ul.mig-list', 'li.mig-item'])).toHaveLength(3);
     expect(follow(result.html, ['li.mig-item', 'span.mig-label'])).toHaveLength(3);
@@ -80,7 +81,7 @@ describe('type03 · 이미지와 글 지그재그 목록', () => {
     const pair = { pc: { src: '/images/cms-sample.svg', alt: '', kind: 'relative' }, mo: { src: '/images/cms-sample-m.svg', alt: '', kind: 'relative' } };
     expect(data).toEqual({
       eyebrow: '작은 제목', heading: '제목을 입력해 보세요', reverse: false,
-      items: [1, 2].map((n) => ({ num: `0${n}`, title: `항목 ${n} 제목`, desc: '설명을 입력해 보세요.', image: pair })),
+      items: [1, 2].map((n) => ({ num: `0${n}`, title: `항목 ${n} 제목`, desc: '설명을 입력해 보세요.', image: pair, steps: [] })),
     });
     const items = follow(result.html, ['section.type-03', 'div.mig-body', 'ul.mig-list', 'li.mig-item']);
     expect(items).toHaveLength(2);

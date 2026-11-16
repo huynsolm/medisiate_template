@@ -23,7 +23,8 @@
             "alt": "",
             "kind": "relative"
           }
-        }
+        },
+        "steps": []
       },
       {
         "num": "02",
@@ -40,7 +41,8 @@
             "alt": "",
             "kind": "relative"
           }
-        }
+        },
+        "steps": []
       }
     ]
   },

@@ -3,7 +3,7 @@ import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, finish, imagesIn, itemPart, layoutFixed, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { byClass, finish, imagesIn, itemPart, layoutFixed, listItems, optional, originalHeader, textOf, textsOf } from '../parse/original.ts';
 import { classesOf, descendants, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema, toNumberInput } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
@@ -54,7 +54,7 @@ export const type25: TypeDefinition<Type25Data> = {
       const { pair, extra: more } = imagesIn(itemPart(li, 'cms-visual'), src, diagnostics);
       extra.push(...more);
       const box = itemPart(li, 'cms-description-box');
-      const item = { ...optional('title', textOf(box, 'cms-title')), ...optional('desc', textOf(box, 'cms-description')), image: pair };
+      const item = { ...optional('title', textOf(box, 'cms-title')), ...optional('desc', textsOf(box, 'cms-description')), image: pair };
       used.push(item.title ?? '', item.desc ?? '');
       return item;
     });

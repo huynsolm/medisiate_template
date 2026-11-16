@@ -3,7 +3,7 @@ import { toNumberInput } from '../schema/page.ts';
 import { h, raw } from '../html/h.ts';
 import { rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, finish, layoutFixed, listItems, originalHeader, perRowFrom, textOf } from '../parse/original.ts';
+import { byClass, finish, itemText, layoutFixed, listItems, originalHeader, perRowFrom } from '../parse/original.ts';
 import { descendants } from '../parse/dom.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, LIST_RESET, presetSection } from './preset.ts';
@@ -44,7 +44,7 @@ export const type09: TypeDefinition<Type09Data> = {
     const lis = listItems(list);
     const perRow = perRowFrom(lis[0]) ?? 3;
     if (perRow !== 3) diagnostics.push(layoutFixed(src, `원본은 한 줄에 ${perRow}개이지만 호스트 프리셋은 PC에서 3개로 고정됩니다`, { perRow }));
-    const items = lis.map((li) => ({ text: textOf(li, 'cms-description') }));
+    const items = lis.map((li) => ({ text: itemText(li, 'cms-description') }));
     const data: Type09Data = { ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}), perRow, items };
     return finish(src, data, [...header.used, ...items.map((i) => i.text)], [], { modifiers, diagnostics });
   },

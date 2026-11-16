@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
-import { scanSection } from '../parse/common.ts';
+import { richFrom, scanSection } from '../parse/common.ts';
 import { byClass, childText, finish, firstByClass, imagesIn, listItems, originalHeader, optional, textOf } from '../parse/original.ts';
 import { children, descendants } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
@@ -64,7 +64,8 @@ export const type10: TypeDefinition<Type10Data> = {
         // 진짜 원본은 육각형 안 핵심 단어가 p.cms-description이다(biny 재현본은 cms-title). 둘 다 받는다.
         ...optional('title', textOf(figure, 'cms-title') || textOf(figure, 'cms-description')),
         ...optional('subtitle', childText(box, 'cms-eyebrow')),
-        ...optional('desc', childText(box, 'cms-description')),
+        // 실제 페이지는 설명 문단을 여러 개 두기도 한다. 상자의 직접 자식 설명 문단을 모두 줄바꿈으로 잇는다
+        ...optional('desc', box ? children(box).filter(byClass('cms-description')).map((p) => richFrom(p)).filter(Boolean).join('<br>') : ''),
         subitems: listItems(sub).map((s) => ({ text: textOf(s, 'cms-title') })),
       };
       used.push(item.num ?? '', item.title ?? '', item.subtitle ?? '', item.desc ?? '', ...item.subitems.map((s) => s.text));

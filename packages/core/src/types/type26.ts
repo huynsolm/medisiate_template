@@ -2,11 +2,11 @@ import { z } from 'zod';
 import { h } from '../html/h.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { richFrom, scanSection, TEXT_BLOCKS, TEXT_INLINE } from '../parse/common.ts';
-import { byClass, childText, finish, firstByClass, originalHeader } from '../parse/original.ts';
+import { byClass, childText, finish, firstByClass, optional, originalHeader, readNotes } from '../parse/original.ts';
 import { attr, children, descendants, type DomElement } from '../parse/dom.ts';
 import { CSS_LENGTH, toNumberInput } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
-import { headerFields, headerShape, presetSection } from './preset.ts';
+import { headerFields, headerShape, notesFields, notesShape, presetSection, withNotes } from './preset.ts';
 
 /*
  * 병합 값은 HTML 규격 범위를 그대로 따른다: colspan 1~1000, rowspan 0~65534 (0은 "그룹 끝까지").
@@ -31,6 +31,7 @@ const widthSchema = z.preprocess(
 );
 const schema = z.object({
   ...headerShape,
+  ...notesShape,
   desc: z.string().optional(),
   /** 표 제목(원본 caption.sr-only, 화면 낭독기용). 호스트도 caption을 화면에서 숨긴다 */
   caption: z.string().optional(),
@@ -104,6 +105,7 @@ export const type26: TypeDefinition<Type26Data> = {
     ...headerFields,
     { key: 'desc', label: '표 위 설명', kind: 'richText' },
     { key: 'caption', label: '표 제목 (화면 낭독기용, 화면에는 안 보임)', kind: 'text' },
+    ...notesFields,
     { key: 'colWidths', label: '열 너비', kind: 'repeat', min: 0, max: 10, fields: [{ key: 'width', label: 'auto 또는 30% 같은 값 (비우면 auto)', kind: 'text' }] },
     ...(['head', 'body'] as const).map((key) => ({
       key, label: key === 'head' ? '머리글 행' : '본문 행', kind: 'repeat' as const, min: 0, max: 20,
@@ -140,11 +142,12 @@ export const type26: TypeDefinition<Type26Data> = {
     const caption = captionEl ? richFrom(captionEl) : '';
     const head = rowsOf(table ? children(table).find((el) => el.tagName === 'thead') : undefined, problems);
     const body = rowsOf(table ? children(table).find((el) => el.tagName === 'tbody') : undefined, problems);
+    const notes = readNotes(src.element, wrap);
     const data: Type26Data = {
       ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}),
-      ...(desc ? { desc } : {}), ...(caption ? { caption } : {}), colWidths, head, body,
+      ...(desc ? { desc } : {}), ...(caption ? { caption } : {}), ...optional('intro', notes.intro), ...optional('note', notes.note), colWidths, head, body,
     };
-    const used = [...header.used, desc, caption, ...[...head, ...body].flatMap((r) => r.cells.map((c) => c.text))];
+    const used = [...header.used, desc, caption, notes.intro, notes.note, ...[...head, ...body].flatMap((r) => r.cells.map((c) => c.text))];
     const result = finish(src, data, used, [], { modifiers: scan.modifiers, diagnostics });
     // 표 구조를 바꾸지 않고는 옮길 수 없는 칸이 있으면 섹션 전체를 원본 그대로 보존한다
     return problems.length > 0 && !result.fallbackReason
@@ -155,7 +158,7 @@ export const type26: TypeDefinition<Type26Data> = {
     const d = section.data;
     const cell = (c: Cell) => h(c.th ? 'th' : 'td', { colspan: c.colspan, rowspan: c.rowspan }, [rich(c.text)]);
     const rows = (list: Type26Data['head']) => list.map((r) => h('tr', {}, r.cells.map(cell)));
-    return presetSection('type-26', section, [
+    return presetSection('type-26', section, withNotes(d, [
       h('div', { class: 'mig-table-wrap' }, [
         !isBlank(d.desc) && h('p', { class: 'mig-desc' }, [rich(d.desc)]),
         h('div', { class: 'table-responsive' }, [
@@ -167,6 +170,6 @@ export const type26: TypeDefinition<Type26Data> = {
           ]),
         ]),
       ]),
-    ]);
+    ]));
   },
 };

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { h } from '../html/h.ts';
 import { rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, finish, listItems, originalHeader, textOf } from '../parse/original.ts';
+import { byClass, finish, itemText, listItems, originalHeader } from '../parse/original.ts';
 import { descendants } from '../parse/dom.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, LIST_RESET, presetSection } from './preset.ts';
@@ -26,7 +26,7 @@ export const type11: TypeDefinition<Type11Data> = {
   parse(src) {
     const { modifiers, diagnostics } = scanSection(src);
     const header = originalHeader(src.element);
-    const items = listItems(descendants(src.element, byClass('cms-bullet-list'))[0]).map((li) => ({ text: textOf(li, 'cms-description') }));
+    const items = listItems(descendants(src.element, byClass('cms-bullet-list'))[0]).map((li) => ({ text: itemText(li, 'cms-description') }));
     const data: Type11Data = { ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}), items };
     return finish(src, data, [...header.used, ...items.map((i) => i.text)], [], { modifiers, diagnostics });
   },

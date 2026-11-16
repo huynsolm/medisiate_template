@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { h } from '../html/h.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, finish, imagesIn, itemPart, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { byClass, finish, imagesIn, itemPart, listItems, optional, originalHeader, textOf, textsOf } from '../parse/original.ts';
 import { descendants, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
@@ -45,7 +45,7 @@ export const type04: TypeDefinition<Type04Data> = {
       const { pair, extra: more } = imagesIn(itemPart(li, 'cms-visual'), src, diagnostics);
       extra.push(...more);
       const box = itemPart(li, 'cms-description-box');
-      const item = { ...optional('num', textOf(box, 'cms-eyebrow')), ...optional('title', textOf(box, 'cms-title')), ...optional('desc', textOf(box, 'cms-description')), image: pair };
+      const item = { ...optional('num', textOf(box, 'cms-eyebrow')), ...optional('title', textOf(box, 'cms-title')), ...optional('desc', textsOf(box, 'cms-description')), image: pair };
       used.push(item.num ?? '', item.title ?? '', item.desc ?? '');
       return item;
     });

@@ -3,7 +3,7 @@ import { h } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
-import { byClass, childText, finish, imagesIn, itemPart, listItems, optional, originalHeader, textOf } from '../parse/original.ts';
+import { byClass, childText, finish, imagesIn, itemPart, itemText, listItems, optional, originalHeader } from '../parse/original.ts';
 import { children, descendants, type DomElement } from '../parse/dom.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
@@ -58,7 +58,7 @@ export const type15: TypeDefinition<Type15Data> = {
         ...optional('title', childText(box, 'cms-title')),
         ...optional('desc', childText(box, 'cms-description')),
         image: pair,
-        subitems: listItems(bullets).map((b) => ({ text: textOf(b, 'cms-description') })),
+        subitems: listItems(bullets).map((b) => ({ text: itemText(b, 'cms-description') })),
       };
       used.push(item.title ?? '', item.desc ?? '', ...item.subitems.map((s) => s.text));
       return item;
