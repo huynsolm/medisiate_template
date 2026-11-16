@@ -186,39 +186,56 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
   };
 }
 
+type OrderToken = ['t' | 'i', string, string];
+
 /**
- * 글 순서 비교용 표현: 공백 없는 글 + 링크 위치·주소(⟦주소⟧글⟦/⟧). 같은 글이라도 링크와 일반 글이 자리를 바꾸면 다르게 나온다
- * (재검수 I-2: 버튼 "예약"과 문단 "예약"이 바뀌어도 글자열만 비교하면 같았다).
- * 원본 쪽 위험한 링크는 출력에서 의도적으로 링크를 빼고(UNSAFE_LINK_REMOVED) 글만 두므로 일반 글로 본다.
+ * 글 순서 비교용 토큰 목록. 문자열로 이어 붙이지 않는다(본문 글이 구분 표시와 같으면 충돌했다: 3차 재검수 I-3).
+ * - ['t', 링크 주소 또는 '', 공백 없는 글]: 글 조각. 같은 링크(또는 링크 없음)의 이어진 글은 하나로 합친다.
+ * - ['i', 링크 주소 또는 '', 이미지 주소]: 이미지. 글과의 앞뒤 위치도 비교된다(I-4).
+ * 링크는 여닫는 표시가 아니라 **글·이미지마다 붙은 주소**로 기록한다. 그래서 원본의 "링크 하나 안 PC/MO 이미지 두 장"과
+ * 출력의 "이미지마다 같은 링크"가 같은 토큰이 된다(I-1).
+ * 원본 쪽 위험한 링크는 출력에서 의도적으로 링크를 빼고(UNSAFE_LINK_REMOVED) 글만 두므로 링크 없는 글로 본다.
  * ignore가 고른 원본 요소(호스트 CSS가 다시 그리는 표시)와 주석·script·style·template은 뺀다.
  */
-function orderSignature(node: DomNode, ignore?: (el: DomElement) => boolean): string {
-  if (node.nodeName === '#text') return ((node as { value?: string }).value ?? '').replace(/\s+/gu, '');
-  if (!('childNodes' in node)) return '';
-  const inner = () => (node.childNodes as DomNode[]).map((c) => orderSignature(c, ignore)).join('');
-  if (!('tagName' in node)) return inner();
-  const el = node as DomElement;
-  if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return '';
-  if (el.tagName === 'a') {
-    const href = safeHref(attr(el, 'href'));
-    if (href !== undefined) return `⟦${href}⟧${inner()}⟦/⟧`;
+function orderTokens(node: DomNode, ignore: ((el: DomElement) => boolean) | undefined, href: string, out: OrderToken[]): OrderToken[] {
+  if (node.nodeName === '#text') {
+    const text = ((node as { value?: string }).value ?? '').replace(/\s+/gu, '');
+    if (text) {
+      const last = out[out.length - 1];
+      if (last && last[0] === 't' && last[1] === href) last[2] += text;
+      else out.push(['t', href, text]);
+    }
+    return out;
   }
-  return inner();
+  if (!('childNodes' in node)) return out;
+  let link = href;
+  if ('tagName' in node) {
+    const el = node as DomElement;
+    if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return out;
+    if (el.tagName === 'img') {
+      out.push(['i', href, attr(el, 'src') ?? '']);
+      return out;
+    }
+    if (el.tagName === 'a') link = safeHref(attr(el, 'href')) ?? href;
+  }
+  for (const child of node.childNodes as DomNode[]) orderTokens(child, ignore, link, out);
+  return out;
 }
 
-/** 섹션 하나를 출력했을 때 원본과 글·링크 순서가 다르면 이유를, 같으면 undefined. */
+/** 섹션 하나를 출력했을 때 원본과 글·링크·이미지 순서가 다르면 이유를, 같으면 undefined. */
 export function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions, ignore?: (el: DomElement) => boolean): string | undefined {
   const single: PageModel = {
     version: 1, theme: options.theme, sections: [section], diagnostics: [],
     meta: { coreVersion: options.coreVersion, hostCss: options.hostCss },
   };
-  // orderCheck: 원본에 없는 생성 글(type24 순서 번호)을 렌더러가 빼고 출력한다(재검수 I-1: 출력에서 문자열로 지우면 작성된 숫자까지 지웠다)
+  // orderCheck: 렌더러가 원본에 없는 생성 글(type24 순서 번호)을 빼고, CSS로 화면 순서를 뒤집는 타입(type30)은 화면 순서대로 출력한다
   const rendered = renderPage(single, { registry: options.registry, orderCheck: true });
   if (rendered.fallbackCount > 0) return undefined; // 데이터 검증 실패는 아래 전체 렌더가 INVALID_DATA로 따로 보고한다
-  const a = orderSignature(element, ignore);
-  const b = orderSignature(parseHtmlFragment(rendered.html) as unknown as DomNode);
-  if (a === b) return undefined;
-  let at = 0;
-  while (at < a.length && a[at] === b[at]) at++;
-  return `원본과 글 순서가 다름: …${a.slice(Math.max(0, at - 10), at + 20)}`;
+  const a = orderTokens(element, ignore, '', []);
+  const b = orderTokens(parseHtmlFragment(rendered.html) as unknown as DomNode, undefined, '', []);
+  const at = a.findIndex((token, i) => !b[i] || token[0] !== b[i]![0] || token[1] !== b[i]![1] || token[2] !== b[i]![2]);
+  if (at < 0 && a.length === b.length) return undefined;
+  const show = (t: OrderToken | undefined) => (t ? `${t[0] === 'i' ? '이미지 ' : ''}${t[2].slice(0, 24)}${t[1] ? ' (링크)' : ''}` : '(없음)');
+  const i = at < 0 ? a.length : at;
+  return `원본과 글 순서가 다름: 원본 "${show(a[i])}" 자리에 출력 "${show(b[i])}"`;
 }

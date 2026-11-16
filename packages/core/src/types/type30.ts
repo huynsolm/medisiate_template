@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { h } from '../html/h.ts';
+import { h, type Child } from '../html/h.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { scanSection } from '../parse/common.ts';
@@ -78,16 +78,18 @@ export const type30: TypeDefinition<Type30Data> = {
     const data: Type30Data = { ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}), blocks };
     return finish(src, data, used, extra, { modifiers, diagnostics });
   },
-  render(section) {
+  render(section, ctx) {
+    // 순서 검사용 출력은 화면 순서(이미지 → 글)로: 실제 출력은 호스트 column-reverse에 맞춘 DOM 순서(글 → 이미지)
+    const inOrder = (text: Child, visual: Child): Child[] => (ctx.orderCheck ? [visual, text] : [text, visual]);
     return presetSection('type-30', section, section.data.blocks.flatMap((b) => [
-      h('div', { class: 'mig-content' }, [
+      h('div', { class: 'mig-content' }, inOrder(
         h('div', { class: 'mig-text-wrap' }, [
           !isBlank(b.brand) && h('span', { class: 'mig-eyebrow' }, [rich(b.brand)]),
           !isBlank(b.model) && h('strong', { class: 'mig-title' }, [rich(b.model)]),
           !isBlank(b.desc) && h('p', { class: 'mig-desc' }, [rich(b.desc)]),
         ]),
         visualPcMo(b.image),
-      ]),
+      )),
       !isBlank(b.subTitle) && h('div', { class: 'mig-text-wrap' }, [h('strong', { class: 'mig-title' }, [rich(b.subTitle)])]),
       b.steps.length > 0 && h('ul', { class: 'mig-list', style: LIST_RESET }, b.steps.map((st) => h('li', { class: 'mig-item' }, [
         !isBlank(st.num) && h('span', { class: 'mig-num' }, [rich(st.num)]),

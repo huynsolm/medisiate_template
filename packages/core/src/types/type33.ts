@@ -3,10 +3,9 @@ import { h } from '../html/h.ts';
 import { generalSection } from '../helpers/general-section.ts';
 import { generalHeader } from '../helpers/header.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
-import { markReadInParts, richFrom, scanSection } from '../parse/common.ts';
+import { markReadInParts, richFrom, richFromNodes, scanSection, structureProblemsInNodes } from '../parse/common.ts';
 import { finish, originalHeader } from '../parse/original.ts';
-import { childNodes, children, descendants, hasClass, isElement, nodesHtml, type DomElement } from '../parse/dom.ts';
-import { sanitizeRichText } from '../html/rich-text.ts';
+import { childNodes, children, descendants, hasClass, isElement, type DomElement } from '../parse/dom.ts';
 import type { TypeDefinition } from './definition.ts';
 import { figureFactsSchema, figureFactsType, type FigureFactsData } from './type27.ts';
 
@@ -24,13 +23,17 @@ const facts = figureFactsType('type33', 'type33');
 /** Q&A 형태: 원본에서 Q&A로 읽었거나, 편집기에서 Q&A 항목을 넣은 경우 */
 const isQna = (section: { variant: string; data: { qna?: unknown[] } }) => section.variant === 'qna' || (section.data.qna?.length ?? 0) > 0;
 
-/** 답 요소의 글(목록 앞)과 첫 목록. 목록 뒤의 글이나 두 번째 목록은 읽지 않는다(남은 글 검사가 fallback). */
-function readAnswer(el: DomElement): { answer: string; list: Array<{ text: string }> } {
+/**
+ * 답 요소의 글(목록 앞)과 첫 목록(답의 직접 자식 ul/ol). 목록 뒤의 글이나 두 번째 목록은 읽지 않는다(남은 글 검사가 fallback).
+ * 목록 앞 글은 공통 규칙대로 문단을 줄바꿈으로 잇고, 그 안의 다른 구조(감싼 목록 등)는 problems에 기록한다(섹션 fallback).
+ */
+function readAnswer(el: DomElement, problems: string[]): { answer: string; list: Array<{ text: string }> } {
   markReadInParts(el);
   const nodes = childNodes(el);
   const at = nodes.findIndex((n) => isElement(n) && (n.tagName === 'ul' || n.tagName === 'ol'));
   const before = at < 0 ? nodes : nodes.slice(0, at);
-  const answer = sanitizeRichText(nodesHtml(before)).replace(/\s+/gu, ' ').replace(/\s*<br>\s*/gu, '<br>').trim();
+  problems.push(...structureProblemsInNodes([...before, ...(at < 0 ? [] : nodes.slice(at + 1))]));
+  const answer = richFromNodes(before);
   const listEl = at < 0 ? undefined : (nodes[at] as DomElement);
   const list = listEl ? children(listEl).filter((c) => c.tagName === 'li').map((li) => ({ text: richFrom(li) })) : [];
   return { answer, list };
@@ -76,13 +79,14 @@ export const type33: TypeDefinition<Type33Data> = {
     const { modifiers, diagnostics } = scanSection(src);
     const header = originalHeader(src.element);
     const used: string[] = [...header.used];
+    const problems: string[] = [];
     const qna = boxes.map((dl) => {
       const dt = children(dl).find((c) => c.tagName === 'dt');
       const dd = children(dl).find((c) => c.tagName === 'dd');
       const qEl = dt ? descendants(dt, (el) => hasClass(el, 'cms-description'))[0] : undefined;
       const aEl = dd ? descendants(dd, (el) => hasClass(el, 'cms-description'))[0] : undefined;
       const question = qEl ? richFrom(qEl) : '';
-      const { answer, list } = aEl ? readAnswer(aEl) : { answer: '', list: [] };
+      const { answer, list } = aEl ? readAnswer(aEl, problems) : { answer: '', list: [] };
       // 원본의 Q·A 표시(span)는 호스트가 다시 그리는 표시라 옮기지 않는다
       used.push('Q', 'A', question, answer, ...list.map((l) => l.text));
       return { question, ...(answer ? { answer } : {}), list };
@@ -92,7 +96,9 @@ export const type33: TypeDefinition<Type33Data> = {
       items: [], qna,
     };
     const result = finish(src, data, used, [], { variant: 'qna', modifiers, diagnostics });
-    return result;
+    return problems.length > 0 && !result.fallbackReason
+      ? { ...result, lossless: false, fallbackReason: `답 안의 구조를 그대로 옮길 수 없음: ${[...new Set(problems)].slice(0, 3).join(', ')}` }
+      : result;
   },
   render(section, ctx) {
     if (!isQna(section)) return facts.render(section as never, ctx);

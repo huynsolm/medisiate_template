@@ -184,31 +184,45 @@ export function duplicateReads(root: DomElement): string[] {
   return [...new Set(problems)];
 }
 
-function richInner(el: DomElement): string {
-  const nodes = childNodes(el);
-  let inner: string;
-  if (!nodes.some((n) => isElement(n) && TEXT_BLOCKS.has(n.tagName))) {
-    inner = cleanRich(innerHtml(el));
-  } else {
-    const lines: string[] = [];
-    let run: DomNode[] = [];
-    const flush = () => {
-      const line = cleanRich(nodesHtml(run));
+/** 노드 목록을 서식 글로. 문단 블록은 줄바꿈으로 잇는다. 요소의 일부(자식 몇 개)만 글로 읽을 때도 쓴다(예: Q&A 답의 목록 앞 글) */
+export function richFromNodes(nodes: DomNode[]): string {
+  if (!nodes.some((n) => isElement(n) && TEXT_BLOCKS.has(n.tagName))) return cleanRich(nodesHtml(nodes));
+  const lines: string[] = [];
+  let run: DomNode[] = [];
+  const flush = () => {
+    const line = cleanRich(nodesHtml(run));
+    if (line) lines.push(line);
+    run = [];
+  };
+  for (const n of nodes) {
+    if (isElement(n) && TEXT_BLOCKS.has(n.tagName)) {
+      flush();
+      const line = richInner(n);
       if (line) lines.push(line);
-      run = [];
-    };
-    for (const n of nodes) {
-      if (isElement(n) && TEXT_BLOCKS.has(n.tagName)) {
-        flush();
-        const line = richInner(n);
-        if (line) lines.push(line);
-      } else {
-        run.push(n);
-      }
+    } else {
+      run.push(n);
     }
-    flush();
-    inner = lines.join('<br>');
   }
+  flush();
+  return lines.join('<br>');
+}
+
+/** 노드들 안에서 줄바꿈으로 나타낼 수 없는 구조(허용 목록 밖 요소, 줄 안 요소 속 블록)를 찾는다 */
+export function structureProblemsInNodes(nodes: DomNode[]): string[] {
+  const problems: string[] = [];
+  for (const n of nodes) {
+    if (!isElement(n)) continue;
+    for (const d of [n, ...descendants(n)]) {
+      if (!TEXT_BLOCKS.has(d.tagName) && !TEXT_INLINE.has(d.tagName)) problems.push(`글 안의 <${d.tagName}>`);
+      const parent = d.parentNode as DomNode | null;
+      if (TEXT_BLOCKS.has(d.tagName) && d !== n && parent && isElement(parent) && TEXT_INLINE.has(parent.tagName)) problems.push(`줄 안 요소 속의 <${d.tagName}>`);
+    }
+  }
+  return [...new Set(problems)];
+}
+
+function richInner(el: DomElement): string {
+  const inner = richFromNodes(childNodes(el));
   // 단락·제목 자신의 허용 style(정렬·색·폭 등)은 블록 span으로 보존한다 (review I-8)
   return blockStyleSpan(el.tagName, attr(el, 'style'), inner);
 }

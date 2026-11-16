@@ -17,6 +17,8 @@ const schema = z.object({
   image: imagePairSchema.default({}),
   title: z.string().optional(),
   desc: z.string().optional(),
+  /** 원본에서 제목이 이미지 뒤에 있었는지(이 경우 출력 순서가 원본과 같다) */
+  titleAfterImage: z.boolean().optional(),
 });
 export type Type01Data = z.infer<typeof schema>;
 
@@ -61,6 +63,11 @@ export const type01: TypeDefinition<Type01Data> = {
     const data: Type01Data = { image, ...(header?.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header?.heading ? { heading: header.heading } : {}) };
     const title = heading ? richFrom(heading) : '';
     if (title) data.title = title;
+    const firstImg = descendants(src.element, (el) => el.tagName === 'img')[0];
+    if (title && heading && firstImg) {
+      const all = descendants(src.element);
+      if (all.indexOf(heading) > all.indexOf(firstImg)) data.titleAfterImage = true;
+    }
     if (desc) data.desc = desc;
     const lostText = uncoveredText(src.element, [...(header?.used ?? []), title, ...paragraphs.map(richFrom)]);
     const fallbackReason = extra.length
@@ -70,13 +77,20 @@ export const type01: TypeDefinition<Type01Data> = {
         : undefined;
     return { data, variant, modifiers, diagnostics, lossless: !fallbackReason && !diagnostics.some((d) => d.level !== 'info'), fallbackReason };
   },
-  render(section) {
+  render(section, ctx) {
     const d = section.data;
     const bg = presetBackground(section.modifiers);
+    /*
+     * 알려진 배치 차이(1단계 결정): 원본 type01은 제목(cms-thin-title) → 이미지 → 설명 순서인데,
+     * 호스트 type-01 프리셋은 글 묶음(제목 + 설명)을 이미지 아래에 둔다(.mig-text-wrap). 내용 손실은 없다.
+     * 실제 617개 섹션이 해당해 fallback으로 돌릴 수 없으므로, 순서 검사용 출력에서만 제목을 이미지 앞에 둔다.
+     * 제목을 이미지 위로 올릴지는 디자인 결정으로 남긴다(docs/review-real-pages-fixes.md).
+     */
+    const titleFirst = ctx.orderCheck && !d.titleAfterImage && !isBlank(d.title) ? h('strong', { class: 'mig-title' }, [rich(d.title)]) : null;
     const text =
       !isBlank(d.title) || !isBlank(d.desc)
         ? h('div', { class: 'mig-text-wrap' }, [
-            !isBlank(d.title) && h('strong', { class: 'mig-title' }, [rich(d.title)]),
+            !titleFirst && !isBlank(d.title) && h('strong', { class: 'mig-title' }, [rich(d.title)]),
             !isBlank(d.desc) && h('p', { class: 'mig-desc' }, [rich(d.desc)]),
           ])
         : null;
@@ -85,6 +99,7 @@ export const type01: TypeDefinition<Type01Data> = {
       presetHeader({ eyebrow: d.eyebrow, title: d.heading }),
       h('div', { class: 'mig-body' }, [
         h('div', { class: 'mig-content' }, [
+          titleFirst,
           visualPcMo(d.image, { wide: true }),
           section.variant === 'highlight' && text ? h('div', { class: 'mig-highlight-box' }, [text]) : text,
         ]),

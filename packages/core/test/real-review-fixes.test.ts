@@ -140,3 +140,39 @@ describe('order check: a link and plain text with the same words are not interch
     expect(result.page.diagnostics.some((d) => d.code === 'UNSAFE_LINK_REMOVED')).toBe(true);
   });
 });
+
+// ---- 3차 재검수(2dd9193) 지적: 순서 비교를 토큰(글·링크·이미지)으로 ----
+
+describe('order check v3', () => {
+  it('I-1 one link around a PC/MO image pair converts normally', () => {
+    const result = convert('<section class="cms type23"><div class="cms-inner"><div class="cms-visual"><a href="https://www.youtube.com/watch?v=abc" target="_blank"><img src="https://cdn.example.com/a.jpg" class="img-fluid d-none d-lg-block m-auto" alt="영상"><img src="https://cdn.example.com/a_m.jpg" class="w-100 d-block d-lg-none" alt="영상"></a></div></div></section>');
+    expect(result.page.sections[0]!.type).toBe('type23');
+    expect(result.html.match(/href="https:\/\/www\.youtube\.com\/watch\?v=abc"/gu)).toHaveLength(2);
+  });
+
+  it('I-3 text that looks like the old link notation cannot hide a reorder', () => {
+    const result = convert('<section class="cms type29"><div class="cms-inner"><div class="cms-description-box"><p class="cms-description">FIRST</p><p class="cms-button-wrap"><a class="cms-square-button" href="/go">예약</a></p><p class="cms-description">⟦/go⟧예약⟦/⟧</p></div></div></section>');
+    expect(result.page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('I-4 an image moving relative to text is detected (type28 image before the badge)', () => {
+    const result = convert('<section class="cms type28"><div class="cms-inner"><div class="cms-visual"><img src="https://example.com/image.png" alt="PIC"></div><div class="cms-description-box em-box-3"><p class="cms-title">BADGE</p></div><div class="cms-description-box"><p class="cms-description">BODY</p></div></div></section>');
+    const html = result.html.replace(/<!--[\s\S]*?-->/gu, '');
+    if (result.page.sections[0]!.type !== 'fallback') expect(html.indexOf('image.png')).toBeLessThan(html.indexOf('BADGE'));
+    else expect(result.page.diagnostics.some((d) => d.code === 'LOSSY_PARSE' && /순서/u.test(d.message))).toBe(true);
+  });
+});
+
+describe('I-2 type33 Q&A answers keep paragraph boundaries; wrapped lists fall back', () => {
+  const qna = (answer: string) => `<section class="cms type33"><div class="cms-inner"><div class="cms-list-wrap"><div class="cms-list-item"><dl class="cms-inner-box"><dt><span>Q</span><div class="cms-description"><button>QUESTION</button></div></dt><dd><div class="copy"><span>A</span><div class="cms-description">${answer}</div></div></dd></dl></div></div></div></section>`;
+
+  it('paragraphs become line breaks', () => {
+    const result = convert(qna('<p>FIRST</p><p>SECOND</p>'));
+    expect(result.page.sections[0]!.type).toBe('type33');
+    expect(result.html).toContain('FIRST<br>SECOND');
+  });
+
+  it('a list wrapped in another element falls back', () => {
+    expect(convert(qna('<div><ul><li>FIRST</li><li>SECOND</li></ul></div>')).page.sections[0]!.type).toBe('fallback');
+  });
+});

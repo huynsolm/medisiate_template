@@ -46,4 +46,27 @@ describe.skipIf(!existsSync(contents))('real pages', () => {
     expect(compared).toBeGreaterThan(2500);
     expect(mismatched).toEqual([]);
   }, 600_000);
+
+  // 순서 검사는 fallback 섹션을 만든다. 정상 섹션을 잘못 걸러내는 회귀(3차 재검수 I-1: 링크 안 PC/MO 이미지 쌍)를 잡기 위해
+  // 실제 페이지에서 순서 사유로 보존되는 섹션을 정확히 고정한다. 아래 9개는 원본에서 글이 이미지보다 앞에 있어
+  // 호스트 프리셋 배치(이미지 → 글)로 옮기면 순서가 바뀌는 진짜 차이다.
+  it('only the known sections are preserved because of a reorder', () => {
+    const preserved: string[] = [];
+    for (const file of walk(contents)) {
+      const rel = path.relative(contents, file);
+      const result = convertDocument(readFileSync(file, 'utf8'), rel, opts);
+      for (const d of result.page.diagnostics) if (d.code === 'LOSSY_PARSE' && /글 순서가 다름/u.test(d.message)) preserved.push(`${d.message.split(':')[0]} ${rel}#${d.sectionIndex}`);
+    }
+    expect(preserved.sort()).toEqual([
+      'type01 13271/0404_종합검진프로그램.html#2',
+      'type01 13271/0404_클래식검진.html#2',
+      'type01 13271/0404_프리미엄검진.html#2',
+      'type01 13271/0405_기업건강검진.html#2',
+      'type01 13289/0503_성병.html#2',
+      'type01 13289/0503_성병.html#5',
+      'type01 13289/0602_리쥬란힐러물광주사.html#2',
+      'type01 13289/0602_리쥬란힐러물광주사.html#5',
+      'type10 13289/0502_임신피임상담.html#11',
+    ].sort());
+  }, 600_000);
 });

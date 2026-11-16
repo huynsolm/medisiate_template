@@ -9,7 +9,11 @@ import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, presetSection } from './preset.ts';
 
-const schema = z.object({ ...headerShape, desc: z.string().optional(), image: imagePairSchema.default({}) });
+const schema = z.object({
+  ...headerShape, desc: z.string().optional(), image: imagePairSchema.default({}),
+  /** 원본에서 설명이 이미지 뒤에 있었는지(순서를 그대로 출력). 원본 도구 기본은 설명 → 이미지 */
+  textAfter: z.boolean().optional(),
+});
 export type Type23Data = z.infer<typeof schema>;
 
 /**
@@ -28,22 +32,25 @@ export const type23: TypeDefinition<Type23Data> = {
     ...headerFields,
     { key: 'desc', label: '설명', kind: 'richText' },
     { key: 'image', label: '이미지 (PC/MO)', kind: 'imagePair' },
+    { key: 'textAfter', label: '설명을 이미지 뒤에', kind: 'checkbox' },
   ],
   defaults: { desc: '설명', image: {} },
   parse(src) {
     const { modifiers, diagnostics } = scanSection(src);
     const header = originalHeader(src.element);
     const inner = children(src.element).find(byClass('cms-inner')) ?? src.element;
-    const desc = childText(children(inner).find(byClass('cms-description-box')), 'cms-description');
-    const { pair, extra } = imagesIn(children(inner).find(byClass('cms-visual')), src, diagnostics);
-    const data: Type23Data = { ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}), ...optional('desc', desc), image: pair };
+    const kids = children(inner);
+    const descBox = kids.find(byClass('cms-description-box'));
+    const visual = kids.find(byClass('cms-visual'));
+    const desc = childText(descBox, 'cms-description');
+    const { pair, extra } = imagesIn(visual, src, diagnostics);
+    const textAfter = Boolean(desc && descBox && visual && kids.indexOf(descBox) > kids.indexOf(visual));
+    const data: Type23Data = { ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}), ...optional('desc', desc), image: pair, ...(textAfter ? { textAfter } : {}) };
     return finish(src, data, [...header.used, desc], extra, { modifiers, diagnostics });
   },
   render(section) {
     const d = section.data;
-    return presetSection('type-23', section, [
-      !isBlank(d.desc) && h('div', { class: 'mig-text-wrap' }, [h('p', { class: 'mig-desc' }, [rich(d.desc)])]),
-      visualPcMo(d.image),
-    ]);
+    const text = !isBlank(d.desc) && h('div', { class: 'mig-text-wrap' }, [h('p', { class: 'mig-desc' }, [rich(d.desc)])]);
+    return presetSection('type-23', section, [!d.textAfter && text, visualPcMo(d.image), d.textAfter && text]);
   },
 };
