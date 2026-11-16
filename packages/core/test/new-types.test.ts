@@ -64,3 +64,27 @@ describe('type28 · 강조 표시 + 이미지 + 설명', () => {
     expect(result.html.indexOf('mig-desc')).toBeLessThan(result.html.indexOf('mig-visual'));
   });
 });
+
+describe('type30 · 장비 소개(이미지·설명 + 단계)', () => {
+  it('parses the original component (section 1)', async () => {
+    const result = convert(sectionOf('type30', 1));
+    const section = result.page.sections[0]!;
+    expect(section.type).toBe('type30');
+    const blocks = (section.data as { blocks: Array<{ brand?: string; desc?: string; steps: unknown[] }> }).blocks;
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0]).toMatchObject({ brand: 'QUANTUM', steps: [] });
+    expect(blocks[0]!.desc).toContain('최신기술Smart FAN BEAM 방식');
+    // 호스트 .mig-content가 column-reverse라 글 → 이미지 순서로 출력해야 이미지가 위에 온다
+    expect(result.html.indexOf('mig-text-wrap')).toBeLessThan(result.html.indexOf('mig-visual'));
+    await expect(JSON.stringify(section, null, 2) + '\n').toMatchFileSnapshot(snapshot('type30/component.expected.json'));
+    await expect(result.html).toMatchFileSnapshot(snapshot('type30/component.expected.html'));
+  });
+
+  it('reads the sub title and numbered steps of a block', () => {
+    const body = sectionOf('type30', 1).replace('</ol>', '</ol><p class="cms-sub-title">간편한 3단계</p><ul class="cms-column-list item-color-box row"><li class="cms-list-item col-4"><div class="cms-inner-box"><div class="cms-description-box"><p class="cms-eyebrow type-number">1</p><p class="cms-description">검체 채취</p></div></div></li></ul>');
+    const result = convert(body);
+    expect(result.page.sections[0]!.type).toBe('type30');
+    expect((result.page.sections[0]!.data as { blocks: Array<{ subTitle?: string; steps: unknown[] }> }).blocks[0]).toMatchObject({ subTitle: '간편한 3단계', steps: [{ num: '1', text: '검체 채취' }] });
+    expect(follow(result.html, ['section.type-30', 'div.mig-body', 'ul.mig-list', 'li.mig-item', 'span.mig-num'])).toHaveLength(1);
+  });
+});

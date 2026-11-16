@@ -20,3 +20,4 @@ biny 재현본에 없던 타입은 진짜 원본 컴포넌트(`reference/cms-ori
 |---|---|
 | `type27.html` | `reference/cms-original/component/type27.html` 1번째 섹션 |
 | `type28.html` | `reference/cms-original/component/type28.html` 1번째 섹션 |
+| `type30.html` | `reference/cms-original/component/type30.html` 1번째 섹션 |
