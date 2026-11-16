@@ -4,7 +4,8 @@ import { presetBackground } from '../helpers/background.ts';
 import { presetHeader } from '../helpers/header.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
-import { descendants } from '../parse/dom.ts';
+import { children, descendants, type DomElement } from '../parse/dom.ts';
+import { byClass, firstByClass, originalHeader } from '../parse/original.ts';
 import { isHeading, pairImages, richFrom, scanSection, uncoveredText, variantFromClasses } from '../parse/common.ts';
 import { joinParagraphs } from '../html/rich-text.ts';
 import { imagePairSchema } from '../schema/page.ts';
@@ -48,15 +49,20 @@ export const type01: TypeDefinition<Type01Data> = {
     const { modifiers, diagnostics } = scanSection(src, Object.keys(TYPE01_SOURCE_VARIANTS));
     const variant = variantFromClasses(src, TYPE01_SOURCE_VARIANTS, diagnostics);
     const { pair: image, extra } = pairImages(descendants(src.element, (el) => el.tagName === 'img'), src, diagnostics);
-    const heading = descendants(src.element, isHeading)[0];
+    // 머리글이 "작은 글 + 제목"(cms-header.top-border > p.cms-eyebrow + p.cms-title)이면 섹션 머리글(eyebrow·heading)로 읽는다.
+    // 원본처럼 이미지 위에 출력되고, 작은 글이 설명에 섞이지 않는다(실제 페이지 14개 섹션에서 순서가 바뀌던 문제).
+    const headerEl = firstByClass(src.element, 'cms-header');
+    const header = headerEl && children(headerEl).some(byClass('cms-eyebrow')) ? originalHeader(src.element) : undefined;
+    const inHeader = (el: DomElement) => Boolean(header && headerEl && (el === headerEl || descendants(headerEl).includes(el)));
+    const heading = descendants(src.element, (el) => isHeading(el) && !inHeader(el))[0];
     // 원본 마크업은 제목도 <p class="cms-thin-title">이므로, 제목 요소 자신과 그 안의 문단은 설명에서 뺀다.
-    const paragraphs = descendants(src.element, (el) => el.tagName === 'p' && el !== heading && !(heading && descendants(heading).includes(el)));
+    const paragraphs = descendants(src.element, (el) => el.tagName === 'p' && !inHeader(el) && el !== heading && !(heading && descendants(heading).includes(el)));
     const desc = joinParagraphs(paragraphs.map(richFrom).filter(Boolean));
-    const data: Type01Data = { image };
+    const data: Type01Data = { image, ...(header?.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header?.heading ? { heading: header.heading } : {}) };
     const title = heading ? richFrom(heading) : '';
     if (title) data.title = title;
     if (desc) data.desc = desc;
-    const lostText = uncoveredText(src.element, [title, ...paragraphs.map(richFrom)]);
+    const lostText = uncoveredText(src.element, [...(header?.used ?? []), title, ...paragraphs.map(richFrom)]);
     const fallbackReason = extra.length
       ? `이미지 ${extra.length + (image.pc ? 1 : 0) + (image.mo ? 1 : 0)}장 중 ${extra.length}장을 담을 자리가 없음`
       : lostText

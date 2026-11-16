@@ -2,8 +2,8 @@ import { z } from 'zod';
 import { h } from '../html/h.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import { richFrom, scanSection, TEXT_BLOCKS, TEXT_INLINE } from '../parse/common.ts';
-import { byClass, childText, finish, firstByClass, optional, originalHeader, readNotes } from '../parse/original.ts';
-import { attr, children, descendants, type DomElement } from '../parse/dom.ts';
+import { finish, firstByClass, optional, originalHeader, readNotes, textsOf } from '../parse/original.ts';
+import { attr, children, descendants, hasClass, type DomElement } from '../parse/dom.ts';
 import { CSS_LENGTH, toNumberInput } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, notesFields, notesShape, presetSection, withNotes } from './preset.ts';
@@ -35,6 +35,8 @@ const schema = z.object({
   desc: z.string().optional(),
   /** 표 제목(원본 caption.sr-only, 화면 낭독기용). 호스트도 caption을 화면에서 숨긴다 */
   caption: z.string().optional(),
+  /** 표 제목을 화면에도 보일지(원본 caption에 sr-only가 없음) */
+  captionVisible: z.boolean().optional(),
   colWidths: z.array(z.object({ width: widthSchema })).default([]),
   head: z.array(rowSchema).default([]),
   body: z.array(rowSchema).default([]),
@@ -104,7 +106,8 @@ export const type26: TypeDefinition<Type26Data> = {
   fields: [
     ...headerFields,
     { key: 'desc', label: '표 위 설명', kind: 'richText' },
-    { key: 'caption', label: '표 제목 (화면 낭독기용, 화면에는 안 보임)', kind: 'text' },
+    { key: 'caption', label: '표 제목', kind: 'text' },
+    { key: 'captionVisible', label: '표 제목을 화면에도 표시 (끄면 화면 낭독기용)', kind: 'checkbox' },
     ...notesFields,
     { key: 'colWidths', label: '열 너비', kind: 'repeat', min: 0, max: 10, fields: [{ key: 'width', label: 'auto 또는 30% 같은 값 (비우면 auto)', kind: 'text' }] },
     ...(['head', 'body'] as const).map((key) => ({
@@ -127,27 +130,39 @@ export const type26: TypeDefinition<Type26Data> = {
     const cols = table ? descendants(table, (el) => el.tagName === 'col') : [];
     // 너비는 style(width: 20%) 또는 width 속성(width="20%")에서 읽는다. 실제 페이지에는 width:* · width:% 같은 오타가 있는데,
     // 브라우저는 잘못된 값을 무시하므로(= 너비 지정 없음) auto로 옮긴다. 그대로 담으면 스키마가 섹션 전체를 거부했다.
-    const colWidths = cols.map((col) => {
-      const raw = (WIDTH.exec(attr(col, 'style') ?? '')?.[1] ?? attr(col, 'width') ?? '').trim();
-      return { width: CSS_LENGTH.test(raw) ? raw : /^\d+(\.\d+)?$/u.test(raw) ? `${raw}px` : 'auto' };
-    });
+    // 브라우저 순서: 유효한 style 너비 → (없거나 무효면) 유효한 width 속성 → 너비 없음(auto). (검수 I-2: 무효한 style이 유효한 속성을 가리던 문제)
+    const validWidth = (raw: string | undefined) => {
+      const v = (raw ?? '').trim();
+      return CSS_LENGTH.test(v) ? v : /^\d+(\.\d+)?$/u.test(v) ? `${v}px` : undefined;
+    };
+    const colWidths = cols.map((col) => ({ width: validWidth(WIDTH.exec(attr(col, 'style') ?? '')?.[1]) ?? validWidth(attr(col, 'width')) ?? 'auto' }));
     // 열 너비는 데이터로 옮기므로, width만 있는 col style은 "버린 style" 경고에서 뺀다.
     const diagnostics = scan.diagnostics.filter((d) => !(d.code === 'INLINE_STYLE_DROPPED' && d.detail?.tag === 'col'
       && (d.detail.declarations as string[]).every((decl) => WIDTH.test(decl))));
     const header = originalHeader(src.element);
     const wrap = firstByClass(src.element, 'cms-table-wrap');
-    const desc = childText(wrap ? children(wrap).find(byClass('cms-description-box')) : undefined, 'cms-description');
+    // 표 묶음 안 설명 상자: 표 앞이면 설명(desc), 표 뒤면 주의 글(note)로. 순서를 지킨다 (검수 I-3)
+    const wrapKids = wrap ? children(wrap) : [];
+    const tableAt = wrapKids.findIndex((k) => k === table || (table !== undefined && descendants(k).includes(table)));
+    const boxText = (before: boolean) => wrapKids
+      .filter((k, i) => hasClass(k, 'cms-description-box') && (tableAt < 0 ? before : before ? i < tableAt : i > tableAt))
+      .map((b) => textsOf(b, 'cms-description')).filter(Boolean).join('<br>');
+    const desc = boxText(true);
+    const afterTable = boxText(false);
     const problems: string[] = [];
     const captionEl = table ? children(table).find((el) => el.tagName === 'caption') : undefined;
     const caption = captionEl ? richFrom(captionEl) : '';
+    // 원본 caption이 sr-only가 아니면 화면에 보이는 표 제목이다 (검수 I-1)
+    const captionVisible = Boolean(captionEl && caption && !hasClass(captionEl, 'sr-only'));
     const head = rowsOf(table ? children(table).find((el) => el.tagName === 'thead') : undefined, problems);
     const body = rowsOf(table ? children(table).find((el) => el.tagName === 'tbody') : undefined, problems);
     const notes = readNotes(src.element, wrap);
     const data: Type26Data = {
       ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}),
-      ...(desc ? { desc } : {}), ...(caption ? { caption } : {}), ...optional('intro', notes.intro), ...optional('note', notes.note), colWidths, head, body,
+      ...(desc ? { desc } : {}), ...(caption ? { caption } : {}), ...(captionVisible ? { captionVisible } : {}),
+      ...optional('intro', notes.intro), ...optional('note', [afterTable, notes.note].filter(Boolean).join('<br>')), colWidths, head, body,
     };
-    const used = [...header.used, desc, caption, notes.intro, notes.note, ...[...head, ...body].flatMap((r) => r.cells.map((c) => c.text))];
+    const used = [...header.used, desc, afterTable, caption, notes.intro, notes.note, ...[...head, ...body].flatMap((r) => r.cells.map((c) => c.text))];
     const result = finish(src, data, used, [], { modifiers: scan.modifiers, diagnostics });
     // 표 구조를 바꾸지 않고는 옮길 수 없는 칸이 있으면 섹션 전체를 원본 그대로 보존한다
     return problems.length > 0 && !result.fallbackReason
@@ -163,7 +178,9 @@ export const type26: TypeDefinition<Type26Data> = {
         !isBlank(d.desc) && h('p', { class: 'mig-desc' }, [rich(d.desc)]),
         h('div', { class: 'table-responsive' }, [
           h('table', { class: 'mig-table' }, [
-            !isBlank(d.caption) && h('caption', {}, [rich(d.caption)]),
+            // 호스트는 caption을 화면에서 숨긴다(position: absolute; 1px; clip). 보이는 표 제목은 그 규칙을 인라인으로 되돌린다
+            !isBlank(d.caption) && h('caption', d.captionVisible
+              ? { style: { position: 'static', width: 'auto', height: 'auto', margin: '0 0 8px', overflow: 'visible', clip: 'auto' } } : {}, [rich(d.caption)]),
             d.colWidths.length > 0 && h('colgroup', {}, d.colWidths.map((c) => h('col', { style: { width: c.width } }))),
             d.head.length > 0 && h('thead', {}, rows(d.head)),
             h('tbody', {}, rows(d.body)),

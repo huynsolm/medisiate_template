@@ -61,3 +61,12 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 ## 6. 판정 기준과 보고 형식
 
 이전과 같다(Critical / Important / Minor, 위치·재현 입력·실제/기대 결과, 직접 실행과 정적 판독 구분, 마지막에 판정).
+
+## 7. 재검수 (지적 반영 + 이후 작업)
+
+- 반영 기록: `docs/review-real-pages-fixes.md` (I-1~I-3, type01 머리글 순서, 글 순서 대조 테스트).
+- 재검수 범위: `8abbcbd..` 이후 전부. 지난 검수 뒤에 들어간 작업도 포함한다:
+  - 새 타입 type27·28·29·30·33 (진짜 원본 컴포넌트 기준, `docs/real-pages-baseline.md` 7장). type33은 호스트에 프리셋이 없어 type-27 카드로 출력.
+  - **링크** (모든 타입 공통, `docs/real-pages-baseline.md` 6장): 서식 글 안 `<a href>`와 이미지를 감싼 링크를 안전한 주소만 보존(`safeHref`), 위험한 주소는 `UNSAFE_LINK_REMOVED` 경고. 우회 가능한 주소 형태가 있는지 봐 주세요.
+- 기대 수치: `npm test` 799 passed, `npm run test:browser` 180 passed, 703페이지 success 314 / partial 374 / failed 15.
+- 결과는 `docs/review-real-pages.md`를 갱신해 같은 브랜치에 커밋·푸시해 주세요.
