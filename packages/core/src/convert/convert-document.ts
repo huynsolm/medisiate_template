@@ -1,7 +1,7 @@
 import { parse } from 'parse5';
 import type { Diagnostic, FileStatus, ImageKind, PageMeta, PageModel, SectionModel, Theme } from '../model/index.ts';
 import { renderPage } from '../page/render-page.ts';
-import { attr, descendants, hasClass, parseHtmlFragment, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
+import { attr, descendants, hasClass, parseHtmlFragment, plainText, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
 import { sectionTypeId } from '../parse/sections.ts';
 import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
@@ -244,7 +244,10 @@ function segments(node: DomNode, view: View, ignore: ((el: DomElement) => boolea
     if (el.tagName === 'a') link = safeHref(attr(el, 'href')) ?? href;
     block = BLOCK_TAGS.has(el.tagName);
   }
-  const inline = !block && 'tagName' in node;
+  // 줄 안 요소 중 구분 자리로 치는 것은 호스트 역할 클래스(mig-*: 머리글 작은 글·제목 등, 호스트 CSS가 줄을 나눔)가 있는 요소와
+  // 인라인 스타일로 블록이 되는 요소(정렬을 옮긴 <span style="display: block">)뿐이다.
+  // em·strong·span 같은 서식 요소는 원본에서 옮긴 클래스가 있어도 글자 모양만 바꾸고 줄을 나누지 않으므로 합치기의 근거가 될 수 없다 (8차 재검수 I-3)
+  const inline = !block && 'tagName' in node && separates(node as DomElement);
   if (block) close();
   if (inline) mark();
   for (const child of node.childNodes as DomNode[]) segments(child, view, ignore, link, out, state);
@@ -252,6 +255,8 @@ function segments(node: DomNode, view: View, ignore: ((el: DomElement) => boolea
   if (block) close();
   return out;
 }
+
+const separates = (el: DomElement) => classesOf(el).some((c) => c.startsWith('mig-')) || /(?:^|;)\s*display\s*:\s*(?!inline\s*(?:;|$)|contents)/iu.test(attr(el, 'style') ?? '');
 
 const joinRuns = (list: Run[][]): Run[] => {
   const out: Run[] = [];
@@ -300,6 +305,30 @@ function matchSegments(source: Segment[], output: Segment[]): string | undefined
   return i < source.length ? `출력에 없는 원본 ${showSeg(source[i])}` : undefined;
 }
 
+const VIEW_NAME: Record<View, string> = { pc: 'PC', tablet: '태블릿', mo: '모바일' };
+
+/**
+ * 원본에서 한 화면 안에서도 폭에 따라 보였다 숨었다 하는 내용(예: d-block d-xl-none, d-sm-none d-md-block)을 찾는다.
+ * 출력은 화면 단위(PC / 모바일·태블릿)로만 숨길 수 있어 이런 표시를 옮길 수 없으므로 원본을 보존해야 한다 (8차 재검수 I-1).
+ */
+function partlyShown(node: DomNode, ignore: ((el: DomElement) => boolean) | undefined): string | undefined {
+  if (!('childNodes' in node)) return undefined;
+  if ('tagName' in node) {
+    const el = node as DomElement;
+    if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return undefined;
+    const own = ownVisibility(el);
+    const view = own && VIEWS.find((v) => own[v] === 'mixed');
+    if (view && (el.tagName === 'img' || plainText(el).trim() || descendants(el).some((d) => d.tagName === 'img'))) {
+      return `원본 내용이 ${VIEW_NAME[view]} 화면 안에서도 폭에 따라 보였다 숨었다 함(출력으로 옮길 수 없는 표시: ${classesOf(el).filter((c) => c.startsWith('d-')).join(' ')})`;
+    }
+  }
+  for (const child of node.childNodes as DomNode[]) {
+    const found = partlyShown(child, ignore);
+    if (found) return found;
+  }
+  return undefined;
+}
+
 export function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions, ignore?: (el: DomElement) => boolean): string | undefined {
   const single: PageModel = {
     version: 1, theme: options.theme, sections: [section], diagnostics: [],
@@ -309,9 +338,11 @@ export function textOrderDiffers(element: DomElement, section: SectionModel, opt
   const rendered = renderPage(single, { registry: options.registry, orderCheck: true });
   if (rendered.fallbackCount > 0) return undefined; // 데이터 검증 실패는 아래 전체 렌더가 INVALID_DATA로 따로 보고한다
   const outputRoot = parseHtmlFragment(rendered.html) as unknown as DomNode;
+  const partly = partlyShown(element, ignore);
+  if (partly) return partly;
   for (const view of VIEWS) {
     const problem = matchSegments(segments(element, view, ignore), segments(outputRoot, view, undefined));
-    if (problem) return `원본과 글 순서가 다름(${{ pc: 'PC', tablet: '태블릿', mo: '모바일' }[view]} 화면): ${problem}`;
+    if (problem) return `원본과 글 순서가 다름(${VIEW_NAME[view]} 화면): ${problem}`;
   }
   return undefined;
 }

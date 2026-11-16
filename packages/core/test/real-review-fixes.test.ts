@@ -273,3 +273,50 @@ describe('merging blocks needs a real separation at the join (7th review I-2)', 
     expect(convert('<section class="cms type04"><div class="cms-inner"><div class="cms-header top-border"><p class="cms-eyebrow">작은</p><p class="cms-title">제목</p></div><ol class="cms-tile-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">첫 문단</p><p class="cms-description">둘째 문단</p></div></li></ol></div></section>').page.sections[0]!.type).toBe('type04');
   });
 });
+
+describe('display ranges inside one screen and CSS rule order (8th review I-1, I-2)', () => {
+  const visual = (cls: string) => convert(`<section class="cms type23"><div class="cms-inner"><div class="cms-visual"><img src="https://example.com/image.png" alt="" class="${cls}"></div></div></section>`);
+  const only = (r: ReturnType<typeof convert>) => (r.page.sections[0]!.data as { image?: { only?: string } }).image?.only;
+
+  it.each(['d-block d-xl-none', 'd-block d-sm-none d-md-block', 'd-none d-sm-block'])('%s hides inside one screen width range and is preserved', (cls) => {
+    const r = visual(cls);
+    expect(r.page.sections[0]!.type).toBe('fallback');
+    expect(r.page.diagnostics.some((d) => d.code === 'LOSSY_PARSE' && d.message.includes('폭에 따라'))).toBe(true);
+  });
+
+  it('a hidden range on an ancestor counts too', () => {
+    const r = convert('<section class="cms type23"><div class="cms-inner"><div class="cms-visual d-block d-xl-none"><img src="https://example.com/image.png" alt=""></div></div></section>');
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('a range that matches whole screens (d-xl-block on top of d-lg-block) is still fine', () => {
+    expect(only(visual('d-none d-lg-block d-xl-block'))).toBe('pc');
+  });
+
+  it.each([
+    ['d-block d-none', 'd-none d-block', undefined],
+    ['d-none d-lg-block d-lg-none', 'd-none d-lg-none d-lg-block', 'pc'],
+  ])('the CSS declaration order decides, not the class order: %s = %s', (a, b, expected) => {
+    for (const cls of [a, b]) {
+      const r = visual(cls);
+      expect(r.page.sections[0]!.type, cls).toBe('type23');
+      expect(only(r), cls).toBe(expected);
+    }
+  });
+});
+
+describe('plain formatting is not a separation for merging blocks (8th review I-3)', () => {
+  const t10 = (title: string) => convert(`<section class="cms type10"><div class="cms-inner"><ol class="cms-figure-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">검사</p><p class="cms-description">검사</p></div><div class="cms-figure-text"><p class="cms-title">${title}</p></div></li></ol></div></section>`);
+
+  it.each(['검사<em>검사</em>', '<strong>검사</strong>검사', '검사<span>검사</span>', '<b>검사</b><i>검사</i>', '검사<span class="text-point">검사</span>'])('two description paragraphs cannot become the title %s', (title) => {
+    expect(t10(title).page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('a span that the paragraph style turns into a block still separates', () => {
+    expect(convert('<section class="cms type01"><p style="text-align:center">가</p><p>나</p></section>').page.sections[0]!.type).toBe('type01');
+  });
+
+  it('formatting inside a single paragraph is still fine', () => {
+    expect(convert('<section class="cms type04"><div class="cms-inner"><ol class="cms-tile-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">첫 <em>문단</em></p><p class="cms-description"><strong>둘째</strong> 문단</p></div></li></ol></div></section>').page.sections[0]!.type).toBe('type04');
+  });
+});

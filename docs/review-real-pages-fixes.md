@@ -159,3 +159,28 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트 6개(Codex 입력·표의 세 행·정상 대조) 중 수정 대상 4개는 수정을 되돌리면 실패.
 - `npm test` 876 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
 - 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음), `only`가 붙은 실제 이미지 3개(모두 PC 전용, 변화 없음).
+
+## 8차 재검수(`00f2827`) 지적 반영
+
+### I-1. 화면마다 대표 폭 하나(0·800·1100)만 봐서 sm·xl 구간의 숨김을 놓침
+- 원인: `d-block d-xl-none`(1200 이상에서 숨김), `d-block d-sm-none d-md-block`(576~767에서 숨김)은 세 화면 분류 안에서 폭에 따라 보였다 숨었다 하는데, 대표 폭에서는 모두 보이는 것으로 나왔다. 출력은 모든 폭에서 보였고 순서 검사도 같은 판정이라 무경고 success였다.
+- 수정(`packages/core/src/parse/common.ts` `ownVisibility`): 화면마다 덮는 Bootstrap 구간의 시작점을 모두 평가한다(모바일 0·576, 태블릿 768, PC 992·1200). 한 화면 안의 구간끼리 결과가 다르면 `'mixed'`.
+  - 출력은 화면 단위(PC / 모바일·태블릿)로만 숨길 수 있어 `'mixed'`는 옮길 수 없다. 순서 검사(`convert-document.ts` `partlyShown`)가 글이나 이미지를 담은 `'mixed'` 요소를 찾으면 사유를 남기고 원본을 보존한다. 조상의 `'mixed'`도 같다.
+  - 이미지 `only`는 화면 전체가 확실히 보이거나 숨을 때만 붙인다.
+- `d-none d-lg-block d-xl-block`처럼 구간이 화면 경계와 맞으면 그대로 PC 전용이다.
+
+### I-2. 같은 폭 규칙 사이의 우선순위를 HTML 클래스 순서로 정함
+- 원인: 같은 breakpoint의 규칙은 입력 문자열 뒤쪽 클래스가 이겼다. Bootstrap CSS에서는 같은 specificity·`!important`라 **CSS 선언 순서**가 정한다(`d-block d-none`과 `d-none d-block`은 같은 결과).
+- 수정: 같은 breakpoint 안에서는 Bootstrap 4 `utilities/_display.scss` 선언 순서(none → inline → inline-block → block → table … → flex → inline-flex)로 정렬해 늦은 쪽이 이긴다. 원본 사이트의 `bootstrap.css`는 버전 표기가 없는데, `d-xl`이 최대 구간이고 Codex 대조 환경도 4.6.2라 Bootstrap 4 순서를 따른다(Bootstrap 5는 none이 마지막이라 결과가 반대).
+- 검수 표의 네 입력: `d-block d-none`·`d-none d-block` → 모두 보임, `d-none d-lg-block d-lg-none`·`d-none d-lg-none d-lg-block` → 모두 PC 전용.
+
+### I-3. 서식 요소(em) 경계를 구분 자리로 써서 제목·본문 역전이 통과
+- 원인: 출력의 모든 줄 안 요소 경계를 구분 자리로 기록해, 제목 `검사<em>검사</em>`의 em 시작을 본문 두 문단의 이음매로 썼다.
+- 수정(`segments`): 구분 자리는 `<br>`, **호스트 역할 클래스(`mig-*`)가 있는 줄 안 요소**(머리글 작은 글·제목 등, 호스트 CSS가 줄을 나눔), **인라인 스타일로 블록이 되는 요소**(정렬을 옮긴 `<span style="display: block">`)의 경계뿐이다. em·strong·b·i·span 같은 서식 요소는 원본에서 옮긴 클래스(`text-point` 등)가 있어도 줄을 나누지 않으므로 구분 자리가 아니다.
+- 한 문단 안의 서식, 문단 둘 → 줄바꿈으로 이은 문단, 머리글 작은 글 + 제목은 지금처럼 통과.
+
+### 검증
+- 새 테스트 14개: Codex 입력 그대로, 같은 유형의 변형(`d-none d-sm-block`, 조상의 구간 숨김, strong·span·b/i·클래스 있는 span 경계), 정상 대조. 수정 대상 10개는 수정을 되돌리면 실패.
+- 기존 테스트 하나(`review-fixes.test.ts` 블록 정렬 span)가 첫 수정안의 오탐을 잡아 `display: block` 스타일 규칙을 추가했다.
+- `npm test` 890 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
+- 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음). 실제 페이지의 sm 클래스는 1개 파일(`13267/0210_분만전검사.html`, `d-sm-block`)뿐이고 결과 변화가 없다.

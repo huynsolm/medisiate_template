@@ -132,3 +132,11 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 화면 표시 판정을 Bootstrap 규칙대로(세 화면: 모바일·태블릿·PC) 계산하고, 이미지 `only`와 순서 검사가 같은 함수를 쓴다. 덩어리 합치기는 출력의 구분 자리(`<br>`, 요소 경계)에서만 허용한다.
 - 확인 요청: 실제 페이지의 다른 표시 클래스 조합(사이트 전용 이름 포함), 구분 자리 규칙의 우회·오탐.
 - 기대 수치: `npm test` 876 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
+
+## 16. 9차 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(8차 재검수 반영). 범위: `00f2827..` 이후.
+- 화면 표시: 화면마다 덮는 Bootstrap 구간(모바일 0·576, 태블릿 768, PC 992·1200)을 모두 보고, 한 화면 안에서 폭에 따라 바뀌면 원본 보존. 같은 breakpoint 규칙은 Bootstrap 4 CSS 선언 순서로 정한다.
+- 덩어리 합치기의 구분 자리: `<br>`, 호스트 역할 클래스(`mig-*`) 요소 경계, 인라인 스타일로 블록이 되는 요소 경계만.
+- 확인 요청: 위 규칙의 우회·오탐. Bootstrap 4 순서 가정(원본 `bootstrap.css` 버전 미확인)이 타당한지.
+- 기대 수치: `npm test` 890 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
