@@ -93,7 +93,8 @@ function prepare(page: PageModel, registry: TypeRegistry, diagnostics: Diagnosti
       });
       return { section: toFallback(section, '데이터 검증 실패'), def: fallbackType as TypeDefinition<unknown>, strategy: 'any' };
     }
-    return { section: { ...section, data: parsed.data }, def, strategy: def.strategy };
+    const ready = { ...section, data: parsed.data };
+    return { section: ready, def, strategy: def.strategyFor ? def.strategyFor(ready) : def.strategy };
   });
 }
 

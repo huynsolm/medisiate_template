@@ -14,7 +14,8 @@ const itemSchema = z.object({
   /** 원 아래 설명(실제 페이지: li 안, 원 밖의 p.cms-description) */
   desc: z.string().optional(),
 });
-const schema = z.object({ ...headerShape, ...notesShape, items: z.array(itemSchema).default([]) });
+export const figureFactsSchema = z.object({ ...headerShape, ...notesShape, items: z.array(itemSchema).default([]) });
+const schema = figureFactsSchema;
 export type Type27Data = z.infer<typeof schema>;
 export type FigureFactsData = Type27Data;
 

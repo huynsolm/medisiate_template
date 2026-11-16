@@ -2,7 +2,7 @@ import type { z } from 'zod';
 import type { HNode } from '../html/h.ts';
 import type { Diagnostic, SectionModel, SectionModifiers, Strategy } from '../model/index.ts';
 import type { RenderContext } from '../render/context.ts';
-import type { SourceSection } from '../parse/dom.ts';
+import type { DomElement, SourceSection } from '../parse/dom.ts';
 
 /** 웹 폼 자동 생성용 필드 메타 */
 export type FieldKind = 'text' | 'richText' | 'textarea' | 'image' | 'imagePair' | 'select' | 'number' | 'color' | 'checkbox' | 'repeat';
@@ -40,6 +40,16 @@ export interface TypeDefinition<T = unknown> {
   label: string;
   /** 'any'는 앞뒤 섹션의 블록에 합류한다 (fallback) */
   strategy: Strategy | 'any';
+  /**
+   * 섹션마다 모드를 다르게 고를 때(선택). 예: type33은 원 목록은 프리셋, Q&A는 호스트 mig-faq-*가 있는 일반 모드.
+   * 없으면 strategy를 쓴다.
+   */
+  strategyFor?(section: SectionModel<T>): Strategy;
+  /**
+   * 글 순서 검사에서 뺄 원본 요소(선택). 호스트 CSS가 다시 그리는 표시만 해당한다
+   * (예: type33 Q&A의 Q·A 표시 span — 호스트 .mig-faq-question::before가 그림).
+   */
+  orderCheckIgnores?(element: DomElement): boolean;
   hostPreset?: string;
   variants: string[];
   schema: z.ZodType<T>;

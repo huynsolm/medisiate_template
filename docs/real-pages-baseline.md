@@ -89,7 +89,14 @@ partial의 대부분은 섹션 단위 fallback(원본 보존)과 아직 없는 �
 | type30 | 33 | 100% | 장비 묶음(이미지·작은 글·제목·설명·소제목·번호 단계) | type-30(column-reverse에 맞춰 글→이미지 순서) |
 | type33 | 56 | 63% | 실제 페이지 형태 = type27과 같은 원 목록(아이콘 위치만 다름) | **type-27 카드**(호스트에 type-33 프리셋 없음) |
 
-type33의 Q&A 아코디언 형태는 호스트의 `mig-faq-*`가 맞는데, 이 규칙은 **일반 모드에만** 있다. 지금은 타입마다 모드가 하나라 type33 안에서 형태별로 모드를 바꿀 수 없어, Q&A는 fallback으로 보존한다(다음 단계).
+### type33 Q&A (섹션별 모드)
+type33의 Q&A 아코디언은 호스트 `mig-faq-*`가 맞는데, 이 규칙은 **일반 모드에만** 있다. 그래서 타입 정의에 섹션별 모드 선택(`strategyFor`)을 더했다.
+- 원 목록 형태 → 프리셋(type-27 카드), Q&A 형태(원본 `dl.cms-inner-box` 또는 편집기에서 Q&A 항목을 넣은 경우) → 일반 모드. 한 페이지에 섞이면 변환기가 블록을 나눠 각자 `.migration-content`로 감싼다(호스트 FAQ 규칙은 `.mig-container`가 없는 감싸개에서만 적용).
+- 출력: `.mig-faq-wrap > .mig-faq-item > .mig-faq-question(strong.mig-title) + .mig-faq-answer(p.mig-desc[, ul])`. 원본은 질문을 눌러 펼치지만 제안서 원칙대로 답을 모두 펼친다. 원본의 Q·A 표시 span은 호스트 CSS(::before)가 다시 그리므로 옮기지 않는다.
+- 글 순서 검사는 타입이 선언한 표시 요소만 뺀다(`orderCheckIgnores`, type33은 dt·.copy 바로 아래의 Q/A 한 글자 span). 다른 곳의 "Q" 글자는 그대로 검사한다.
+- 답 = 목록 앞 글 + 첫 목록(`ul.cms-list-box`). 목록 뒤 글이나 두 번째 목록은 담지 않아 fallback.
+- 질문의 아코디언 `button`은 줄 안 요소로 인정(글 유지, 펼치기 동작은 정적 표현).
+- Chromium(호스트 CSS) 확인: Q·A 표시가 그려지고 답이 모두 보인다. 실제 Q&A 섹션 3개 변환, type33 63% → 68%.
 
 ## 8. 남은 일 (다음 순서)
 

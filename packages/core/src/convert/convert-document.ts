@@ -143,7 +143,7 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
     };
     // 글을 모두 담았어도 순서가 바뀔 수 있다(예: 버튼 뒤 문단이 버튼 앞으로). 이 섹션만 출력해 원본과 글 순서를 비교하고,
     // 다르면 원본을 보존한다 (실제 원본 대조 재검수 R-I-2, I-3). 비교 규칙은 real-pages 테스트와 같다.
-    const reordered = textOrderDiffers(src.element, section, options);
+    const reordered = textOrderDiffers(src.element, section, options, def.orderCheckIgnores);
     if (reordered) {
       diagnostics.push({ level: 'warn', code: 'LOSSY_PARSE', message: `${def.id}: ${reordered} → 원본을 fallback으로 보존`, sectionIndex: src.index });
       sections.push(fallbackFromSource(src, id, reordered));
@@ -189,7 +189,15 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
 const squashText = (html: string) => plainText(parseHtmlFragment(html.replace(/<!--[\s\S]*?-->|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gu, '')) as never).replace(/\s+/gu, '');
 
 /** 섹션 하나를 출력했을 때 원본과 글 순서가 다르면 이유를, 같으면 undefined. type24 순서 번호는 합의된 생성 글이라 뺀다. */
-function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions): string | undefined {
+/** 원본 요소의 글(공백 없이). ignore가 고른 요소(호스트가 다시 그리는 표시)와 주석·script·style은 뺀다 */
+function sourceText(node: DomNode, ignore: ((el: DomElement) => boolean) | undefined): string {
+  if (node.nodeName === '#text') return ((node as { value?: string }).value ?? '').replace(/\s+/gu, '');
+  if (!('childNodes' in node)) return '';
+  if ('tagName' in node && (['script', 'style', 'template'].includes(node.tagName) || ignore?.(node as DomElement))) return '';
+  return (node.childNodes as DomNode[]).map((c) => sourceText(c, ignore)).join('');
+}
+
+export function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions, ignore?: (el: DomElement) => boolean): string | undefined {
   const single: PageModel = {
     version: 1, theme: options.theme, sections: [section], diagnostics: [],
     meta: { coreVersion: options.coreVersion, hostCss: options.hostCss },
@@ -197,7 +205,7 @@ function textOrderDiffers(element: DomElement, section: SectionModel, options: C
   const rendered = renderPage(single, { registry: options.registry });
   if (rendered.fallbackCount > 0) return undefined; // 데이터 검증 실패는 아래 전체 렌더가 INVALID_DATA로 따로 보고한다
   const output = section.type === 'type24' ? rendered.html.replace(/<span class="mig-num">\d+<\/span>/gu, '') : rendered.html;
-  const a = squashText(outerHtml(element));
+  const a = ignore ? sourceText(element, ignore) : squashText(outerHtml(element));
   const b = squashText(output);
   if (a === b) return undefined;
   let at = 0;

@@ -24,7 +24,7 @@ const KNOWN: Record<string, Record<number, string>> = {
   },
   type33: {
     1: '원본 컴포넌트의 dl·상자 목록 형태(증명서 발급 안내). 실제 페이지에는 드묾',
-    2: '원본 컴포넌트의 dl·표 목록 형태. 실제 페이지에는 드묾',
+    2: '원본 컴포넌트의 dl·표 목록 형태(Q&A와 다른 dl 구조). 실제 페이지에는 드묾',
   },
   type04: { 3: '병원 전용 마크업(div.description > div.text-description 3칸 상자)은 원본 도구 클래스가 아님' },
 };

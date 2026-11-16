@@ -135,7 +135,8 @@ export function variantFromClasses(src: SourceSection, sourceVariants: Record<st
 /** 글 안에서 줄바꿈(<br>)으로 경계를 나타낼 수 있는 블록: 문단(p)과 문단을 감싸기만 하는 상자들 */
 export const TEXT_BLOCKS: ReadonlySet<string> = new Set(['p', 'div', 'section', 'article', 'aside', 'header', 'footer', 'main', 'nav', 'address']);
 /** 글 안에 있어도 경계·구조를 잃지 않는 줄 안 요소 (img는 이미지 수 검사가 따로 맡는다) */
-export const TEXT_INLINE: ReadonlySet<string> = new Set(['em', 'strong', 'b', 'i', 'u', 'sup', 'sub', 'span', 'br', 'a', 'small', 'mark', 'font', 'img']);
+// button: 원본 Q&A 질문의 아코디언 버튼 등. 글은 그대로 두고 동작(펼치기)은 정적 표현 원칙대로 없앤다
+export const TEXT_INLINE: ReadonlySet<string> = new Set(['em', 'strong', 'b', 'i', 'u', 'sup', 'sub', 'span', 'br', 'a', 'small', 'mark', 'font', 'img', 'button']);
 
 const cleanRich = (html: string) => sanitizeRichText(html).replace(/\s+/gu, ' ').replace(/\s*<br>\s*/gu, '<br>').trim();
 
@@ -151,6 +152,11 @@ const cleanRich = (html: string) => sanitizeRichText(html).replace(/\s+/gu, ' ')
  * WeakSet이라 원본 DOM이 사라지면 함께 사라진다.
  */
 const readAsText = new WeakSet<DomElement>();
+/** 파서가 자식들을 나눠 읽은 요소(예: Q&A 답 = 글 + 목록). 통째 글 요소로 보지 않고, 나눠 읽은 부분만 구조 검사를 받는다 */
+const readInParts = new WeakSet<DomElement>();
+export function markReadInParts(el: DomElement): void {
+  readInParts.add(el);
+}
 /** 요소마다 richFrom으로 읽어 글이 나온 횟수(바깥 호출만). 같은 원본 글을 두 필드로 읽었는지 finish()가 확인한다. */
 const readCount = new WeakMap<DomElement, number>();
 
@@ -220,7 +226,7 @@ export function textStructureProblems(root: DomElement): string[] {
   const TEXT_CLASSES = ['cms-description', 'cms-title', 'cms-thin-title', 'cms-eyebrow'];
   const holdsText = (el: DomElement) => childNodes(el).some((n) => n.nodeName === '#text' && textContentOf(n).trim() !== '');
   const leafItem = (el: DomElement) => el.tagName === 'li' && !descendants(el).some((d) => classesOf(d).some((c) => c.startsWith('cms-')));
-  const isText = (el: DomElement) => readAsText.has(el) || classesOf(el).some((c) => TEXT_CLASSES.includes(c)) || holdsText(el) || leafItem(el);
+  const isText = (el: DomElement) => !readInParts.has(el) && (readAsText.has(el) || classesOf(el).some((c) => TEXT_CLASSES.includes(c)) || holdsText(el) || leafItem(el));
   for (const textEl of descendants(root, isText)) {
     // 글 요소 안의 글 요소(예: li 안의 p.cms-description)는 바깥에서 한 번만 보면 된다
     if (ancestors(textEl).some((a) => a !== root && descendants(root).includes(a) && isText(a))) continue;

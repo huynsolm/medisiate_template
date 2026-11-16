@@ -126,8 +126,39 @@ describe('type33 · 원 안의 아이콘·작은 글·값 (실제 페이지 형�
     expect(follow(result.html, ['section.type-27', 'div.mig-body', 'ul.mig-list', 'li.mig-item', 'span.mig-label'])).toHaveLength(2);
   });
 
-  it('the Q&A accordion form is preserved as a fallback for now', () => {
-    const qna = '<section class="cms type33"><div class="cms-inner"><div class="cms-list-wrap"><div class="cms-list-item"><dl class="cms-inner-box"><dt class="title"><span>Q</span><div class="cms-description"><button>질문?</button></div></dt><dd class="collapse"><div class="copy"><span>A</span><div class="cms-description">답변</div></div></dd></dl></div></div></div></section>';
-    expect(convert(qna).page.sections[0]!.type).toBe('fallback');
+  const qna = (answer: string) => '<section class="cms type33"><div class="cms-inner"><div class="cms-header top-border"><p class="cms-eyebrow">유선염</p><p class="cms-title">자주하는 질문</p></div><div class="cms-list-wrap"><div class="cms-list-item">'
+    + '<dl class="cms-inner-box"><dt class="title row m-0"><span>Q</span><div class="col-10 cms-description"><button data-toggle="collapse" data-target="#q1">질문 하나?</button></div></dt>'
+    + `<dd class="collapse" id="q1"><div class="copy row m-0"><span>A</span><div class="col-10 cms-description">${answer}</div></div></dd></dl></div></div></div></section>`;
+
+  it('the Q&A accordion becomes the host FAQ (general mode), all answers open, Q/A markers drawn by the host', () => {
+    const result = convert(qna('답 글입니다.'));
+    const section = result.page.sections[0]!;
+    expect(section.type).toBe('type33');
+    expect(section.variant).toBe('qna');
+    expect((section.data as { qna: unknown[] }).qna).toEqual([{ question: '질문 하나?', answer: '답 글입니다.', list: [] }]);
+    expect(result.html).not.toContain('mig-container');
+    expect(follow(result.html, ['div.mig-faq-wrap', 'div.mig-faq-item', 'div.mig-faq-question', 'strong.mig-title'])).toHaveLength(1);
+    expect(follow(result.html, ['div.mig-faq-item', 'div.mig-faq-answer', 'p.mig-desc'])).toHaveLength(1);
+    expect(result.html).not.toMatch(/<span>[QA]<\/span>/u);
+  });
+
+  it('an answer with text then a list keeps both, in order', () => {
+    const result = convert(qna('장점은 다음과 같습니다.<ul class="cms-list-box"><li>첫째 장점</li><li>둘째 장점</li></ul>'));
+    expect(result.page.sections[0]!.type).toBe('type33');
+    expect((result.page.sections[0]!.data as { qna: Array<{ answer?: string; list: unknown[] }> }).qna[0]).toEqual({ question: '질문 하나?', answer: '장점은 다음과 같습니다.', list: [{ text: '첫째 장점' }, { text: '둘째 장점' }] });
+    const html = result.html;
+    expect(html.indexOf('장점은 다음과')).toBeLessThan(html.indexOf('첫째 장점'));
+  });
+
+  it('text after the answer list is not moved before it (order check still applies)', () => {
+    const result = convert(qna('<ul class="cms-list-box"><li>목록</li></ul>목록 뒤 글'));
+    const html = result.html.replace(/<!--[\s\S]*?-->/gu, '');
+    if (result.page.sections[0]!.type !== 'fallback') expect(html.indexOf('목록</li>')).toBeLessThan(html.indexOf('목록 뒤 글'));
+  });
+
+  it('a real "Q" outside the marker span is still part of the text check', () => {
+    const result = convert(qna('Q 등급은 높습니다.'));
+    expect(result.page.sections[0]!.type).toBe('type33');
+    expect(result.html).toContain('Q 등급은 높습니다.');
   });
 });
