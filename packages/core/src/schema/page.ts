@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { DIAGNOSTIC_CODES, type PageModel } from '../model/index.ts';
+import { safeHref } from '../html/rich-text.ts';
 
 /** style 속성에 그대로 들어가는 색 값. 세미콜론·따옴표 같은 주입 문자를 막는다. */
 export const CSS_COLOR = /^(#[0-9a-f]{3,8}|(rgb|rgba|hsl|hsla)\([0-9.,%\s/deg]+\)|[a-z]+)$/iu;
@@ -28,6 +29,8 @@ export const imageRefSchema = z.object({
   width: z.number().int().positive().optional(),
   height: z.number().int().positive().optional(),
   kind: imageKindSchema,
+  link: z.string().refine((v) => safeHref(v) === v, '링크 주소는 http(s)·mailto·tel 또는 상대 주소여야 합니다').optional(),
+  newTab: z.boolean().optional(),
 });
 
 export const imagePairSchema = z.object({

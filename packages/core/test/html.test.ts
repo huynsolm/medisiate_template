@@ -53,8 +53,9 @@ describe('sanitizeRichText', () => {
     );
   });
 
-  it('unwraps disallowed tags but keeps their text', () => {
-    expect(sanitizeRichText('<div><a href="x">link</a></div>')).toBe('link');
+  it('unwraps disallowed tags but keeps their text (links keep a safe address, see links.test.ts)', () => {
+    expect(sanitizeRichText('<div><section>text</section></div>')).toBe('text');
+    expect(sanitizeRichText('<div><a href="x">link</a></div>')).toBe('<a href="x">link</a>');
   });
 
   it('removes script and style elements completely', () => {

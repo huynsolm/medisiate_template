@@ -1,6 +1,6 @@
 import type { Diagnostic, ImagePair, ImageRef } from '../model/index.ts';
 import { imageRef } from '../helpers/image-ref.ts';
-import { blockStyleSpan, filterInlineStyle, richTextToPlain, sanitizeRichText } from '../html/rich-text.ts';
+import { blockStyleSpan, filterInlineStyle, richTextToPlain, safeHref, sanitizeRichText } from '../html/rich-text.ts';
 import { ancestors, attr, childNodes, classesOf, descendants, innerHtml, isElement, nodesHtml, plainText, type DomElement, type DomNode, type SourceSection } from './dom.ts';
 import { modifiersFromClasses } from './modifiers.ts';
 
@@ -26,6 +26,9 @@ export function scanSection(src: SourceSection, typeVariants: Iterable<string> =
       if (/^on/iu.test(a.name)) {
         diagnostics.push({ level: 'warn', code: 'EVENT_ATTRIBUTE_REMOVED', message: `${a.name} 속성 제거`, sectionIndex: src.index, ...at(el), detail: { tag: el.tagName, value: a.value } });
       }
+    }
+    if (el.tagName === 'a' && attr(el, 'href') !== undefined && safeHref(attr(el, 'href')) === undefined) {
+      diagnostics.push({ level: 'warn', code: 'UNSAFE_LINK_REMOVED', message: `안전하지 않은 링크 주소 제거(글은 유지): ${(attr(el, 'href') ?? '').slice(0, 60)}`, sectionIndex: src.index, ...at(el), detail: { href: attr(el, 'href') } });
     }
     if (el.tagName === 'img') {
       const kind = imageRef(attr(el, 'src') ?? '').kind;
@@ -55,7 +58,12 @@ function toInt(value: string | undefined): number | undefined {
 }
 
 export function imageFromElement(el: DomElement): ImageRef {
-  return imageRef(attr(el, 'src') ?? '', attr(el, 'alt') ?? '', toInt(attr(el, 'width')), toInt(attr(el, 'height')));
+  const ref = imageRef(attr(el, 'src') ?? '', attr(el, 'alt') ?? '', toInt(attr(el, 'width')), toInt(attr(el, 'height')));
+  // 이미지를 감싼 링크(<a href><img></a>)도 옮긴다. 위험한 주소는 scanSection이 경고하고 링크 없이 둔다.
+  const anchor = ancestors(el).find((a) => a.tagName === 'a');
+  const link = anchor ? safeHref(attr(anchor, 'href')) : undefined;
+  if (anchor && link !== undefined) return { ...ref, link, ...(attr(anchor, 'target') === '_blank' ? { newTab: true } : {}) };
+  return ref;
 }
 
 const PC_MARK = /^(pc|pc-only|only-pc|show-pc|visible-lg|visible-md|hidden-xs|d-lg-block|d-md-block|img-pc|pc-img)$|[-_]pc$/u;

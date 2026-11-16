@@ -7,7 +7,7 @@ export interface RenderImageOptions {
 
 /** 속성 순서 고정: decoding, loading, src, alt, width, height, style */
 export function renderImage(img: ImageRef, options: RenderImageOptions = {}) {
-  return h('img', {
+  const image = h('img', {
     decoding: 'async',
     loading: 'lazy',
     src: img.src,
@@ -16,6 +16,8 @@ export function renderImage(img: ImageRef, options: RenderImageOptions = {}) {
     height: img.height,
     style: { border: '0', ...options.style },
   });
+  // 원본에서 이미지를 감싼 링크(동영상 썸네일 등)
+  return img.link ? h('a', { href: img.link, ...(img.newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}) }, [image]) : image;
 }
 
 export interface VisualOptions {

@@ -5,6 +5,23 @@ import { CSS_COLOR, CSS_LENGTH } from '../schema/page.ts';
 /** 제목·설명 같은 짧은 서식 텍스트에 허용하는 태그 */
 export const RICH_TEXT_TAGS = new Set(['em', 'strong', 'b', 'i', 'br', 'span', 'u', 'sup', 'sub']);
 const DROP_WITH_CONTENT = new Set(['script', 'style', 'template', 'iframe', 'object', 'noscript']);
+const SAFE_SCHEMES = new Set(['http', 'https', 'mailto', 'tel']);
+
+/**
+ * 링크 주소 검사. http(s)·mailto·tel과 상대 주소(/a, ../a, a.html, #id)만 허용한다.
+ * 브라우저는 주소 안의 탭·줄바꿈을 지우고 앞뒤 공백·제어 문자를 무시하므로(예: "java\tscript:"도 실행됨), 그렇게 정리한 뒤 scheme을 본다.
+ * 허용하면 정리한 주소를, 아니면 undefined를 돌려준다.
+ */
+export function safeHref(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  // eslint-disable-next-line no-control-regex
+  const cleaned = value.replace(/[\t\n\r]/gu, '').replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/gu, '');
+  if (cleaned === '') return undefined;
+  const scheme = /^([a-zA-Z][a-zA-Z0-9+.-]*):/u.exec(cleaned)?.[1]?.toLowerCase();
+  if (scheme !== undefined) return SAFE_SCHEMES.has(scheme) ? cleaned : undefined;
+  // scheme 없는 주소라도 //host 형태(프로토콜 상대)는 다른 사이트로 가므로 http(s)처럼 허용한다. 그 밖은 상대 주소.
+  return cleaned;
+}
 const CLASS_TOKEN = /^[a-zA-Z0-9_-]+$/u;
 
 type StyleCheck = (value: string) => boolean;
@@ -90,6 +107,13 @@ function walk(nodes: P5Node[] | undefined): string {
     const tag = node.tagName;
     if (!tag || DROP_WITH_CONTENT.has(tag)) continue;
     const inner = walk(node.childNodes);
+    if (tag === 'a') {
+      // 링크는 안전한 주소일 때만 남긴다(주소·target만). 위험한 주소는 글만 남기고 scanSection이 경고한다.
+      const href = safeHref(node.attrs?.find((a) => a.name === 'href')?.value);
+      const blank = node.attrs?.find((a) => a.name === 'target')?.value === '_blank';
+      out += href === undefined ? inner : `<a href="${escapeAttr(href)}"${blank ? ' target="_blank" rel="noopener noreferrer"' : ''}>${inner}</a>`;
+      continue;
+    }
     if (!RICH_TEXT_TAGS.has(tag)) {
       out += inner;
       continue;

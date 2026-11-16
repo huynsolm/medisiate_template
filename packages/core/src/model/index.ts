@@ -18,6 +18,10 @@ export interface ImageRef {
   width?: number | undefined;
   height?: number | undefined;
   kind: ImageKind;
+  /** 이미지를 감싼 링크(원본 <a href><img></a>, 예: 동영상 썸네일). safeHref를 통과한 주소만 */
+  link?: string | undefined;
+  /** 링크를 새 창으로(원본 target="_blank") */
+  newTab?: boolean | undefined;
 }
 
 export interface ImagePair {
@@ -77,6 +81,7 @@ export const DIAGNOSTIC_CODES = [
   'SSI_REMOVED',
   'INVALID_DATA',
   'PRESET_LAYOUT_FIXED',
+  'UNSAFE_LINK_REMOVED',
 ] as const;
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number];
