@@ -44,8 +44,9 @@ describe('type01 on the original markup', () => {
 describe('every original type markup', () => {
   const files = readdirSync(ORIGINAL).filter((f) => f.endsWith('.html')).sort();
 
-  it('covers the 25 types biny reproduces', () => {
-    expect(files).toHaveLength(25);
+  it('covers the 25 types biny reproduces plus types taken from the real components', () => {
+    // biny 재현본 25개 + 진짜 원본 컴포넌트에서 가져온 타입(fixtures/original/README.md)
+    expect(files).toHaveLength(26);
   });
 
   it.each(files)('%s converts without dropping any image', (file) => {

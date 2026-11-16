@@ -7,7 +7,7 @@ import { TypeRegistry, type TypeDefinition } from '../src/types/definition.ts';
 import { sourceSections } from '../src/parse/sections.ts';
 import { defaultRegistry } from '../src/types/index.ts';
 
-const html = `<div class="cms-container"><section class="cms type27 foo"><h3>제목 --> 깨기</h3><p>본문&nbsp;텍스트</p><script>alert(1)</script></section></div>`;
+const html = `<div class="cms-container"><section class="cms type99 foo"><h3>제목 --> 깨기</h3><p>본문&nbsp;텍스트</p><script>alert(1)</script></section></div>`;
 
 describe('fallback', () => {
   it('renders a visible warning, the original text and the original html as an escaped comment', () => {
@@ -15,7 +15,7 @@ describe('fallback', () => {
     const section = fallbackFromSource(src!, 's1', '미구현 타입');
     const out = serialize(fallbackType.render(section, createRenderContext()));
     expect(out).toContain('data-migration-fallback="true"');
-    expect(out).toContain('[변환 미지원] type27 미구현 타입');
+    expect(out).toContain('[변환 미지원] type99 미구현 타입');
     expect(out).toContain('제목 --&gt; 깨기');
     expect(out).toContain('제목 --&gt; 깨기\n본문&nbsp;텍스트');
     // 주석은 한 번만 열리고 닫혀야 한다
@@ -23,7 +23,7 @@ describe('fallback', () => {
     expect(out.match(/-->/gu)).toHaveLength(1);
     expect(out).not.toContain('<script>');
     expect(out).not.toContain('<h3>');
-    expect(section.source).toEqual({ file: '01/a.html', index: 1, classList: ['cms', 'type27', 'foo'] });
+    expect(section.source).toEqual({ file: '01/a.html', index: 1, classList: ['cms', 'type99', 'foo'] });
   });
 
   it('is hidden from the type picker and adopts neighbouring mode', () => {

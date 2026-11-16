@@ -29,7 +29,7 @@ describe('convertDocument', () => {
   });
 
   it('falls back for unsupported types and reports partial', () => {
-    const result = convertDocument(doc('<section class="cms type01"><p>a</p></section><section class="cms type27"><p>표</p></section>'), 'a.html', opts);
+    const result = convertDocument(doc('<section class="cms type01"><p>a</p></section><section class="cms type99"><p>표</p></section>'), 'a.html', opts);
     expect(result.page.sections[1]?.type).toBe('fallback');
     expect(result.page.diagnostics.some((d) => d.code === 'UNSUPPORTED_TYPE' && d.sectionIndex === 2)).toBe(true);
     expect(result.status).toBe('partial');

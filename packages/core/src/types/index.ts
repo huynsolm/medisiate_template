@@ -30,8 +30,9 @@ import { type15 } from './type15.ts';
 import { type17 } from './type17.ts';
 import { type25 } from './type25.ts';
 import { type26 } from './type26.ts';
+import { type27 } from './type27.ts';
 
 /** 웹 번들과 CLI가 함께 쓰는 정적 타입 목록 */
-export const ALL_TYPES: AnyTypeDefinition[] = [type00, type01, type02, type03, type04, type05, type06, type07, type09, type10, type11, type12, type13, type14, type15, type16, type17, type18, type19, type20, type21, type22, type23, type24, type25, type26, textVisual, textZigzag, textSteps, textHex, textIconGrid];
+export const ALL_TYPES: AnyTypeDefinition[] = [type00, type01, type02, type03, type04, type05, type06, type07, type09, type10, type11, type12, type13, type14, type15, type16, type17, type18, type19, type20, type21, type22, type23, type24, type25, type26, type27, textVisual, textZigzag, textSteps, textHex, textIconGrid];
 
 export const defaultRegistry = new TypeRegistry(ALL_TYPES);

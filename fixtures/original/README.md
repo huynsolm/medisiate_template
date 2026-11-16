@@ -11,3 +11,11 @@
 - 원본 `cms.css`(http://fxfile.drline.net/cms/public/css/cms.css)는 이 작업 환경에서 받을 수 없었다(http 전용 서버, 세션 프록시는 https만 통과).
 
 실제 `cms/contents` 표본을 받으면 그 표본을 `fixtures/types/typeNN/`에 추가하고, 이 파일들과 구조가 같은지 확인한다.
+
+## 진짜 원본 컴포넌트에서 가져온 파일
+
+biny 재현본에 없던 타입은 진짜 원본 컴포넌트(`reference/cms-original/component/typeNN.html`, 사용자가 2026-11-16 제공)의 첫 섹션을 그대로 쓴다.
+
+| 파일 | 출처 |
+|---|---|
+| `type27.html` | `reference/cms-original/component/type27.html` 1번째 섹션 |

@@ -48,7 +48,7 @@ describe('I-3 lossless parsing', () => {
       '<section class="cms type00"><h2>제목</h2></section>' +
       '<section class="cms type01"><img class="pc" src="p.jpg"><img class="mo" src="m.jpg"><p>a</p></section>' +
       '<section class="cms type01"><img src="x1.jpg"><img src="x2.jpg"><img src="x3.jpg"></section>' +
-      '<section class="cms type27"><img src="t.jpg"><img src="t.jpg"></section>';
+      '<section class="cms type99"><img src="t.jpg"><img src="t.jpg"></section>';
     const r = convert(body);
     expect(renderedSrcs(r.html)).toEqual(r.images.map((i) => i.src).sort());
   });

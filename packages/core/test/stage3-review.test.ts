@@ -7,7 +7,7 @@ import { check, convert, original } from './support/original.ts';
 
 // 3단계(P2·P3) 검수 지적 사항 (docs/review-stage3.md)에 대한 회귀 테스트
 // 3단계 P2·P3 + 4단계 P4·P5 (같은 일반 검사를 적용한다)
-const STAGE3 = ['type07', 'type09', 'type10', 'type02', 'type03', 'type26', 'type11', 'type04', 'type25', 'type15', 'type17', 'type18', 'type23', 'type13', 'type06', 'type16', 'type14', 'type19', 'type24', 'type22', 'type20', 'type21', 'type12', 'type05'];
+const STAGE3 = ['type07', 'type09', 'type10', 'type02', 'type03', 'type26', 'type11', 'type04', 'type25', 'type15', 'type17', 'type18', 'type23', 'type13', 'type06', 'type16', 'type14', 'type19', 'type24', 'type22', 'type20', 'type21', 'type12', 'type05', 'type27'];
 const ctx = () => createRenderContext({ mode: 'preset' });
 
 /** 편집기에서 모든 글 칸을 채운 데이터. 글마다 서로 다른 값을 넣고 그 값 목록을 돌려준다. */

@@ -1,0 +1,36 @@
+{
+  "id": "s1",
+  "type": "type27",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "운동치료의",
+    "heading": "소요시간",
+    "note": "운동치료의 소요시간은 각 운동 별로 차이가 있으나 일반적으로 운동은 한 번에 30분에서 1시간씩, 1주일에 3~5회 중등도 이상의 강도가 권장됩니다.",
+    "items": [
+      {
+        "label": "1회",
+        "text": "30분 ~ 1시간",
+        "icon": {}
+      },
+      {
+        "label": "운동강도",
+        "text": "중등도 이상",
+        "icon": {}
+      },
+      {
+        "label": "1주일",
+        "text": "3회 ~ 5회",
+        "icon": {}
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type27"
+    ]
+  }
+}
