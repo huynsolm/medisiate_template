@@ -1,0 +1,174 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style>
+    .cms-container .cms .cms-tile-list.between-arrow .cms-list-item:before,
+    .cms-container .cms .cms-tile-list.between-arrow .cms-list-item:after {display:none}
+    .cms-content-box {background:#f5f5f5;padding:60px 0;margin:100px 0 0 0;}
+    .cms-content-box .title {font-size:2.625rem;font-weight:200;line-height:3rem;color:#f96f1f;padding-left:60px;}
+    .cms-content-box .cms-list-content {}
+    .cms-content-box .cms-list-content ul {list-style:none;padding:0;margin:0;}
+    .cms-content-box .cms-list-content ul li {font-size:1.125rem;line-height:2rem;font-weight:300;color:#444446;margin-top:2.5%;}
+    .cms-content-box .cms-list-content ul li strong {font-weight:500}
+    .cms-content-box .cms-list-content ul li:first-child {margin-top:0;}
+    .cms-content-box .cms-list-content ul li.type01 dl {margin:40px 0 40px 0;padding:0;}
+    .cms-content-box .cms-list-content ul li.type01 dl dt {font-size:1.375rem;font-weight:500;color:#161616;}
+    .cms-content-box .cms-list-content ul li.type01 dl dd {position:relative;color:#f96f1f;font-size:1.875rem;font-weight:400;padding-left:33px;letter-spacing:-0.05rem;}
+    .cms-content-box .cms-list-content ul li.type01 dl dd .arrow{display:block;position:absolute;top:50%;left:0;width:30px;height:1px;background:#f96f1f;z-index:2}
+    .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:before,
+    .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:after{content:"";display:block;position:absolute;top:0;left:20px;width:10px;height:1px;background:#f96f1f;}
+    .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:before{transform:translate(0px, -4px) rotate(45deg)}
+    .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:after{transform:translate(0px, 4px) rotate(-45deg)}
+    .bg-content {background:url(https://fxfile.drline.net/local/13280/cms/sub0501_img_02.jpg) center  no-repeat;background-size:cover;}
+    .cms-content-area {padding:150px 0;}
+    .cms-content-area .cms-content-textarea {margin-top:55px}
+    .cms-content-area .cms-content-textarea .cms-title {font-size:2.625rem;font-weight:300;margin:0;padding:0;line-height:1.2;letter-spacing: -0.02em;}
+    .cms-content-area .cms-content-textarea .cms-title em {font-weight:700;color:#444446 !important}
+    .cms-content-area .cms-content-textarea .cms-description {font-size:1.125rem;line-height:1.5;font-weight:300;margin-top:50px;}
+    .cms-container .cms .cms-description-box ul.cms-list-text {list-style:none;margin:0;padding:0;}
+    .cms-container .cms .cms-description-box ul.cms-list-text li,
+    .cms-container .cms .cms-description-box .cms-description-dep {font-size:1rem;font-weight:300;position:relative;padding-left:10px;}
+    .cms-container .cms .cms-description-box ul.cms-list-text li:before,
+    .cms-container .cms .cms-description-box .cms-description-dep:before {content:"";display:block;width:5px;height:1px;background:#fff;position:absolute;top:12px;left:0;}
+    @media (max-width:991px){
+        .cms-content-box {padding:6.7%;margin:100px 0 0 0;}
+        .cms-content-box .cms-list-content ul {margin-top:4.6%}
+        .cms-content-box .cms-list-content ul li.type01 dl {margin:40px 0 40px 0;padding:0;}
+        .cms-content-box .title {padding-left:0;}
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow{display:block;position:absolute;top:15px;left:0;width:30px;height:1px;background:#f96f1f;z-index:2}
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:before,
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:after{content:"";display:block;position:absolute;top:0;left:20px;width:10px;height:1px;background:#f96f1f;}
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:before{transform:translate(0px, -4px) rotate(45deg)}
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:after{transform:translate(0px, 4px) rotate(-45deg)}
+        .bg-content {background:url(https://fxfile.drline.net/local/13280/cms/sub0501_img_02_m.jpg) bottom no-repeat;background-size:cover;height:110vw;}
+        .cms-content-area {padding:0;}
+        .cms-content-area .cms-content-textarea {margin-top:0;}
+        .cms-content-area .cms-content-textarea .cms-title {font-size:1.5rem;}
+        .cms-content-area .cms-content-textarea .cms-description {font-size:1rem;margin-top:6%;}
+    }
+    @media (max-width:767px){
+        .bg-content {height:164vw;}
+    }
+    @media (max-width:479px){
+        .cms-content-box .title {font-size:1.188rem;line-height:1.438rem;}
+        .cms-content-box .cms-list-content ul li {font-size:0.663rem;line-height:1.125rem;}
+        .cms-content-box .cms-list-content ul li.type01 dl {margin:4.6% 0;}
+        .cms-content-box .cms-list-content ul li.type01 dl dt {font-size:0.75rem;}
+        .cms-content-box .cms-list-content ul li.type01 dl dd {font-size:0.975rem;padding-left:15px;}
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow{display:block;position:absolute;top:7px;left:0;width:10px;height:1px;background:#f96f1f;z-index:2}
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:before,
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:after{content:"";display:block;position:absolute;top:0;left:7px;width:5px;height:1px;background:#f96f1f;}
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:before{transform:translate(0px, -1px) rotate(45deg)}
+        .cms-content-box .cms-list-content ul li.type01 dl dd .arrow:after{transform:translate(0px, 1px) rotate(-45deg)}
+        .cms-content-area .cms-content-textarea .cms-title {font-size:1.188rem;font-weight:300;margin:0;padding:0;}
+        .cms-content-area .cms-content-textarea .cms-description {font-size:0.813rem;line-height:2;font-weight:300;margin-top:35px;}
+        .cms-container .cms .cms-description-box ul.cms-list-text li,
+        .cms-container .cms .cms-description-box .cms-description-dep {font-size:0.663rem;font-weight:300;position:relative;padding-left:5px;}
+        .cms-container .cms .cms-description-box ul.cms-list-text li:before,
+        .cms-container .cms .cms-description-box .cms-description-dep:before {content:"";display:block;width:3px;height:1px;background:#fff;position:absolute;top:8px;left:0;}
+    }
+</style>
+<div class="cms-container">
+    <!-- contents area [s] -->
+    <section class="cms type00">
+        <div class="cms-inner">
+            <div class="cms-header bottom-border">
+                <p class="cms-page-title">검진센터소개</p>
+            </div>
+        </div>
+    </section>
+    <section class="cms type01">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header">
+                <p class="cms-thin-title">주기적인 건강검진은<br><em>조기에 모든 병을 예방</em>할 수 있습니다.</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-visual">
+                <img src="https://fxfile.drline.net/local/13280/cms/sub0501_img_01.jpg" alt="" class="img-fluid d-none d-lg-block">
+                <img src="https://fxfile.drline.net/local/13280/cms/sub0501_img_01_m.jpg" alt="" class="w-100 d-block d-lg-none">
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+            <div class="cms-content-box row">
+                <div class="col-12 col-lg-3">
+                    <div class="title">건강검진의<br />필요성</div>
+                </div>
+                <div class="col-12 col-lg-9">
+                    <div class="cms-list-content">
+                        <ul>
+                            <li>암 검진은 일반적으로 신체적 이상이나 증상이 없고 스스로 건강하고 생각될 때, 검사를 받음으로써 병을 조기에 발견하고 치료하고자 하는 것으로, 건강검진을 통하여 암을 조기에 발견하여 치료하면 완치율을 크게 높일 수 있습니다.</li>
+                            <li>많은 사람들이 암을 불치병 혹은 난치병으로 생각하는 이유는 이처럼 치료가 가능한 초기에 병원에 오시는 것이 아니라 상당히 진행되어 증상이 있을 때 병원을 찾으시기 때문입니다. 환자가 이상 증상을 느끼고 병원을 찾을 때는 이미 수술로 제거할 수 없을 만큼 암이 커져 있거나 다른 조직으로 전이가 된 경우가 많습니다.</li>
+                            <li><strong>암은 상당히 진행될 때 까지도 특이 증상이 없을 수 있으며</strong>, 암이 진행되어 나타나는 증상들도 평소 흔히 경험해 오던 증상들과 비슷하기 때문에 치료시기를 놓치는 경우가 많습니다. 따라서 예방으로 암의 발생을 줄이고 설령 암이 발생하였다 하더라도 <strong>조기에 검진을 받아 치료하면 소중한 목숨을 암으로 부터 지킬 수 있습니다.</strong></li>
+                            <li>위암의 경우 조기진단만 되면 90%이상이 완치되고, 대장암과 자궁경부암은 암검진으로 전암단계의 병변을 발견하여 치료함으로써 암 발생 자체를 줄일 수 있으며, 유방암도 검진으로 조기 진단만 되면 유방 모양을 그대로 유지하며 암을 완치시킬 수 있습니다.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cms bg-content">
+        <div class="cms-inner">
+            <div class="cms-content-area">
+                <div class="cms-content-textarea">
+                    <p class="cms-title">특히 한국인에게 흔한 위암, 간암, 대장암, 유방암,<br /> 자궁경부암 등은비교적 쉽게 검진을 받을 수 있으며,<br /><em>조기에 발견하여 치료받을 경우 대부분 완치가 가능</em>합니다.</p>
+                    <p class="cms-description">암으로 인한 개인 및 가족의 고통과 국민적 부담을 크게 감소시킬 암 조기검진은 암 사망을 줄이기 위한 가장 중요한 방법입니다.<br />아무리 강조해도 지나치지 않은 것이 건강입니다.<br />당장 아픈 곳이 없어도 병을 일으킬 수 있는 위험 요소를 사전에 알아내어 치료하는 것이 건강검진의 목적이라 할 수 있습니다.<br />이제 건강한 인생의 출발을 조기 건강검진을 통하여 누리시길 당부드리고,<br /> 하루하루 건강한 삶을 누리시길 바랍니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- contents area [e] -->
+    <section class="cms type11 type-bg bg-image-2 text-white">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">양정분 검진센터의</p>
+                <p class="cms-title">특장점</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-bullet-list list-bg-box">
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">우수하고 친절한 의료진</p>
+                            <p class="cms-description-dep">양정분 검진센터의 우수하고 친절한 의료진이 여러분께서 건강검진 시 편안한 마음으로 검진을 받으실 수 있도록 최선을 다하고 있습니다. 양정분 검진센터에서 조기종합검진으로 가족의 건강을 지키세요.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">맞춤검진에 의한 다양한 검진프로그램</p>
+                            <ul class="cms-list-text">
+                                <li>종합건강검진</li>
+                                <li>건강보험공단검진</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">One Day–One Stop 진료실시</p>
+                            <ul class="cms-list-text">
+                                <li>단순처방(위염, 헬리코박터 등)은 검진 당일 처방 실시</li>
+                                <li>대장내시경 검사 시 용종이 발견되면 당일 제거 실시</li>
+                                <li>검진 후 결과 상담 및 추가 검사 실시</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">After Care</p>
+                            <ul class="cms-list-text">
+                                <li>진료연계 시 영상 검사 결과 CD 제공</li>
+                                <li>오후 2시 이후 무료 결과 상담 > 정밀검사 연계</li>
+                                <li>아주대학교병원, 서울아산병원 등 협력병원의 진료연계</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <!-- contents area [e] -->
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

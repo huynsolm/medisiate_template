@@ -1,0 +1,854 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style>
+.cms-container .cms.type01 .cms-description-box {max-width:980px}
+.cms-container .cms .cms-table {border-top:2px solid #b79b77}
+.cms-container .cms .cms-table tbody th:first-child {background:#fff;}
+.cms-container .cms .cms-table tbody td {border-right:none;text-align:left;}
+.cms-container .cms .cms-table tbody td .descript {display:block;color:#b79b77}
+.cms-container .cms .cms-tile-list .cms-description-box .descript {text-align:left;font-size:1rem;letter-spacing:-0.05rem;}
+.cms-container .cms .cms-figure-list>.cms-list-item {min-width:16%}
+.type25 .cms-box-inner.top-area {margin-bottom:25px}
+.type25 .cms-description-box.type01 .eyebrow {display:inline-block;margin:0;padding:10px 23px;border:1px solid #b79b77;font-weight:400;font-size:13px;line-height:1;color:#b79b77;border-radius:16px;text-transform:uppercase;}
+.cms-container .cms.type25 .cms-description-box.type01 .cms-description {color:#b1926a}
+.cms-container .cms.type25 .cms-description-box.type01 .cms-description::before {display:none}
+.type25 .cms-box-inner.top-area .cms-eyebrow.type-number{width:35px;height:35px;padding:0;line-height:35px;text-align:center;border-radius:50%;display:inline-block;margin:0 10px 0 0;background:#b09572;font-weight: 400;font-size: 13px;color: #fff;text-transform: uppercase;vertical-align:middle;}
+.type25 .cms-box-inner.top-area .cms-title{padding:0;display:inline-block;margin:0;font-weight:400;font-size:32px;color:#b1926a;text-transform:uppercase;vertical-align:middle;}
+.type25 .cms-box-inner.top-area .cms-title span {position:relative;padding-left:10px;}
+.type25 .cms-box-inner.top-area .cms-title span:before {content:"";display:block;position:absolute;top:50%;left:0;height:30px;width:1px;background:#e3d3bf;transform:translateY(-50%);}
+@media (min-width: 992px){
+    .cms-container .cms .cms-tile-list.array-zigzag:not(.reverse) .cms-list-item.row.odd {
+        -webkit-box-orient: horizontal;
+        -webkit-box-direction: reverse;
+        -ms-flex-direction: row-reverse;
+        flex-direction: row-reverse;
+    }
+}
+@media(max-width:991px){
+    .cms-container .cms .cms-row-list.text-type-1 .cms-list-item .cms-description-box .description {display:block;font-size:0.875rem;}
+    .cms-container .cms .cms-bullet-list .cms-list-item.cms-list-type01 dt {font-size:1.5rem;line-height:1.8rem;}
+    .cms-container .cms .cms-bullet-list .cms-list-item .list-mt-type {margin-top:30px;}
+    .cms-container .cms .cms-bullet-list .cms-list-item {margin-bottom:15px}
+    .type25 .cms-box-inner.top-area .cms-eyebrow.type-number{width:28px;height:28px;line-height:26px;font-size:16px;}
+    .type25 .cms-box-inner.top-area .cms-title{font-size:23px;}
+    .type25 .cms-box-inner.top-area .cms-title span:before {height:20px;}
+}
+@media(max-width:479px){
+    .cms-container .cms .cms-row-list.text-type-1 .cms-list-item .cms-description-box .description {display:block;font-size:0.688rem;}
+    .cms-container .cms .cms-bullet-list .cms-list-item.cms-list-type01 dt {font-size:1.125rem;line-height:1.5rem;margin-bottom:5px}
+    .cms-container .cms .cms-bullet-list .cms-list-item .list-mt-type {margin-top:20px;}
+    .cms-container .cms .cms-bullet-list .cms-list-item {margin-bottom:10px}
+    .type25 .cms-box-inner.top-area .cms-eyebrow.type-number{width:19px;height:19px;line-height:19px;font-size:11px;}
+    .type25 .cms-box-inner.top-area .cms-title{font-size:16px;}
+    .type25 .cms-box-inner.top-area .cms-title span:before {height:15px;}
+}
+/* tab-menu */
+.contanier {max-width:1200px;margin:0 auto;}
+.nav-tabs {border-bottom:none;}
+.nav-tabs .nav-item {width:20%;}
+.nav-tabs .nav-link.active, 
+.nav-tabs .nav-item.show .nav-link {color:#b1926a;background-color:#fff;}
+.nav-link {padding:5% 0;text-align:center;color:#0f0f0f;}
+.nav-tabs .nav-link {border:1px solid #e8e8e8;border-radius:0;}
+.nav-tabs .nav-link.active, 
+.nav-tabs .nav-item.show .nav-link {background:#b1926a;color:#fff;font-weight:500;border:1px solid #8a848f;}
+@media (max-width:991px){
+    .contanier {padding:0 15px;}
+}
+@media (max-width:768px){
+    .nav-tabs .nav-item {width:33.3333333%;}
+    .nav-tabs .nav-link {font-size:0.75rem;}
+}
+
+</style>
+<div class="contanier">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#tab1">자궁근종</a>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#tab2">난소낭종</a>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#tab3">자궁외임신</a>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#tab4">난관수정 및 난관복원수술 </a>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#tab5">단일통로 복강경을 이용한 수술</a>
+        </li>
+    </ul>
+</div>
+<div class="tab-content">
+    <!-- 자궁근종 [s] -->
+    <div class="tab-pane fade show active" id="tab1">
+        <div class="cms-container">
+            <!-- contents area [s] -->
+            <section class="cms type00">
+                <div class="cms-inner">
+                    <div class="cms-header bottom-border">
+                    <p class="cms-page-title">자궁근종</p>
+                    </div>
+                </div>
+            </section>
+            <section class="cms type01">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->                  
+                    <div class="cms-header">
+                        <p class="cms-thin-title">자궁근종은<em>자궁내 근육에 생기는 종양으로</em><br />여성에게 매우 흔하게 발생하며, 35세 이상의 여성에서<br />40~50%에서 나타납니다.</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->                  
+                    <div class="cms-visual">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010101_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->              
+                </div>
+            </section>
+            <section class="cms type23">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">자궁근종</p>
+                        <p class="cms-title">어떻게 치료하나요?</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-description-box text-center">
+                        <p class="cms-description">근종이 작고 증상이 없을 때는 수개월 간격으로 추적관찰을 할 수 있으나 근종이 크거나 증상을 유발하는 경우 수술적 치료가 필요합니다. 이전에는 자궁전체를 들어내는 자궁적출술이 일차 치료로 알려졌지만 w여성병원은 근종만 제거하여 조직학적 진단(악성여부) 하고 임신도 가능하게 자궁을 보존합니다.</p>
+                    </div>
+                    <div class="cms-visual">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010201.jpg" alt="" class="img-fluid d-none d-lg-block">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010201_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+            <section class="cms type25 type-bg">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">자궁근종</p>
+                        <p class="cms-title">증례</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-box-inner top-area text-center">
+                        <p class="cms-eyebrow type-number">01</p>
+                        <p class="cms-title">최OO (36세)</p>
+                    </div>
+                    <div class="cms-description-box text-center mb-5">
+                        <p class="cms-description">첫째 분만 후 6년간 임신이 잘 안되어 시행한 초음파상 자궁내막을 누르는 7.5㎝의 근종이 발견되었고 복강경하 자궁근종 적출수술 후 임신되어 3.28㎏의 건강한 남아를 출산하였습니다.</p>
+                    </div>
+                    <div class="cms-list-wrap mb-5">
+                        <ul class="cms-column-list text-type-2 row">
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010301.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010301_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010302.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010302_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010303.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010303_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010304.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010304_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="cms-box-inner top-area text-center mt-5">
+                        <p class="cms-eyebrow type-number">02</p>
+                        <p class="cms-title">김OO (42세)</p>
+                    </div>
+                    <div class="cms-description-box text-center mb-5">
+                        <p class="cms-description">하복부에서 만져지는 종괴와 빈혈(hg7.8)을 호소로 내원하였으며 초음파상 13cm근종이 발견되어 3개월의 호르몬 치료로 근종크기는 9.5cm으로 감소하고 혈색소수치(hg10.5)로 교정하여 수혈 없이 복강경하고 근종적출수술을 시행하여 자궁을 보존하고 빈혈을 교정하였습니다.</p>
+                    </div>
+                    <div class="cms-list-wrap">
+                        <ul class="cms-column-list text-type-2 row">
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010401.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010401_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010402.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010402_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010403.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010403_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+            <!-- contents area [e] -->
+        </div>
+    </div>
+    <!-- 자궁근종 [e] -->
+    <!-- 난소낭종 [s] -->
+    <div class="tab-pane fade" id="tab2">
+        <div class="cms-container">
+            <!-- contents area [s] -->
+            <section class="cms type00">
+                <div class="cms-inner">
+                    <div class="cms-header bottom-border">
+                    <p class="cms-page-title">난소낭종</p>
+                    </div>
+                </div>
+            </section>
+            <section class="cms type01">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->                  
+                    <div class="cms-header">
+                        <p class="cms-thin-title">난소낭종은 <em>난소에 발생하는 내부에 수액성분이 차 있는</em><br /><em>양성의 혹</em>으로 배란과 관련되는<br />생리적 낭종과 양성 난소종양을 말합니다.</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->                  
+                    <div class="cms-visual">
+                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020101_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->              
+                </div>
+                </section>
+                <section class="cms type19">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">난소낭종의</p>
+                        <p class="cms-title">종류</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-list-wrap">
+                        <ol class="cms-figure-list item-between-border text-type-2 row justify-content-left">
+                            <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                            <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                            <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                            <li class="cms-list-item col-6 col-lg-2">
+                                <div class="cms-figure hexagon">
+                                    <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                        <g transform="translate(-297.031 -11866)">
+                                            <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                        </g>
+                                    </svg>
+                                    <div class="cms-figure-text">
+                                        <p class="cms-eyebrow">01</p>
+                                        <p class="cms-description">자궁내막종</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-2">
+                                <div class="cms-figure hexagon">
+                                    <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                        <g transform="translate(-297.031 -11866)">
+                                            <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                        </g>
+                                    </svg>
+                                    <div class="cms-figure-text">
+                                        <p class="cms-eyebrow">02</p>
+                                        <p class="cms-description">기형종</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-2">
+                                <div class="cms-figure hexagon">
+                                    <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                        <g transform="translate(-297.031 -11866)">
+                                            <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                        </g>
+                                    </svg>
+                                    <div class="cms-figure-text">
+                                        <p class="cms-eyebrow">03</p>
+                                        <p class="cms-description">점액성 난소낭종</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-2">
+                                <div class="cms-figure hexagon">
+                                    <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                        <g transform="translate(-297.031 -11866)">
+                                            <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                        </g>
+                                    </svg>
+                                    <div class="cms-figure-text">
+                                        <p class="cms-eyebrow">04</p>
+                                        <p class="cms-description">장액성 난소낭종</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-2">
+                                <div class="cms-figure hexagon">
+                                    <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                        <g transform="translate(-297.031 -11866)">
+                                            <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                        </g>
+                                    </svg>
+                                    <div class="cms-figure-text">
+                                        <p class="cms-eyebrow">05</p>
+                                        <p class="cms-description">출혈성낭종</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-2">
+                                <div class="cms-figure hexagon">
+                                    <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                        <g transform="translate(-297.031 -11866)">
+                                            <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                        </g>
+                                    </svg>
+                                    <div class="cms-figure-text">
+                                        <p class="cms-eyebrow">06</p>
+                                        <p class="cms-description">섬유종</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+
+            <section class="cms type09 type-bg">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">난소낭종의</p>
+                        <p class="cms-title">증상</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-list-wrap">
+                        <ul class="cms-column-list item-bg-box text-type-3 row justify-content-start">
+                            <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                            <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                            <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                            <li class="cms-list-item col-12">
+                                <div class="cms-inner-box row">
+                                    <div class="cms-figure check col-auto">
+                                        <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                            <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="cms-description-box col">
+                                        <p class="cms-description">생리통</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-12">
+                                <div class="cms-inner-box row">
+                                    <div class="cms-figure check col-auto">
+                                        <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                            <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="cms-description-box col">
+                                        <p class="cms-description">골반통증</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-12">
+                                <div class="cms-inner-box row">
+                                    <div class="cms-figure check col-auto">
+                                        <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                            <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="cms-description-box col">
+                                        <p class="cms-description">복부팽만</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-12">
+                                <div class="cms-inner-box row">
+                                    <div class="cms-figure check col-auto">
+                                        <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                            <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="cms-description-box col">
+                                        <p class="cms-description">복통(꼬이는 느낌)
+                                        </p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-12">
+                                <div class="cms-inner-box row">
+                                    <div class="cms-figure check col-auto">
+                                        <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                            <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="cms-description-box col">
+                                        <p class="cms-description">질출혈</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-12">
+                                <div class="cms-inner-box row">
+                                    <div class="cms-figure check col-auto">
+                                        <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                            <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="cms-description-box col">
+                                        <p class="cms-description">무증상으로 검진 시 우연히 발견되는 경우도 매우 많음</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+
+            <section class="cms type23">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">난소낭종은</p>
+                        <p class="cms-title">어떻게 치료하나요?</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-visual">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020201.jpg" alt="" class="img-fluid d-none d-lg-block m-auto">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010201_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                    </div>
+                    <div class="cms-description-box text-center mt-5 mb-5">
+                        <p class="cms-description">수주에서 수개월이내에 저절로 소실되는 생리적 낭종은 경과관찰이 원칙입니다. 하지만 폐경상태에서 커져있는 낭종이나 무증상이더라도 크기가 줄지 않고 커지는 낭종의 경우는 난소암과의 감별을 위해 수술적 조직검사를 합니다.</p>
+                    </div>
+                    <div class="cms-visual mt-5">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020301.jpg" alt="" class="img-fluid d-none d-lg-block m-auto">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_010301_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+            <section class="cms type25 type-bg">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">난소낭종</p>
+                        <p class="cms-title">증례</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-box-inner top-area text-center">
+                        <p class="cms-eyebrow type-number">01</p>
+                        <p class="cms-title">전OO (32세) <span>자궁내막종</span></p>
+                    </div>
+                    <div class="cms-description-box text-center mb-5">
+                        <p class="cms-description">6개월 전부터 심해진 생리통과 결혼한 지 2년째 임신이 되지 않는 난임으로 시행한 초음파상 6cm자궁내막증을 진단하고 복강경수술로 자궁내막종 제거 및 난관유착박리수술을 시행하고  3개월간의 호르몬치료 후 건강한 아이를 임신하였습니다(둘째 자연분만)</p>
+                    </div>
+                    <div class="cms-list-wrap mb-5">
+                        <ul class="cms-column-list text-type-2 row">
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020401.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020401_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020402.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020402_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020403.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020403_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="cms-box-inner top-area text-center mt-5">
+                        <p class="cms-eyebrow type-number">02</p>
+                        <p class="cms-title">임OO (26세) <span>난소낭종</span></p>
+                    </div>
+                    <div class="cms-description-box text-center mb-5">
+                        <p class="cms-description">우연히 발견된 8cm의 기형종을 배에 흉터가 없이 질식단일공 수술(trans vaginal lapa cystectomy)하였습니다. </p>
+                    </div>
+                    <div class="cms-list-wrap">
+                        <ul class="cms-column-list text-type-2 row">
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020501.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020501_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020502.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020502_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020503.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020503_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020504.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020504_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="cms-box-inner top-area text-center mt-5">
+                        <p class="cms-eyebrow type-number">03</p>
+                        <p class="cms-title">정OO (22세) <span>난소염전이 생긴 기형종</span></p>
+                    </div>
+                    <div class="cms-description-box text-center mb-5">
+                        <p class="cms-description">새벽에 갑자기 시작된 복통으로 종합병원 응급실에 내원하여 검사한 복부CT검사상 좌측 난소 기형종의 염전이 진단되어 응급으로 복강경수술 시행하였고, 종양만 제거하고 양측 난소 및 난관을 보존하였습니다. </p>
+                    </div>
+                    <div class="cms-list-wrap">
+                        <ul class="cms-column-list text-type-2 row">
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020601.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020601_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020602.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_020602_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+            <!-- contents area [e] -->
+        </div>
+    </div>
+    <!-- 난소난종 [e] -->
+    <!-- 자궁외임신 [s] -->
+    <div class="tab-pane fade" id="tab3">
+        <div class="cms-container">
+            <!-- contents area [s] -->
+            <section class="cms type00">
+                <div class="cms-inner">
+                    <div class="cms-header bottom-border">
+                    <p class="cms-page-title">자궁외임신</p>
+                    </div>
+                </div>
+            </section>
+            <section class="cms type01">
+                <div class="cms-inner">
+                <!-- 제목 영역 [s] -->                  
+                <div class="cms-header">
+                    <p class="cms-thin-title">자궁외임신이란 <em>수정란이 자궁내막에 착상되지 않고</em><br /><em>나팔관이나 난소, 복강내에 착상된 경우를 말합니다.</em></p>
+                </div>
+                <!-- 제목 영역 [e] -->
+                <!-- 콘텐츠 영역 [s] -->                  
+                <div class="cms-visual">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030101_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                </div>
+                <!-- 콘텐츠 영역 [e] -->              
+                </div>
+            </section>
+            <section class="cms type23">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">자궁외임신은</p>
+                        <p class="cms-title">어떻게 치료하나요?</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-description-box text-center">
+                        <p class="cms-description">혈액학적으로 안정되었고 임신호르몬(β-hcg) 수치가 높지 않을 땐 약물치료 MTX (metrotrexate)를 사용합니다. 수술적치료는 임신호르몬 수치가 높거나, 자궁외임신의 원인을 확인하고 제거하기 위해 수술합니다. 과거에는 자궁외임신이 진단되면 한쪽 나팔관 전체를 제거하는 수술을 시행하였습니다.</p>
+                    </div>
+                    <div class="cms-visual">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030201.jpg" alt="" class="img-fluid d-none d-lg-block">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030201_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+            <section class="cms type25 type-bg">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">자궁외임신</p>
+                        <p class="cms-title">증례</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-box-inner top-area text-center">
+                        <p class="cms-eyebrow type-number">01</p>
+                        <p class="cms-title">박OO (28세)</p>
+                    </div>
+                    <div class="cms-description-box text-center mb-5">
+                        <p class="cms-description">3년 전 우측난관 임신으로 타병원에서 우측난관 전체 제거 수술한 후 남아있는 좌측난관에 다시 자궁외임신이 되어 본원에서 복강경하 난관절개수술을 시행하고(salpingotomy) 건강한 아이를 자연 임신하여 분만하였습니다.</p>
+                    </div>
+                    <div class="cms-list-wrap mb-5">
+                        <ul class="cms-column-list text-type-2 row">
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030301.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030301_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030302.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030302_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030303.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030303_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030304.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030304_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="cms-description-box text-center type01 mb-5">
+                        <p class="eyebrow">w여성병원은</p>
+                        <p class="cms-description">수술이 필요한 자궁외임신의 97.8%를 난관개구 수술을 통해 나팔관을 보존하여 이후 정상임신을 가능하게 하였습니다. 365일 24시간 응급 자궁외임신 수술이 가능합니다.</p>
+                    </div>
+                    <div class="cms-box-inner top-area text-center mt-5">
+                        <p class="cms-eyebrow type-number">02</p>
+                        <p class="cms-title">김OO (32세)</p>
+                    </div>
+                    <div class="cms-description-box text-center mb-5">
+                        <p class="cms-description">결혼 3개월 만에 임신하였으나 타 여성 종합 병원에서 우측 자궁각임신으로 진단받고 개복수술을 권유받았으나 본원 내원하여 복강경하 자궁각임신 제거 수술 후 건강하게 회복되어 자연 임신하였습니다. </p>
+                    </div>
+                    <div class="cms-list-wrap">
+                        <ul class="cms-column-list text-type-2 row">
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030401.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030401_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030402.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030402_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030403.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030403_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030404.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_030404_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="cms-description-box text-center type01 mb-5">
+                        <p class="eyebrow">w여성병원은</p>
+                        <p class="cms-description">자궁외임신 중 자궁각임신이 출혈과 통증이 심해 가장 위험한 경우로 알려져 있습니다. 타 병원에서는 개복하여 자궁부분절제를 시행하는 자궁각임신도 w여성병원은 복강경으로 수술 치료하여 흉터가 적고 회복이 빠르며 다음 임신을 원활이 하는데 최선을 다하고 있습니다.</p>
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+            <!-- contents area [e] -->
+        </div>
+    </div>
+    <!-- 자궁외임신[e] -->
+    <!-- 난관수정및 난관복원수술 [s] -->
+    <div class="tab-pane fade" id="tab4">
+        <div class="cms-container">
+            <!-- contents area [s] -->
+            <section class="cms type00">
+                <div class="cms-inner">
+                    <div class="cms-header bottom-border">
+                    <p class="cms-page-title">난관수정및 난관복원수술</p>
+                    </div>
+                </div>
+            </section>
+            <section class="cms type01">
+                <div class="cms-inner">
+                <!-- 제목 영역 [s] -->                  
+                <div class="cms-header">
+                    <p class="cms-thin-title">난관수정이란 <em>나팔관 끝부분이 막혀 나팔관에 <br />물이 차면 나팔관이 붓고 혹처럼 변하게 되는것을 말합니다.</em></p>
+                </div>
+                <!-- 제목 영역 [e] -->
+                <!-- 콘텐츠 영역 [s] -->                  
+                <div class="cms-visual">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040101_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                </div>
+                <div class="cms-description-box">
+                    <p class="cms-description larger">난관수정은 임신에 악영향을 미치는데 나팔관의 분비물이 자궁속으로 흘러들어 아기의 착상을 방해하거나 배아발달을 저해하여 유산률이 높아집니다.</p>
+                </div>
+                <!-- 콘텐츠 영역 [e] -->              
+                </div>
+            </section>
+            <section class="cms type09 type-bg">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">난소낭종의</p>
+                        <p class="cms-title">증상</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-list-wrap">
+                        <ul class="cms-column-list item-bg-box text-type-3 row justify-content-start">
+                            <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                            <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                            <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                            <li class="cms-list-item col-12">
+                                <div class="cms-inner-box row">
+                                    <div class="cms-figure check col-auto">
+                                        <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                            <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="cms-description-box col">
+                                        <p class="cms-description">물같은 질분비물의 반복</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-12">
+                                <div class="cms-inner-box row">
+                                    <div class="cms-figure check col-auto">
+                                        <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                            <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="cms-description-box col">
+                                        <p class="cms-description">하복통</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-12">
+                                <div class="cms-inner-box row">
+                                    <div class="cms-figure check col-auto">
+                                        <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                            <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="cms-description-box col">
+                                        <p class="cms-description">불임</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+            <section class="cms type25">
+                <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->
+                    <div class="cms-header top-border">
+                        <p class="cms-eyebrow">난관수정</p>
+                        <p class="cms-title">증례</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->
+                    <div class="cms-box-inner top-area text-center">
+                        <p class="cms-eyebrow type-number">01</p>
+                        <p class="cms-title">김OO (31세)</p>
+                    </div>
+                    <div class="cms-description-box text-center mb-5">
+                        <p class="cms-description">유산수술 후 왼쪽 하복부가 자주 아프고 임신이 잘 안되어 시행한 난관조영술에서 양측난관이 막힌 난관수종으로 진단되어 3월 복강경수술로 막혀있는 난관채부를 열어주고 정상 상태로 성형 후 8월 자연임신 되어 정상 분만 하였습니다.</p>
+                    </div>
+                    <div class="cms-list-wrap mb-5">
+                        <ul class="cms-column-list text-type-2 row">
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040201.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040201_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040202.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040202_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040203.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040203_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                            <li class="cms-list-item col-6 col-lg-3">
+                                <div class="cms-visual">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040204.jpg" alt="" class="w-100 d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_040204_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->
+                </div>
+            </section>
+            <!-- contents area [e] -->
+        </div>
+    </div>
+    <!-- 난관 수정[e] -->
+    <!-- 단일통로복강경을이용한수술 [s] -->
+    <div class="tab-pane fade" id="tab5">
+        <div class="cms-container">
+            <!-- contents area [s] -->
+            <section class="cms type00">
+                <div class="cms-inner">
+                    <div class="cms-header bottom-border">
+                    <p class="cms-page-title">단일통로 복강경을 이용한 수술</p>
+                    </div>
+                </div>
+            </section>
+            <section class="cms type01">
+                <div class="cms-inner">
+                <!-- 제목 영역 [s] -->                  
+                <div class="cms-header">
+                    <p class="cms-thin-title">어쩔 수 없이 병든 자궁 및 난소를 전부 제거해야하는 경우<br /><em>최소한의 흉터를 위해 배꼽이나 질(더글라스와)을 통한 <br />단일통로 수술이 가능합니다.</em></p>
+                </div>
+                <!-- 제목 영역 [e] -->
+                <!-- 콘텐츠 영역 [s] -->                  
+                <div class="cms-visual">
+                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_050101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                    <img src="https://fxfile.drline.net/local/13267/cms/sub_0301_img_050101_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                </div>
+            </section>
+            <!-- contents area [e] -->
+        </div>
+    </div>
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

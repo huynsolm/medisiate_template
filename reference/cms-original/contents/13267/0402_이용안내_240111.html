@@ -1,0 +1,973 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style>
+    .cms-container .cms.type01 .cms-description-box {max-width:980px}
+    .cms-container .cms .cms-table {border-top:2px solid #b79b77}
+    .cms-container .cms .cms-table tbody th:first-child {background:#fff;}
+    .cms-container .cms .cms-table tbody td {border-right:none;text-align:left;}
+    .cms-container .cms .cms-table tbody td .descript {display:block;color:#b79b77}
+    .cms-container .cms .cms-tile-list .cms-description-box .descript {text-align:left;font-size:1rem;letter-spacing:-0.05rem;}
+    @media (min-width: 992px){
+        .cms-container .cms .cms-tile-list.array-zigzag:not(.reverse) .cms-list-item.row.odd {
+            -webkit-box-orient: horizontal;
+            -webkit-box-direction: reverse;
+            -ms-flex-direction: row-reverse;
+            flex-direction: row-reverse;
+        }
+    }
+    @media(max-width:991px){
+        .cms-container .cms .cms-row-list.text-type-1 .cms-list-item .cms-description-box .description {display:block;font-size:0.875rem;}
+        .cms-container .cms .cms-bullet-list .cms-list-item.cms-list-type01 dt {font-size:1.5rem;line-height:1.8rem;}
+        .cms-container .cms .cms-bullet-list .cms-list-item .list-mt-type {margin-top:30px;}
+        .cms-container .cms .cms-bullet-list .cms-list-item {margin-bottom:15px}
+    }
+    @media(max-width:479px){
+        .cms-container .cms .cms-row-list.text-type-1 .cms-list-item .cms-description-box .description {display:block;font-size:0.688rem;}
+        .cms-container .cms .cms-bullet-list .cms-list-item.cms-list-type01 dt {font-size:1.125rem;line-height:1.5rem;margin-bottom:5px}
+        .cms-container .cms .cms-bullet-list .cms-list-item .list-mt-type {margin-top:20px;}
+        .cms-container .cms .cms-bullet-list .cms-list-item {margin-bottom:10px}
+    }
+    /* tab-menu */
+    .contanier {max-width:1200px;margin:0 auto;}
+    .nav-tabs {border-bottom:none;}
+    .nav-tabs .nav-item {width:20%;}
+    .nav-tabs .nav-link.active, 
+    .nav-tabs .nav-item.show .nav-link {color:#b1926a;background-color:#fff;}
+    .nav-link {padding:5% 0;text-align:center;color:#0f0f0f;}
+    .nav-tabs .nav-link {border:1px solid #e8e8e8;border-radius:0;}
+    .nav-tabs .nav-link.active, 
+    .nav-tabs .nav-item.show .nav-link {background:#b1926a;color:#fff;font-weight:500;border:1px solid #8a848f;}
+    @media (max-width:991px){
+        .contanier {padding:0 15px;}
+    }
+    @media (max-width:768px){
+        .nav-tabs .nav-item {width:33.3333333%;}
+        .nav-tabs .nav-link {font-size:0.75rem;}
+    }
+    </style>
+    <div class="contanier">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#tab1">룸타입</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab2">모유수유실</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab3">이용안내 및 서비스</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab4">식단</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab5">신생아실</a>
+            </li>
+        </ul>
+    </div>
+    <div class="tab-content">
+        <!-- 룸안내 [s] -->
+        <div class="tab-pane fade show active" id="tab1">
+            <div class="cms-container">
+                <!-- contents area [s] -->
+                <section class="cms type00">
+                    <div class="cms-inner">
+                        <div class="cms-header bottom-border">
+                        <p class="cms-page-title">룸타입</p>
+                        </div>
+                    </div>
+                </section>
+                <section class="cms type03">
+                    <div class="cms-inner">
+                        <!-- 제목 영역 [s] -->
+                        <div class="cms-header">
+                            <p class="cms-thin-title">프리미엄급에 걸맞는 고품격 시설을 갖춘<br><em>W여성병원 산후조리원</em>의<br><em>5가지 룸타입</em>을 안내합니다.</p>
+                        </div>
+                        <!-- 제목 영역 [e] -->
+                        <!-- 콘텐츠 영역 [s] -->
+                        <div class="cms-list-wrap">
+                            <!-- 지그재그 방향 뒤집으려면 reverse 클래스 추가 -->
+                            <ol class="cms-tile-list array-zigzag text-type-1">
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010101_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">01</p>
+                                            <p class="cms-title">스탠다드</p>
+                                            <p class="cms-description">삼성 82L 2단냉장고 / LG 32인치 LED TV / LG 시스템에어컨 / 시몬스 퀸 사이즈 침대 / 쇼파 / 의자 및 테이블 / 원목아기침대 / 초극세사 마이크로하이바(알러지·진드기방지)이불&amp;배게 / 옷장 / 수유발판 / 수유쿠션 / 회음부방석 / 스펙트라 유축기 / 개별 냉·난방 조절기 / 전화기 / 에바·아메리칸스탠다드 세면대&amp;수전 / 비데 / 펠할리곤스 4종 (샴푸, 컨디셔너,바디워시,비누) / 간접등(산모와 아이 시선보호) / 각방 무선공유기 설치 / 공기청정기 / 헤어드라이기</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010102.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010102_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">02</p>
+                                            <p class="cms-title">디럭스</p>
+                                            <p class="cms-description">삼성 82L 2단냉장고 / LG 32인치 LED TV / LG 시스템에어컨 / 시몬스 퀸 사이즈 침대 / 쇼파 / 의자 및 테이블 / 원목아기침대 / 초극세사 마이크로하이바(알러지·진드기방지)이불&amp;배게 / 옷장 / 수유발판 / 수유쿠션 / 회음부방석 / 스펙트라 유축기 / 개별 냉·난방 조절기 / 전화기 / 에바·아메리칸스탠다드 세면대&amp;수전 / 비데 / 펠할리곤스 4종(샴푸, 린스, 바디워시, 바디로션) / 간접등(산모와 아이 시선보호) / 각방 무선공유기 설치 / 공기청정기 / 헤어드라이기 </p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010103.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010103_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">03</p>
+                                            <p class="cms-title">디럭스 특실</p>
+                                            <p class="cms-description">삼성 82L 2단냉장고 / LG 32인치 LED TV / LG 시스템에어컨/시몬스 퀸 사이즈 침대 / 쇼파 / 의자 및 테이블 / 원목아기침대 / 
+                                                초극세사마이크로하이바(알러지·진드기방지)이불&amp;배게 / 옷장 / 개인용소독기 / 수유발판 / 수유쿠션 / 회음부방석 / 스펙트라 유축기 / 개별 냉·난방 조절기/전화기 / 에바·아메리칸스탠다드 세면대&amp;수전 / 비데 / 펠할리곤스 4종(샴푸, 린스, 바디워시, 바디로션) / 간접등(산모와 아이 시선보호) / 인터넷 무료 Wi-Fi 제공 / 헤어드라이기
+                                                / 공기청정기 </p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010104.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010104_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">04</p>
+                                            <p class="cms-title">스위트</p>
+                                            <p class="cms-description">삼성 냉장고160L 2단냉장고 / LG 42인치 LED TV / LG 시스템에어컨 / 시몬스 킹 사이즈 침대 / 청호 공기청정기 / 쇼파 / 의자 및 테이블 / 원목아기침대 / 초극세사 마이크로하이바(알러지·진드기방지)이불&amp;배게 / 옷장 / 개인용소독기 / 수유발판 / 수유쿠션 / 회음부방석 / 스펙트라 유축기 / 개별 냉·난방 조절기 / 전화기 / 에바·아메리칸스탠다드 세면대&amp;수전 / 비데 / 헤어드라이기 / 펠할리곤스 4종(샴푸, 린스, 바디워시, 바디로션) / 간접등(산모와 아이 시선보호) / 인터넷 무료 Wi-Fi 제공 / 공기청정기 </p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="col-lg-12 px-0">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010105.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010105_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row odd align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010106.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010106_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">05</p>
+                                            <p class="cms-title">W그랜드스위트</p>
+                                            <p class="cms-description">삼성 냉장고160L 2단냉장고 / LG 42인치 LED TV / LG 시스템에어컨 / 시몬스 킹 사이즈 침대 / 청호 공기청정기 / 쇼파 / 의자 및 테이블 / 원목아기침대 /  초극세사 마이크로하이바(알러지·진드기방지)이불&amp;배게 / 옷장 / 개인용소독기 / 수유발판 / 수유쿠션 / 회음부방석 / 스펙트라 유축기 / 개별 냉·난방 조절기 / 전화기 / 에바·아메리칸스탠다드 세면대&amp;수전 / 비데 / 개인좌욕기 / 헤어드라이기 / 펠할리곤스 4종(샴푸, 린스, 바디워시, 바디로션) /  간접등(산모와 아이 시선보호) / 인터넷 무료 Wi-Fi 제공 / 공기청정기 / LED마스크 / 족열기</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="col-lg-12 px-0">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010107.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_010107_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                        <!-- 콘텐츠 영역 [e] -->
+                    </div>
+                </section>
+                <!-- contents area [e] -->
+            </div>
+        </div>
+        <!-- 룸안내 [e] -->
+        <!-- 모유수유실 [s] -->
+        <div class="tab-pane fade" id="tab2">
+            <div class="cms-container">
+                <!-- contents area [s] -->
+                <section class="cms type00">
+                    <div class="cms-inner">
+                        <div class="cms-header bottom-border">
+                        <p class="cms-page-title">모유수유실</p>
+                        </div>
+                    </div>
+                </section>
+                <section class="cms type01">
+                    <div class="cms-inner">
+                        <!-- 제목 영역 [s] -->                  
+                        <div class="cms-header">
+                            <p class="cms-thin-title">프리미엄급에 걸맞는 고품격 시설을 갖춘<br><em>W여성병원 산후조리원</em>의<br><em>모유수유실</em>을 안내합니다.</p>
+                        </div>
+                        <!-- 제목 영역 [e] -->
+                        <!-- 콘텐츠 영역 [s] -->                  
+                        <div class="cms-visual">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020101_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <!-- 콘텐츠 영역 [e] -->              
+                    </div>
+                    </section>
+                <section class="cms type03">
+                    <div class="cms-inner">
+                        <!-- 콘텐츠 영역 [s] -->
+                        <div class="cms-list-wrap">
+                            <!-- 지그재그 방향 뒤집으려면 reverse 클래스 추가 -->
+                            <ol class="cms-tile-list array-zigzag text-type-1">
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020201.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020201_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">01</p>
+                                            <p class="cms-title">모유수유실 살균 시스템</p>
+                                            <p class="cms-description">시중의 일반적인 공기살균기와는 다른 병의원 전용 플루 제로 공기살균기를 사용하여 연약 한 신생아의 폐를 바이러스로부터 보호하고 있습니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020202.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020202_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">02</p>
+                                            <p class="cms-title">모유수유실 공기청정 시스템</p>
+                                            <p class="cms-description">모유수유실 외부창으로 자연통풍에 탁월한 구조와 더불어 청호나이스 뉴 크린띠에 공기청정기로 10단계의 효과적인 공기청정 시스템이 모유수유실을 깨끗하게 정화시킵니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020203.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020203_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">03</p>
+                                            <p class="cms-title">성공적인 모유수유</p>
+                                            <p class="cms-description">성공적인 모유수유를 위해 모유수유 전담간호사를 초빙해 모유수유를 적극적으로 도와드립니다. 모유수유를 적극 권장하는 병원으로 아기의 수유리듬을 고려해 자연스러운 흡입리듬을 갖춘 스펙트라 유축기가 모유수유실에 비치되어 있습니다. 깔때기 소독은 신생아실에서 해드립니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020204.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_020204_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">04</p>
+                                            <p class="cms-title">모유영양성분 분석서비스</p>
+                                            <p class="cms-description">엄마들의 빈틈없는 영양설계를 위한 모유영양성분 분석서비스를 무료로 제공합니다.
+                                                아기의 건강한 성장을 바라는 엄마의 마음을 잘 알기에 모유의 영양상태를 분석하고, 모유기준함량과 비교 평가하여 지침을 알려드리는 모유분석 서비스입니다.
+                                                기본 모유영양분석 서비스는 단백질 지방 유당 수분 등의 수치를 제공하며 자세한 사항은 조리원 입실시 설명드립니다. (원하는 산모 누구나 서비스를 제공합니다.)</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                        <!-- 콘텐츠 영역 [e] -->
+                    </div>
+                </section>
+                <!-- contents area [e] -->
+            </div>
+        </div>
+        <!-- 모유수유실 [e] -->
+        <!-- 서비스 안내 [s] -->
+        <div class="tab-pane fade" id="tab3">
+            <div class="cms-container">
+                <!-- contents area [s] -->
+                <section class="cms type00">
+                    <div class="cms-inner">
+                        <div class="cms-header bottom-border">
+                        <p class="cms-page-title">이용안내 및 서비스</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="cms type31">
+                    <div class="cms-inner">                        
+			            <div class="cms-list-wrap">
+                            <dl class="cms-list-item mt-55">
+                                <dt class="cms-title">※ w더블유여성병원 산후조리원 이용안내 및 서비스</dt>
+                            </dl>
+                            <table class="cms-table table-type01">
+                                <caption class="sr-only">w더블유여성병원 산후조리원 이용안내 및 서비스</caption>
+                                <!-- 테이블 셀 너비는 colgroup으로 설정 -->
+                                <colgroup>
+                                    <col style="width:10%">
+                                    <col style="width:10%">
+                                    <col style="width:60%">
+                                    <col style="width:20%">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th colspan="2" scope="col">구 분</th>
+                                    <th scope="col">내 용</th>
+                                    <th scope="col">장 소</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td rowspan="2" class="border-right">에스테틱</td>
+                                    <td class="border-right">전신</td>
+                                    <td class="text-left">
+                                        <ul class="list-box">
+                                            <li>전신&nbsp;경혈&nbsp;마사지&nbsp;- 6박7일 이상&nbsp;이용&nbsp;1회만 무료(추가시&nbsp;유료)</li>
+                                        </ul>
+                                    </td>
+                                    <td>9층 (134번)</td>
+                                </tr>
+                                <tr>
+                                    <td class="border-right">얼굴</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>얼굴마사지&nbsp;주&nbsp;1회  &nbsp;스위트룸이상&nbsp;주&nbsp;2회(아로마&nbsp;오일, 앰플)</li>
+                                        </ul>
+                                    </td>
+                                    <td>9층 (133번)</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">두피&nbsp;마사지(샴푸)</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>화금&nbsp;오전&nbsp;9시 ~ 12시 사이</li>
+                                        </ul>
+                                    </td>
+                                    <td rowspan="2">9층(133번)</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">물리치료실(9A~5P)</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>세라젬&nbsp;의료기, 파우제&nbsp;안마의자, 발맛사지기, 뱅앤올룹슨&nbsp;스피커</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">산모&nbsp;식사<br>(1인 6식)</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 아침:8시 간식:10시 점심:12시 간식:3시 저녁:5시 야식:8시00분</li>
+                                            <li>- 보호자 식사는 배식 1시간 전에 신청(111번)</li>
+                                            <li>- 식권은 2층에서 구입(식권:6000원,공기1000원-1인만 가능)</li>
+                                            <li>- 주&nbsp;3회 특식&nbsp;제공&nbsp;</li>
+                                            <li>* 토스트&amp;원두커피 제공 (오전 7시~9시)</li>
+                                        </ul>
+                                    </td>
+                                    <td>각 호실 룸서비스</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">적외선램프, 좌욕실</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 필요시 자유롭게 이용하십시오. (각 병실 및 좌욕실 응급 비상벨 설치)</li>
+                                        </ul>
+                                    </td>
+                                    <td>2,3층</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">인터넷</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 각&nbsp;병실마다&nbsp;무선&nbsp;공유기&nbsp;설치</li>
+                                        </ul>
+                                    </td>
+                                    <td>2,3층</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">청소 및 세탁물</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 개인 속옷, 양말, 수건을 세탁해 드립니다.</li>
+                                            <li>* 산모님것만 가능(세탁물은&nbsp;오후&nbsp;3시까지 수거, 세탁&nbsp;후&nbsp;다음날&nbsp;각&nbsp;병실로&nbsp;가져다&nbsp;드림)</li>
+                                            <li>* 퇴원전날은 세탁물을 내놓지 마십시오.</li>
+                                            <li>- 방청소시간: 오전9시30분~12시</li>
+                                            <li>오전중에는 문을 잠그지 마시고 귀중품은 본인이 가지고 다니세요.</li>
+                                        </ul>
+                                    </td>
+                                    <td>세탁물실 장소<br>- 2층 210호 옆<br>- 3층 306호 옆<br>- 4층 탕비실 옆</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">회음부 방석, 수유쿠션, 발판, 전동식&nbsp;유축기</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 병실마다&nbsp;비치되어&nbsp;쉽고&nbsp;편안한&nbsp;자세로&nbsp;모유수유가&nbsp;가능합니다.</li>
+                                            <li>- 깔대기와&nbsp;젖병&nbsp;소독은&nbsp;신생아실에서&nbsp;해드립니다.(깔때기, 저장팩은&nbsp;1층 매점&nbsp;구입가능)</li>
+                                        </ul>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">모유수유실</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 모유수유를&nbsp;적극적으로&nbsp;도와드립니다.(기저부&nbsp;마사지, 유축방법, 수유자세)</li>
+                                        </ul>
+                                    </td>
+                                    <td>2층</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">신생아&nbsp;관리</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 신생아&nbsp;목욕, 젖병&nbsp;수유, 황달&nbsp;및&nbsp;배꼽&nbsp;관리, 하루&nbsp;3번 체온&nbsp;측정</li>
+                                        </ul>
+                                    </td>
+                                    <td>신생아실</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">소아과&nbsp;협진</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 필요시&nbsp;진료&nbsp;및&nbsp;상담&nbsp;가능</li>
+                                        </ul>
+                                    </td>
+                                    <td>1층 소아과</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">모유수유실&amp;신생아실&nbsp;소독&nbsp;및&nbsp;환기</td>
+                                    <td class="text-left border-right">
+                                        <div class="row m-0">
+                                            <ul class="col-4 list-box">
+                                                <li>- 오전&nbsp;10시~12시</li>
+                                                <li>- 오후&nbsp;6시&nbsp;~&nbsp;8시</li>
+                                            </ul>
+                                            <ul class="col-8 list-box">
+                                                <li> 산모가&nbsp;원할&nbsp;때는&nbsp;언제든지&nbsp;모자동실&nbsp;가능합니다.</li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>신생아실</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">아기&nbsp;사진&nbsp;촬영</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 수,금&nbsp;저녁&nbsp;오후&nbsp;5시 40분 ~ 6시 30분 사이<br>신생아&nbsp;기념사진을&nbsp;찍어&nbsp;드립니다.(사진은 스튜디오에서 찾으세요)</li>
+                                        </ul>
+                                    </td>
+                                    <td>3층 문화센터</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">퇴원 진료</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 퇴원 하루 전날 산모님 퇴원진찰이 있습니다.</li>
+                                        </ul>
+                                    </td>
+                                    <td>7층 외래</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="border-right">퇴원 (오전 10시전까지)</td>
+                                    <td class="text-left border-right">
+                                        <ul class="list-box">
+                                            <li>- 퇴원시 카드키, 리모콘, 세탁망, 가방은 반납</li>
+                                            <li>- 아기 겉싸개, 속싸개, 베냇저고리 2층 신생아실로 가져오세요.</li>
+                                        </ul>
+                                    </td>
+                                    <td>신생아실</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <!-- <div class="cms-description-box em-box">
+                                <p class="cms-description">남편 분 외 외부방문객 면회는 제한합니다.</p>
+                            </div> -->
+                        </div>
+                    </div>
+                </section>
+                <section class="cms type01">
+                    <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->                  
+                    <div class="cms-header">
+                        <p class="cms-thin-title">W여성병원 산후조리원의<br><em>최상의 서비스</em>를 안내합니다.  </p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->                  
+                    <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_030101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_030101_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->              
+                    </div>
+                </section>
+                <section class="cms type26">
+                    <div class="cms-inner">
+                        <div class="cms-header top-border">
+                            <p class="cms-eyebrow">W여성병원 산후조리원의</p>
+                            <p class="cms-title">피부관리</p>
+                        </div>
+                        <!-- 콘텐츠 영역 [s] -->
+                        <div class="cms-table-wrap">
+                            <div class="cms-description-box">
+                                <p class="cms-description">출산 후 지치고 손상된 피부에 빛을 더할 수 있는 안전하고 효과적인 피부 관리가 제공됩니다. 스킨케어 서비스 및 두피마사지 등을 무료로 실시합니다.<br>(점심시간: 12~1시 이용제한)</p>
+                            </div>
+                            <table class="cms-table">
+                                <caption class="sr-only">테이블 제목</caption>
+                                <!-- 테이블 셀 너비는 colgroup으로 설정 -->
+                                <colgroup>
+                                    <col style="width:20%">
+                                    <col style="width:50%">
+                                    <col style="width:30%">
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">기본피부관리</th>
+                                        <td>페이스테라피, 수딩팩마사지, 고주파, 두피마사지</td>
+                                        <td>모든 산모님<br>(6박 7일 이상 조리원 이용 산모님)</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">기본+스페셜1</th>
+                                        <td>페이스테라피, 수딩팩마사지, 고주파, 두피마사지<span class="descript">+ 복부비만마사지</span></td>
+                                        <td>디럭스 특실<br>조리원 이용 산모님</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">기본+스페셜2</th>
+                                        <td>페이스테라피, 수딩팩마사지, 고주파, 두피마사지<span class="descript">+ 가슴이완마사지(2주이용시), 해초힐링마사지, 복부고주파</span></td>
+                                        <td>스위트<br>조리원 이용 산모님</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">기본+스페셜3</th>
+                                        <td>페이스테라피, 수딩팩마사지, 고주파, 두피마사지<span class="descript">+가슴이완마사지(2주이용시) 힐링모유가슴마사지(모유증진)1회, 전신고급아로마오일마사지(1회무료)</span></td>
+                                        <td>w그랜드스위트<br>조리원 이용 산모님</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- 콘텐츠 영역 [e] -->
+                    </div>
+                </section>
+                <section class="cms type10">
+                    <div class="cms-inner">
+                        <!-- 제목 영역 [s] -->
+                        <div class="cms-header top-border">
+                            <p class="cms-eyebrow">W여성병원 산후조리원의</p>
+                            <p class="cms-title">물리치료</p>
+                        </div>
+                        <!-- 제목 영역 [e] -->
+                        <!-- 콘텐츠 영역 [s] -->
+                        <div class="cms-description-box">
+                            <p class="cms-description">출산 후 체형관리에 도움을 받으실 수 있도록 최신식 장비를 도입하여 산모분들께 서비스를 제공해드립니다. 산모님이 원하실 때마다 언제든지 사용 가능합니다.</p>
+                        </div>
+                        <div class="cms-visual mobile-expanded">
+                            <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_030201.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_030201_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-list-wrap">
+                            <ol class="cms-figure-list text-type-1">
+                                <li class="cms-list-item">
+                                    <div class="row align-items-center">
+                                        <div class="cms-figure hexagon col-lg-auto">
+                                            <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                                <g transform="translate(-297.031 -11866)">
+                                                    <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                                </g>
+                                            </svg>
+                                            <div class="cms-figure-text">
+                                                <p class="cms-eyebrow">01</p>
+                                                <p class="cms-description">좌욕기</p>
+                                            </div>
+                                        </div>
+                                        <div class="cms-description-box col-lg">
+                                            <p class="cms-eyebrow">how to</p>
+                                            <p class="cms-description">회음 절개 부위의 염증 예방과 상처 부위의 통증을 감소시킵니다. 산도 손상을 빨리 아물게 하고 염증을 낫게 하는데 좋습니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item">
+                                    <div class="row align-items-center">
+                                        <div class="cms-figure hexagon col-lg-auto">
+                                            <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                                <g transform="translate(-297.031 -11866)">
+                                                    <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                                </g>
+                                            </svg>
+                                            <div class="cms-figure-text">
+                                                <p class="cms-eyebrow">02</p>
+                                                <p class="cms-description">적외선 치료기</p>
+                                            </div>
+                                        </div>
+                                        <div class="cms-description-box col-lg">
+                                            <p class="cms-eyebrow">how to</p>
+                                            <p class="cms-description">필립스 램프를 통하여 발생하는 적외선을 환부에 조사하여 전도열이나 방사열을 이용하여 통증을 완화하는데 사용됩니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item">
+                                    <div class="row align-items-center">
+                                        <div class="cms-figure hexagon col-lg-auto">
+                                            <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                                <g transform="translate(-297.031 -11866)">
+                                                    <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                                </g>
+                                            </svg>
+                                            <div class="cms-figure-text">
+                                                <p class="cms-eyebrow">03</p>
+                                                <p class="cms-description">세라젬 마스터 V4</p>
+                                            </div>
+                                        </div>
+                                        <div class="cms-description-box col-lg">
+                                            <p class="cms-eyebrow">how to</p>
+                                            <p class="cms-description">W산후케어센터 세라젬 마스터 V4는 출산 후 피로감과 뭉친 근육을 풀어줄 등/허리 척추 안마기기로 시트 전체에 열선이 깔려있어 따뜻한 온열 마사지를 누워서 받는 전신 안마의자입니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item">
+                                    <div class="row align-items-center">
+                                        <div class="cms-figure hexagon col-lg-auto">
+                                            <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                                <g transform="translate(-297.031 -11866)">
+                                                    <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                                </g>
+                                            </svg>
+                                            <div class="cms-figure-text">
+                                                <p class="cms-eyebrow">04</p>
+                                                <p class="cms-description">파라핀</p>
+                                            </div>
+                                        </div>
+                                        <div class="cms-description-box col-lg">
+                                            <p class="cms-eyebrow">how to</p>
+                                            <p class="cms-description">파라핀 요법은 파라핀의 보온력과 열전도성을 이용한 요법입니다. 근육이완 작용으로 피로를 풀어줍니다.</p>                                            
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item">
+                                    <div class="row align-items-center">
+                                        <div class="cms-figure hexagon col-lg-auto">
+                                            <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                                <g transform="translate(-297.031 -11866)">
+                                                    <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                                </g>
+                                            </svg>
+                                            <div class="cms-figure-text">
+                                                <p class="cms-eyebrow">05</p>
+                                                <p class="cms-description">파우제 M2</p>
+                                            </div>
+                                        </div>
+                                        <div class="cms-description-box col-lg">
+                                            <p class="cms-eyebrow">how to</p>
+                                            <p class="cms-description">프리미엄 SL프레임의 높은 밀착력으로 목부터 허리, 허리부터 허벅지까지 마사지를 받으실 수 있습니다. 출산 후 체형관리에 도움을 받으실 수 있도록 최신식 세라젬을 도입하여 무료 제공하고 있습니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item">
+                                    <div class="row align-items-center">
+                                        <div class="cms-figure hexagon col-lg-auto">
+                                            <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                                <g transform="translate(-297.031 -11866)">
+                                                    <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                                </g>
+                                            </svg>
+                                            <div class="cms-figure-text">
+                                                <p class="cms-eyebrow">06</p>
+                                                <p class="cms-description">종아리 겸용 발 마사지기</p>
+                                            </div>
+                                        </div>
+                                        <div class="cms-description-box col-lg">
+                                            <p class="cms-eyebrow">how to</p>
+                                            <p class="cms-description">공기압방식의 종아리 발 마사지기로 경직된 근육을 풀어주고 하체의 혈액순환을 원활하게 해주는데 도움이 됩니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item">
+                                    <div class="row align-items-center">
+                                        <div class="cms-figure hexagon col-lg-auto">
+                                            <svg class="cms-figure-svg" width="276" height="244" viewBox="0 0 276 244">
+                                                <g transform="translate(-297.031 -11866)">
+                                                    <path id="path" class="cls-1" d="M490.031,11870H379.977a24.026,24.026,0,0,0-20.745,11.8l-55.027,94.3a23.482,23.482,0,0,0,0,23.7l55.027,94.3a23.907,23.907,0,0,0,20.745,11.9H490.031a23.907,23.907,0,0,0,20.745-11.9l55.027-94.3a23.482,23.482,0,0,0,0-23.7l-55.027-94.3A24.026,24.026,0,0,0,490.031,11870Z"></path>
+                                                </g>
+                                            </svg>
+                                            <div class="cms-figure-text">
+                                                <p class="cms-eyebrow">07</p>
+                                                <p class="cms-description">건식 족욕기</p>
+                                            </div>
+                                        </div>
+                                        <div class="cms-description-box col-lg">
+                                            <p class="cms-eyebrow">how to</p>
+                                            <p class="cms-description">위생적인 건식 족욕으로 혈액순환을 돕고 면역력 증강에 도움이 됩니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                        <!-- 콘텐츠 영역 [e] -->
+                    </div>
+                </section>
+                <section class="cms type26">
+                    <div class="cms-inner">
+                        <!-- 제목 영역 [s] -->
+                        <div class="cms-header top-border">
+                            <p class="cms-eyebrow">W여성병원 산후조리원의</p>
+                            <p class="cms-title">전신관리(경혈)</p>
+                        </div>
+                        <!-- 제목 영역 [e] -->
+                        <!-- 콘텐츠 영역 [s] -->
+                        <div class="cms-table-wrap">
+                            <div class="cms-description-box">
+                                <p class="cms-description">출산 전후로 산모님들에게 올 수 있는 근본적인 문제점을 해결하여 산전의 모습으로 돌아갈 수 있도록 도와주는 프로그램을 운영하고 있습니다. 다년간의 경험이 풍부한 전신회복관리사로부터 산후 최상의 서비스를 제공합니다.</p>
+                            </div>
+                            <table class="cms-table">
+                                <caption class="sr-only">테이블 제목</caption>
+                                <!-- 테이블 셀 너비는 colgroup으로 설정 -->
+                                <colgroup>
+                                    <col style="width:10%">
+                                    <col style="width:20%">
+                                    <col style="width:45%">
+                                    <col style="width:10%">
+                                    <col style="width:15%">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th scope="col" colspan="3">스페셜 전신관리</th>
+                                        <th scope="col">소요시간</th>
+                                        <th scope="col">비용</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1회</td>
+                                        <td>체형순환 전신관리</td>
+                                        <td>체형의 균형과 심신의 밸런스를 케어하여 일상으로의 복귀를 위한 관리가 제공됩니다. 스팀타월을 이용하여 가슴과 전신의 혈액순환을 도와 혈자리를 관리하고 있습니다.</td>
+                                        <td class="text-center">50분</td>
+                                        <td class="text-center">무료<br>(6박7일 이상 조리원 이용 산모님)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1회</td>
+                                        <td>아로마(Aroma)전신관리</td>
+                                        <td>아로마(Aroma)오일로 후각신경의 자극을 통해 감정상태를 조절하고 어깨, 가슴, 등, 허리 등 피부 지방 탄력성 증가를 도와 점막세포, 피부세포를 건강하게 유지시켜주는 관리가 제공됩니다.</td>
+                                        <td class="text-center">50분</td>
+                                        <td class="text-center">7만원</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1회</td>
+                                        <td>마유(馬油) 전신관리</td>
+                                        <td>피부 재생능력이 탁월한 마유(馬油)오일로 어깨, 가슴, 등, 허리와 허벅지, 종아리 등 전신을 관리하며 상하체 조화로운 균형을 위한 탁월한 혈액순환 근육관리를 제공합니다.</td>
+                                        <td class="text-center">1시간 10분~20분</td>
+                                        <td class="text-center">10만원</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- 콘텐츠 영역 [e] -->
+                    </div>
+                </section>
+                <!-- contents area [e] -->
+            </div>
+        </div>
+        <!-- 안내[e] -->
+        <!-- 식단 [s] -->
+        <div class="tab-pane fade" id="tab4">
+            <div class="cms-container">
+                <!-- contents area [s] -->
+                <section class="cms type00">
+                    <div class="cms-inner">
+                        <div class="cms-header bottom-border">
+                        <p class="cms-page-title">식단</p>
+                        </div>
+                    </div>
+                </section>
+                <section class="cms type01">
+                    <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->                  
+                    <div class="cms-header">
+                        <p class="cms-thin-title">프리미엄급에 걸맞는 고품격 시설을 갖춘<br><em>W여성병원 산후조리원</em>의<br><em>고급스러운 식단</em>을 안내합니다.</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->                  
+                    <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_040101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_040101_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                    </div>
+                    <div class="cms-description-box">
+                        <p class="cms-description larger">풀무원의 엄선된 식재료를 이용한 산모님들의 체계적인 영양관리와 직접 균형 있는 식단을 짜서 최고의 음식서비스를 제공합니다. 산모의 몸을 생각하고 아기를 위해 모유수유에도 도움이 되는 좋은 식단을 통해 산모와 아기 모두를 더욱 건강하게 만들어드립니다.</p>
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->              
+                    </div>
+                </section>
+                
+                <section class="cms type09 type-bg">
+                    <div class="cms-inner">
+                        <!-- 제목 영역 [s] -->
+                        <div class="cms-header top-border">
+                            <p class="cms-eyebrow">W여성병원 산후조리원</p>
+                            <p class="cms-title">건강식단</p>
+                        </div>
+                        <!-- 제목 영역 [e] -->
+                        <!-- 콘텐츠 영역 [s] -->
+                        <div class="cms-list-wrap">
+                            <ul class="cms-column-list item-bg-box text-type-3 row justify-content-start">
+                                <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                                <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                                <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                                <li class="cms-list-item col-12 col-lg-6">
+                                    <div class="cms-inner-box row">
+                                        <div class="cms-figure check col-auto">
+                                            <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                                <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="cms-description-box col">
+                                            <p class="cms-description">식사는 1인 4식, 간식은 1인 2식으로 제공됩니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item col-12 col-lg-6">
+                                    <div class="cms-inner-box row">
+                                        <div class="cms-figure check col-auto">
+                                            <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                                <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="cms-description-box col">
+                                            <p class="cms-description">아침 8시 간식 10시, 점심 12시, 간식 3시, 저녁 5시, 야식 8시 총 6번 <strong>룸서비스</strong>됩니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item col-12 col-lg-6">
+                                    <div class="cms-inner-box row">
+                                        <div class="cms-figure check col-auto">
+                                            <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                                <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="cms-description-box col">
+                                            <p class="cms-description">특별식은 매주 월, 수, 금요일 점심에 제공됩니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item col-12 col-lg-6">
+                                    <div class="cms-inner-box row">
+                                        <div class="cms-figure check col-auto">
+                                            <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                                <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="cms-description-box col">
+                                            <p class="cms-description">보호자 식사는 <strong>룸서비스</strong> 1시간 전에 2층 신생아실로 신청하시면 됩니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item col-12 col-lg-6">
+                                    <div class="cms-inner-box row">
+                                        <div class="cms-figure check col-auto">
+                                            <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                                <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="cms-description-box col">
+                                            <p class="cms-description">식권은 2층에서 6000원에 구입가능하며, 공기는 1인만 가능합니다. </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- 콘텐츠 영역 [e] -->
+                    </div>
+                </section>
+                <!-- contents area [e] -->
+            </div>
+        </div>
+        <!-- 식단[e] -->
+        <!-- 신생아실 [s] -->
+        <div class="tab-pane fade" id="tab5">
+            <div class="cms-container">
+                <!-- contents area [s] -->
+                <section class="cms type00">
+                    <div class="cms-inner">
+                        <div class="cms-header bottom-border">
+                        <p class="cms-page-title">신생아실</p>
+                        </div>
+                    </div>
+                </section>
+                <section class="cms type01">
+                    <div class="cms-inner">
+                    <!-- 제목 영역 [s] -->                  
+                    <div class="cms-header">
+                        <p class="cms-thin-title">철저하고 안전하게 건강상태를 체크하는<br><em>신생아실</em>을 안내합니다.</p>
+                    </div>
+                    <!-- 제목 영역 [e] -->
+                    <!-- 콘텐츠 영역 [s] -->                  
+                    <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050101.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050101_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                    </div>
+                    <div class="cms-description-box">
+                        <p class="cms-description larger">신생아실은 24시간 개방형으로 아기의 안전을 언제나 확인할 수 있도록 24시간 개방되어 있습니다. 철저한 신생아 관리, 안전한 신생아 관리를 하며 꼼꼼하고 체계적으로 신생아의 건강상태를 체크합니다. </p>
+                    </div>
+                    <!-- 콘텐츠 영역 [e] -->              
+                    </div>
+                </section>
+                <section class="cms type03">
+                    <div class="cms-inner">
+                        <!-- 제목 영역 [s] -->
+                        <div class="cms-header top-border">
+                            <p class="cms-eyebrow">W여성병원 산후조리원</p>
+                            <p class="cms-title">신생아실의 장점</p>
+                        </div>
+                        <!-- 제목 영역 [e] -->
+                        <!-- 콘텐츠 영역 [s] -->
+                        <div class="cms-list-wrap">
+                            <!-- 지그재그 방향 뒤집으려면 reverse 클래스 추가 -->
+                            <ol class="cms-tile-list array-zigzag text-type-1">
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050201.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050201_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">01</p>
+                                            <p class="cms-title">신생아기 돌봄</p>
+                                            <p class="cms-description">전문 간호인력이 철저한 신생아 관리를 합니다. 매일 목욕 후 체중을 체크하며 신생아의 체온, 호흡, 심장박동수로 건강상태 및 몸 상태를 정밀 체크합니다. 또한 오감을 자극하는 아기마사지로 성장 발달을 촉진하고 있으며 두뇌개발에 좋은 음악(차병원태교연구소의 뇌로 가는 EQ클래식)을 주기적으로 들려줍니다. 이러한 음악은 아기의 우뇌를 자극하여 EQ계발을 위한 최적의 알파파환경을 조성해주며, 아기들의 수면 호흡안정에 도움을 줍니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050202.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050202_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">02</p>
+                                            <p class="cms-title">전문직 간호사, 소아과원장님</p>
+                                            <p class="cms-description">실무경험이 많은 전문직 간호사 투입, 신생아상태를 빠르게 체크하고 있습니다. 소아과 원장님의 협진으로 안전하게 신생아를 케어합니다. </p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050203.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050203_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">03</p>
+                                            <p class="cms-title">위생적인 공간&amp;신생아실 위생 관리 시스템</p>
+                                            <p class="cms-description">저희 조리원은 식당, 면회실 및 입원실 각층 분리 운영하여 면역력이 약한 아기를 위해 안전한 위생적인 조리원입니다. 산모와 신생아를 위한 친환경 소재로 제한적인 소독액을 사용하오니 안심하셔도 됩니다.</p>
+                                            <p class="descript row">
+                                                <span class="col-2 px-0">* 내부소독 :</span><span class="col-10 px-0">최상의 청결 상태가 되도록 매일 관리,1일 3회 철저한 청소와 소독(오후 6~8시)을 시행합니다. 이때 모자동실을 권장합니다.</span>
+                                                <span class="col-2 px-0">* 외부소독 :</span><span class="col-10 px-0">방역업체(팁스)에 의뢰해 매달 체계적인 전체 방역을 실시합니다.</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="cms-list-item row align-items-center">
+                                    <div class="cms-visual col-lg-6">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050204.jpg" alt="" class="img-fluid d-none d-lg-block">
+                                        <img src="https://fxfile.drline.net/local/13267/cms/sub_0401_img_050204_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                                    </div>
+                                    <div class="cms-description-box col-lg-6">
+                                        <div class="cms-box-inner">
+                                            <p class="cms-eyebrow type-number">04</p>
+                                            <p class="cms-title">정전사고대책</p>
+                                            <p class="cms-description">자가발전기를 가동하여 전기시설 이용에 전혀 문제가 없습니다.</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                        <!-- 콘텐츠 영역 [e] -->
+                    </div>
+                </section>
+                <!-- contents area [e] -->
+            </div>
+        </div>
+    </div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

@@ -1,0 +1,293 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style>
+    .cms-boxlist-area .list-box {list-style:none;padding:0;margin:0;border:1px solid #dad8d7;}
+    .cms-boxlist-area .list-box li {padding:20px 50px;position:relative}
+    .cms-boxlist-area .list-box li:after {content:"";display:block;width:1px;height:calc(100% - 30px);background:#dad8d7;position:absolute;top:50%;right:0;transform:translateY(-50%);}
+    .cms-boxlist-area .list-box li:last-child:after {display:none;}
+    .cms-boxlist-area .list-box li .list-box-content {padding:20px 0;}
+    .cms-boxlist-area .list-box li .list-box-content:before {content:"";display:block;width:60px;height:1px;background:#b1926a;position:absolute;top:50%;right:-30px;transform:translateY(-50%)}
+    .cms-boxlist-area .list-box li .list-box-content:after {content:"";display:block;width:10px;height:10px;border-bottom:1px solid #b1926a;border-right:1px solid #b1926a;position:absolute;top:50%;right:-30px;transform:translateY(-50%) rotate(-45deg)}
+    .cms-boxlist-area .list-box li:last-child .list-box-content:before,
+    .cms-boxlist-area .list-box li:last-child .list-box-content:after {display:none;}
+    .cms-boxlist-area .list-box li h5 {text-align:left;color:#b1926a;font-size:1.125rem;margin:0 0 15px 0;}
+    .cms-boxlist-area .list-box li h6 {font-size:1.063rem;letter-spacing:-0.025rem;}
+    .cms-container .cms.type31 .cms-list-wrap .cms-list-item .cms-description::before {display:none;}
+    .cms-container .cms.type31 .cms-list-wrap .cms-list-item .cms-description {padding:0;}
+    .cms-container .cms.type31 .cms-list-wrap .cms-boxlist-area .list-box li .list-box-content .cms-description {font-weight:300;font-size:1.063rem;}
+    .cms-tablelist-area .list-box {list-style:none;padding:0;margin:0;}
+    .cms-tablelist-area .list-box li {min-height:130px;}
+    .cms-tablelist-area .list-box li + li {margin-top:60px}
+    .cms-tablelist-area .list-box li .list-box-content {padding:0;margin:0;width:100%}
+    .cms-tablelist-area .list-box li .list-box-content .title {-webkit-box-flex:0;-ms-flex: 0 0 28%;flex: 0 0 28%;max-width:28%;margin:0;padding:15px 0 0 0;border-top:3px solid #ece5de}
+    .cms-tablelist-area .list-box li .list-box-content .text {-webkit-box-flex:0;-ms-flex: 0 0 67%;flex: 0 0 67%;max-width:67%;padding:15px 0 0 0;margin-left:5%;}
+    .cms-tablelist-area .list-box li .list-box-content .title h5 {font-size:1.125rem;font-weight:400}
+    .cms-tablelist-area .list-box li .list-box-content .title h5 span {color:#b1926a}
+    .cms-tablelist-area .list-box li .list-box-content .text .lt-text {padding-left:10px;position:relative;margin:0;}
+    .cms-tablelist-area .list-box li .list-box-content .text .lt-text:before {content:"";display:block;width:5px;height:1px;background:#444446;position:absolute;top:13px;left:0;}
+    @media (max-width:991px){
+	.cms-boxlist-area .list-box {border:1px solid #dad8d7;padding:25px;}
+	.cms-boxlist-area .list-box li {padding:0;}
+	.cms-boxlist-area .list-box li:after {display:none}
+	.cms-boxlist-area .list-box li .list-box-content {border-bottom:1px solid #dad8d7;padding:5% 0;}
+	.cms-boxlist-area .list-box li:last-child .list-box-content {border-bottom:none}
+	.cms-boxlist-area .list-box li .list-box-content:before {height:30px;width:1px;left:50%;bottom:-15px;right:auto;top:auto;transform:translateY(0)}
+	.cms-boxlist-area .list-box li .list-box-content:after {top:auto;right:auto;left:50%;bottom:-15px;border-right:none;border-left:1px solid #b1926a;transform:translate(-50%) rotate(-45deg)}
+	.cms-boxlist-area .list-box li h5 {font-size:1.031rem}
+	.cms-boxlist-area .list-box li h6 {font-size:1rem}
+	.cms-container.sub0304 .cms.type31 .cms-list-wrap .cms-boxlist-area .list-box li .list-box-content .cms-description {font-size:1rem;line-height:1.4}
+    .cms-tablelist-area .list-box li {min-height:auto;}
+    .cms-tablelist-area .list-box li + li {margin-top:6.25%}
+    .cms-tablelist-area .list-box li .list-box-content .title {-webkit-box-flex:0;-ms-flex: 0 0 100%;flex: 0 0 100%;max-width:100%;margin:0;padding:1% 0 0 0;border-top:3px solid #ece5de}
+    .cms-tablelist-area .list-box li .list-box-content .text {-webkit-box-flex:0;-ms-flex: 0 0 100%;flex: 0 0 100%;max-width:100%;padding:0 0 0 0;margin-left:3%;}
+    .cms-tablelist-area .list-box li .list-box-content .title h5 {font-size:1.031rem;font-weight:400;margin:0;}
+    }
+    @media (max-width:479px){
+        .cms-boxlist-area .list-box {padding:15px}
+        .cms-boxlist-area .list-box li h5 {font-size:0.688rem}
+        .cms-boxlist-area .list-box li h6 {font-size:0.688rem}
+        .cms-container.sub0304 .cms.type31 .cms-list-wrap .cms-boxlist-area .list-box li .list-box-content .cms-description {font-size:0.688rem;}
+        .cms-boxlist-area .list-box li .list-box-content:before {height:20px;bottom:-10px;}
+        .cms-boxlist-area .list-box li .list-box-content:after {bottom:-10px;width:5px;height:5px;}
+    }
+</style>
+<div class="cms-container">
+    <!-- contents area [s] -->
+    <section class="cms type00">
+        <div class="cms-inner">
+            <div class="cms-header bottom-border">
+                <p class="cms-page-title">검진센터</p>
+            </div>
+        </div>
+    </section>
+    <section class="cms type31 element-animate fadeInUp element-animated mt-0 pt-3">
+		<div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">이용안내</p>
+                <p class="cms-title">증명서발급안내</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+			<!-- 콘텐츠 영역 [s] -->
+			<div class="cms-list-wrap">
+				<dl class="cms-list-item">
+					<dt class="cms-title">외래진료</dt>
+					<dd class="cms-description">
+						<div class="cms-boxlist-area">
+							<ul class="row list-box justify-content-center">
+								<li class="col-12 col-lg-3">
+									<div class="list-box-content">
+										<h5>01</h5>
+                                        <p class="cms-description">외래진료 신청 후 담당의사와 상담</p>
+									</div>
+								</li>
+								<li class="col-12 col-lg-3">
+									<div class="list-box-content">
+										<h5>02</h5>
+                                        <p class="cms-description">진단서 발급신청</p>
+									</div>
+								</li>
+                                <li class="col-12 col-lg-3">
+									<div class="list-box-content">
+										<h5>03</h5>
+                                        <p class="cms-description">수납 후 발행</p>
+									</div>
+								</li>
+								<li class="col-12 col-lg-3">
+									<div class="list-box-content">
+										<h5>04</h5>
+                                        <p class="cms-description">수납 후 발행</p>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</dd>
+				</dl>
+            </div>
+            <div class="cms-list-wrap">
+				<dl class="cms-list-item">
+					<dt class="cms-title">입원진료</dt>
+					<dd class="cms-description">
+						<div class="cms-boxlist-area">
+							<ul class="row list-box justify-content-center">
+								<li class="col-12 col-lg-4">
+									<div class="list-box-content">
+										<h5>01</h5>
+                                        <p class="cms-description">병동 간호사실에 신청</p>
+									</div>
+								</li>
+								<li class="col-12 col-lg-4">
+									<div class="list-box-content">
+										<h5>02</h5>
+                                        <p class="cms-description">진단서 발급신청</p>
+									</div>
+								</li>
+                                <li class="col-12 col-lg-4">
+									<div class="list-box-content">
+										<h5>03</h5>
+                                        <p class="cms-description">수납 후 발행</p>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</dd>
+				</dl>
+            </div>
+            <div class="cms-list-wrap">
+				<dl class="cms-list-item">
+					<dt class="cms-title">구비서류</dt>
+					<dd class="cms-description">
+						<div class="cms-tablelist-area">
+							<ul class="list-box">
+								<li>
+									<div class="list-box-content row">
+                                        <div class="title">
+										    <h5><span>01.</span> 환자 본인(만 17세 이상)이 신청하는 경우</h5>
+                                        </div>
+                                        <div class="text">
+                                            <p class="lt-text">환자 본인의 신분증(주민등록증, 여권, 운전면허증)</p>
+                                        </div>
+									</div>
+								</li>
+								<li>
+									<div class="list-box-content row">
+										<div class="title">
+										    <h5><span>02.</span> 환자 만 14세 미만 의 미성년자인 경우</h5>
+                                        </div>
+                                        <div class="text">
+                                            <p class="lt-text">유가족이 동행하여 안치실 호실을 확인합니다.</p>
+                                        </div>
+									</div>
+								</li>
+                                <li>
+									<div class="list-box-content row">
+										<div class="title">
+										    <h5><span>03.</span> 환자의 친족이 신청하는 경우</h5>
+                                        </div>
+                                        <div class="text">
+                                            <p class="lt-text">신청인 신분증</p>
+                                            <p class="lt-text">가족관계증명서, 주민등록표 등본 등 친족관계임을 확인할 수 있는 서류</p>
+                                            <p class="lt-text">환자가 자필 서명한 동의서</p>
+                                            <p class="lt-text">환자의 신분증 사본</p>
+                                        </div>
+									</div>
+								</li>
+                                <li>
+									<div class="list-box-content row">
+										<div class="title">
+										    <h5><span>04.</span> 환자(만 14세 이상 만 17세 미만의 미성년자)의 친족이 신청하는 경우</h5>
+                                        </div>
+                                        <div class="text">
+                                            <p class="lt-text">신청인 신분증</p>
+                                            <p class="lt-text">가족관계증명서, 주민등록표 등본 등 친족관계임을 확인할 수 있는 서류</p>
+                                            <p class="lt-text">환자가 자필 서명한 동의서</p>
+                                        </div>
+									</div>
+								</li>
+                                <li>
+									<div class="list-box-content row">
+										<div class="title">
+										    <h5><span>05.</span> 환자가 지정하는 대리인이 신청하는 경우</h5>
+                                        </div>
+                                        <div class="text">
+                                            <p class="lt-text">신청인 신분증</p>
+                                            <p class="lt-text">환자가 자필 서명한 동의서</p>
+                                            <p class="lt-text">환자가 자필 서명한 위임장</p>
+                                            <p class="lt-text">환자의 신분증 사본</p>
+                                        </div>
+									</div>
+								</li>
+                                <li>
+									<div class="list-box-content row">
+										<div class="title">
+										    <h5><span>06.</span> 환자(환자가 만 14세 미만 미성년자)가 지정하는 대리인이 신청하는 경우</h5>
+                                        </div>
+                                        <div class="text">
+                                            <p class="lt-text">신청인 신분증</p>
+                                            <p class="lt-text">환자의 법적 대리인이 자필 서명한 동의서</p>
+                                            <p class="lt-text">환자의 법적 대리인이 자필 서명한 위임장</p>
+                                            <p class="lt-text">법적 대리인의 신분증</p>
+                                            <p class="lt-text">법적 대리인을 증명할 수 있는 서류(가족관계 증명서, 주민등록표 등본 등)</p>
+                                        </div>
+									</div>
+								</li>
+                                <li>
+									<div class="list-box-content row">
+										<div class="title">
+										    <h5><span>07.</span> 환자(환자가 만 14세 이상 만 17세 미만인 미성년자)가 지정하는 대리인이 신청하는 경우</h5>
+                                        </div>
+                                        <div class="text">
+                                            <p class="lt-text">신청인 신분증</p>
+                                            <p class="lt-text">환자가 자필 서명한 동의서</p>
+                                            <p class="lt-text">환자가 자필 서명한 위임장</p>
+                                            <p class="lt-text">학생증(강제규정아님)</p>
+                                        </div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</dd>
+				</dl>
+            </div>
+			<!-- 콘텐츠 영역 [e] -->
+		</div>
+	</section>
+    <section class="cms type26">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">이용안내</p>
+                <p class="cms-title">발급서류종류</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-table-wrap">
+                <table class="cms-table">
+                    <caption class="sr-only">테이블 제목</caption>
+                    <!-- 테이블 셀 너비는 colgroup으로 설정 -->
+                    <colgroup>
+                        <col style="width:30%">
+                        <col style="width:70%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th scope="col">종류</th>
+                            <th scope="col">비고</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">입/퇴원확인서</th>
+                            <td>병원에 입원하고 퇴원하였음을 증명하는 서식 (질병분류번호 기재, 진단명은 기재하지 않음)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">일반진단서</th>
+                            <td>진찰, 검사 결과를 종합하여 환자의 건강상태를 증명하는 서식</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">상해진단서</th>
+                            <td>타인이나 외부 요인에 의해 인체 손상이 있는 경우 그 상해 정도를 기록하는 서식</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">수술확인서</th>
+                            <td>수술명, 진단명, 수술일자 기재</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">후유장애진단서</th>
+                            <td>장애 상태를 판정하는 서식, 병명, 수술명, 장애소견 기재</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">소견서</th>
+                            <td>진료결과를 알 수 있는 서식, 병명, 진단소견 기재</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">진료의뢰서</th>
+                            <td>상급의료기관의 의뢰서식</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

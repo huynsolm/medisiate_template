@@ -1,0 +1,712 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style type="text/css">
+    .cms-container .cms.sub0403 .cms-description-box .cms-eyebrow {padding:10px;}
+    .cms-container .cms.sub0403 .cms-tile-list.text-type-2 .cms-description-box .cms-title {border:none}
+    .cms-container .cms.sub0403 .cms-tile-list.between-arrow .cms-list-item:before,
+    .cms-container .cms.sub0403 .cms-tile-list.between-arrow .cms-list-item:after {display:none;}
+    .cms-container .cms.type15.sub0403 .cms-column-list .cms-list-item:before {content:"";display:block;background:#b1926a;width:35px;height:1px;position:absolute;top:40%;right:-10px;}
+    .cms-container .cms.type15.sub0403 .cms-column-list .cms-list-item:after {content:"";display:block;width:11px;height:11px;position:absolute;top:40%;right:-5px;border-right:1px solid #b1926a;border-top:1px solid #b1926a;transform:rotate(45deg) translate(-2px,-50%);}
+    .cms-container .cms.type15.sub0403 .cms-column-list .cms-list-item:last-child:before,
+    .cms-container .cms.type15.sub0403 .cms-column-list .cms-list-item:last-child:after {display:none}
+    .cms-container .cms .cms-description-box .cms-description.text-title {font-size:2.125rem;font-weight:500;}
+    .cms-container .cms .cms-description-box .cms-description.text-title .type01 {font-size:1.625rem;font-weight:300;display:block}
+    .cms-container .cms .cms-figure-list.sub0401 {display:flex}
+
+    .cms-container .cms.type-bg.sub0401 .cms-column-wrap.box-type {padding:0;background:none;}
+    .cms-container .cms.sub0401 .cms-description-box .cms-title {font-size:3.125rem;font-weight:400;margin:0;}
+    .cms-container .cms.sub0401 .cms-description-box .cms-description {margin:50px 0 0 0;}
+    .cms-container .cms.sub0401 .cms-bullet-list.list-style-1 .cms-list-item {padding:0}
+    .cms-container .cms.sub0401 .cms-bullet-list.list-style-1 .cms-list-item:before {width:30px;height:2px;background:#3c3c3c;top:-30px;}
+    .cms-container .cms .cms-figure-list.sub0401>.cms-list-item {padding:50px}
+    .cms-container .cms .cms-figure.sub0401 .cms-figure-text {position:relative;top:auto;left:auto;transform:translate(0,0);background:#fff;width:100%;padding-bottom:calc(100% - 16px);border-radius:50%;border:8px solid #ece5de;}
+    .cms-container .cms .cms-figure-list.text-type-1.sub0401 .cms-figure-text .cms-description {position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+    .cms-container .cms .cms-figure-list.text-type-1.sub0401 .cms-figure-text .cms-description img {max-width:100%;margin:0 auto;}
+    .cms-container .cms .cms-figure-list.text-type-1.sub0401 .cms-figure-text .cms-description .num {font-size:1.125rem;border-top:1px solid #b1926a;border-bottom:1px solid #b1926a;margin-bottom:35px;display:block;}
+    .cms-container .cms.type-bg.sub0401-bg {background:url(https://fxfile.drline.net/local/13286/cms/bg_type0401.jpg) no-repeat;background-size:cover}
+    .cms-container .cms.sub0401-bg .cms-header.top-border:before {background:#fff}
+    .cms-container .cms.sub0401-bg .cms-header .cms-eyebrow {color:#fff;}
+    .cms-container .cms.sub0401-bg .cms-header .cms-title {color:#fff}
+    .cms-container .cms .cms-figure.sub0401.type01 .cms-figure-text {background:rgba(31,42,52,0.4);border:1px solid #92959a}
+    .cms-container .cms.type02 .cms-figure-list .cms-description.type01 {color:#fff;font-size:1.313rem;line-height:1.4;font-weight:500;}
+    .video {width:100%;max-width:900px;margin:0 auto;}
+    .video-container {position:relative;width:100%;height:auto;padding-top:50%;}
+    iframe {z-index:1;top:0;left:0;position:absolute;width:100%;height:100%;}
+    @media(max-width:991px){
+        .cms-container .cms.sub0401 .cms-description-box .cms-title {font-size:2.75rem;}
+        .cms-container .cms.sub0401 .cms-description-box .cms-description {margin:5% 0 0 0;}
+        .cms-container .cms .cms-figure-list.sub0401>.cms-list-item {padding:5%}
+        .cms-container .cms.type02 .cms-figure-list .cms-description.type01 {font-size:1.188rem;}
+        .cms-container .cms.type-bg.sub0401-bg {background:url(https://fxfile.drline.net/local/13286/cms/bg_type0401_m.jpg) no-repeat;background-size:cover}
+        .cms-container .cms.type15.sub0403 .cms-column-list .cms-list-item:before {content:"";display:block;background:#b1926a;width:1px;height:35px;position:absolute;top:auto;right:auto;bottom:-35px;left:50%;}
+        .cms-container .cms.type15.sub0403 .cms-column-list .cms-list-item:after {content:"";display:block;width:11px;height:11px;position:absolute;top:auto;right:auto;bottom:-35px;left:50%;border-left:1px solid #b1926a;border-top:none;border-right:none;border-bottom:1px solid #b1926a;transform:rotate(-45deg) translate(-20%,-50%);}
+        .cms-container .cms.sub0403 .cms-column-list.text-type-1 .cms-list-item .cms-description-box .cms-title {text-align:center;}         
+        .cms-container .cms .cms-figure-list.text-type-1.sub0401 .cms-figure-text .cms-description .num {margin-bottom:20%;padding:5% 0;}
+    }
+    @media(max-width:479px){
+        .cms-container .cms.sub0401 .cms-description-box .cms-title {font-size:1.5rem;}
+        .cms-container .cms.type02 .cms-figure-list .cms-description.type01 {font-size:0.813rem;}
+        .cms-container .cms.type15.sub0403 .cms-column-list .cms-list-item:before {content:"";display:block;background:#b1926a;width:1px;height:25px;position:absolute;top:auto;right:auto;bottom:-25px;left:50%;}
+        .cms-container .cms.type15.sub0403 .cms-column-list .cms-list-item:after {content:"";display:block;width:11px;height:11px;position:absolute;top:auto;right:auto;bottom:-25px;left:50%;border-left:1px solid #b1926a;border-top:none;border-right:none;border-bottom:1px solid #b1926a;transform:rotate(-45deg) translate(-20%,-50%);}
+        .cms-container .cms .cms-figure-list.text-type-1.sub0401 .cms-figure-text .cms-description img {max-width:80%;margin:0 auto;}
+        .cms-container .cms .cms-figure-list.text-type-1.sub0401 .cms-figure-text .cms-description.type01 img {max-width:50%;margin:0 auto;}
+        .cms-container .cms .cms-figure-list.text-type-1.sub0401 .cms-figure-text .cms-description .num {font-size:0.875rem;}
+        .cms-container .cms .cms-description-box .cms-description.text-title {font-size:1.125rem;}
+        .cms-container .cms .cms-description-box .cms-description.text-title .type01 {font-size:1rem;}
+    }
+    .cms-container .cms .cms-description-box ul {padding:0;list-style:none;}
+	.cms-container .cms .cms-tile-list.text-type-2 .cms-description-box p.type-number,
+	.cms-container .cms .cms-tile-list.text-type-2 .cms-description-box p.cms-lt-text {display:inline-block;vertical-align:top;line-height:25px}
+	.cms-container .cms .cms-tile-list.text-type-2 .cms-description-box .cms-lt-text {width: calc(100% - 45px);padding-left:10px;font-size:1.125rem;}
+	.cms-container .cms.type-bg.bg-image-1{background: url(https://fxfile.drline.net/cms/public/images/contents/cms/corset_14.jpg) no-repeat 50% 50%;background-size: cover;}
+    .cms-container .cms .cms-description-box .cms-eyebrow.type01 {background:none;color:#b1926a;font-size:1.5rem;font-family:"noto sans",sans-serif;}
+
+	@media (max-width:479px) {
+		.cms-container .cms .cms-tile-list.text-type-2 .cms-description-box .cms-lt-text {font-size: 13px;}
+        .cms-container .cms .cms-description-box .cms-eyebrow.type01 {font-size:1rem;}
+	}
+
+	
+</style>
+<div class="cms-container">
+	<!-- contents area [s] -->
+	<section class="cms type00">
+		<div class="cms-inner">
+			<div class="cms-header bottom-border">
+				<p class="cms-page-title">내시경 이마지방종 제거술</p>
+			</div>
+		</div>
+	</section>
+	<section class="cms type01">
+		<div class="cms-inner">
+			<!-- 제목 영역 [s] -->
+			<div class="cms-header">
+				<p class="cms-thin-title"><em>내시경 이마지방종 제거술</em>이란?</p>
+			</div>
+			<!-- 제목 영역 [e] -->
+			<!-- 콘텐츠 영역 [s] -->
+			<div class="cms-visual">
+				<img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_01.jpg" alt="" class="img-fluid d-none d-lg-block">
+				<img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_01_m.jpg" alt="" class="w-100 d-block d-lg-none">
+			</div>
+			<div class="cms-description-box">
+				<p class="cms-description larger">우연히 이마에 생긴 볼록한 혹을 발견하고 여드름이나 단순한 뾰루지로 생각했다가  시간이 지날수록 크기가 서서히 커져 검사를 받아보면 지방종인 경우가 많습니다.</p>
+                <p class="cms-description larger">이마에 생기는 지방종의 경우 외관상의 문제나 불편함으로 제거 수술을 고려하게 되는데 일반적으로 시행하는 수술법은 지방종 바로 위의 피부를 절개하고 근육을 박리하여 제거합니다.<br />하지만 이 방법은 이마에 흉터를 남기고 감각 신경이 일부 손상될 수 있는 단점이 있습니다.</p>
+                <p class="cms-description larger">내시경 이마지방종 제거술은 흉터가 보이지 않는 두피 쪽을 절개한 뒤 내시경으로 박리하여 오직 지방종만을 제거하는 수술로 이마에 흉터 없이 간단하고 깔끔하게 제거가 가능합니다.</p>
+			</div>
+			<!-- 콘텐츠 영역 [e] -->
+		</div>
+	</section>
+    <section class="cms type09 type-bg">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">이마지방종을</p>
+                <p class="cms-title">제거하는 이유? </p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-column-list item-bg-box text-type-3 row justify-content-start">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-inner-box row">
+                            <div class="cms-figure check col-auto">
+                                <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                    <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"/>
+                                </svg>
+                            </div>
+                            <div class="cms-description-box col">
+                                <p class="cms-description">지방종이 점점 크기가 커질 때</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-inner-box row">
+                            <div class="cms-figure check col-auto">
+                                <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                    <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"/>
+                                </svg>
+                            </div>
+                            <div class="cms-description-box col">
+                                <p class="cms-description">지방종이 주변의 신경, 근육을 자극해서 기능에 문제가 생기거나 생활에 불편을 겪을 때</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-inner-box row">
+                            <div class="cms-figure check col-auto">
+                                <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                    <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"/>
+                                </svg>
+                            </div>
+                            <div class="cms-description-box col">
+                                <p class="cms-description">악성이 의심되어 조직검사가 필요할 때</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-inner-box row">
+                            <div class="cms-figure check col-auto">
+                                <svg class="cms-figure-svg" width="40" height="40" viewBox="0 0 40 40">
+                                    <path class="cls-1" d="M323,9872.8a16.985,16.985,0,1,1-16.981,16.98A17,17,0,0,1,323,9872.8m0-3.01a20,20,0,1,0,20,19.99,19.993,19.993,0,0,0-20-19.99h0Zm8.444,12.94-10.216,10.21-4.028-4.02-2.013,2.01,4.027,4.03,2.014,2.01,2.014-2.01,10.216-10.22-2.014-2.01h0Z" transform="translate(-303 -9869.78)"/>
+                                </svg>
+                            </div>
+                            <div class="cms-description-box col">
+                                <p class="cms-description">볼록 튀어나온 지방종이 신경이 쓰일 때</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type04 sub0403">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">내시경 이마지방종 제거술</p>
+                <p class="cms-title">장점</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-tile-list between-arrow text-type-2">
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0201.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0201_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow">01</p>
+                                <p class="cms-title">수술 전 정밀 초음파 검사</p>
+                                <p class="cms-description">종양, 혈관, 신경의 위치를 수술 전 미리 파악하여 합병증을 최소화합니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0202.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0202_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow">02</p>
+                                <p class="cms-title">두피절개를 통한 흉터 최소화</p>
+                                <p class="cms-description">두피를 절개하여 수술하기 때문에 이마에 보이는 흉터가 없습니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0203.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0203_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow">03</p>
+                                <p class="cms-title">혈관손상 및 신경 손상의 최소화</p>
+                                <p class="cms-description">근육 내로 주행하는 혈관과 신경을 박리할 필요가 없어 손상을 최소화합니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0204.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0204_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow">04</p>
+                                <p class="cms-title">FULL HD 내시경 장비 사용</p>
+                                <p class="cms-description">확대된 시야로 정상조직 손상을 최소화하며 오직 지방종만을 제거합니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0205.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0205_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow">05</p>
+                                <p class="cms-title">빠른 회복 기간</p>
+                                <p class="cms-description">내시경으로 확대된 시야로 수술하므로 합병증이 현저하게 적어 회복이 빠릅니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>  
+    <section class="cms type03 type-bg bg-color-2">
+		<div class="cms-inner">
+			<div class="cms-header top-border">
+                <p class="cms-eyebrow">내시경 이마지방종 제거술</p>
+                <p class="cms-title">대상</p>
+			</div>
+			<div class="cms-list-wrap marT_70">
+				<ol class="cms-tile-list array-zigzag reverse text-type-2">
+					<li class="cms-list-item row align-items-center">
+						<div class="cms-visual col-lg-4">
+							<img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_03.png" alt="" class="img-fluid d-none d-lg-block">
+							<img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_03_m.png" alt="" class="img-fluid d-block d-lg-none">
+						</div>
+						<div class="cms-description-box col-lg-8">
+							<div class="cms-box-inner">
+								<ul class="cms-description-list">
+									<li>
+										<p class="cms-eyebrow type-number type01">01</p>
+										<p class="cms-lt-text">이마에 절개 흉터가 생기는 게 싫어서 오랫동안 수술을 미루시던 분</p>
+									</li>
+									<li>
+										<p class="cms-eyebrow type-number type01">02</p>
+										<p class="cms-lt-text">크기가 커져서 제거를 해야 하는데 이마 한가운데에 흉터가 부담스러우신 분</p>
+									</li>
+									<li>
+										<p class="cms-eyebrow type-number type01">03</p>
+										<p class="cms-lt-text">조직 검사를 해보고 싶은데 흉터가 부담스러우신 분</p>
+									</li>
+									<li>
+										<p class="cms-eyebrow type-number type01">04</p>
+										<p class="cms-lt-text">크기가 너무 작아서 피부절개가 부담스러우신 분</p>
+									</li>
+									<li>
+										<p class="cms-eyebrow type-number type01">05</p>
+										<p class="cms-lt-text">감각신경손상의 합병증이 걱정되시는 분</p>
+									</li>
+									<li>
+										<p class="cms-eyebrow type-number type01">06</p>
+										<p class="cms-lt-text">수술 후 빠른 회복기간이 필요하신 분</p>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</li>
+				</ol>
+			</div>
+		</div>
+	</section>  
+    <section class="cms type02 type-bg sub0401-bg">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-title">초이만의<br /><span class="font-weight-light">내시경 이마지방종</span></p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-figure-list text-type-1 row justify-content-center sub0401">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-6 col-lg-3">
+                        <div class="cms-figure sub0401 type01">
+                            <div class="cms-figure-text">
+                                <p class="cms-description">
+                                    <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0101.png" alt="" class="img-fluid d-none d-lg-block">
+							        <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0101_m.png" alt="" class="w-100 d-block d-lg-none">
+                                </p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description type01">원데이 수술<br /><span class="font-weight-light">진료-검사-수술<br />하루에 진행가능</span></p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-3">
+                        <div class="cms-figure sub0401 type01">
+                            <div class="cms-figure-text">
+                                <p class="cms-description type01">
+                                    <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0102.png" alt="" class="img-fluid d-none d-lg-block">
+							        <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0102_m.png" alt="" class="w-100 d-block d-lg-none">
+                                </p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description type01">낮 병동<br />입원 가능</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-3">
+                        <div class="cms-figure sub0401 type01">
+                            <div class="cms-figure-text">
+                                <p class="cms-description">
+                                    <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0103.png" alt="" class="img-fluid d-none d-lg-block">
+							        <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0103_m.png" alt="" class="w-100 d-block d-lg-none">
+                                </p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description type01">정밀 도플러<br />초음파 검사<br /><span class="font-weight-light">(혈관위치 미리 확인)</span></p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-3">
+                        <div class="cms-figure sub0401 type01">
+                            <div class="cms-figure-text">
+                                <p class="cms-description type01">
+                                    <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0104.png" alt="" class="img-fluid d-none d-lg-block">
+							        <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0104_m.png" alt="" class="w-100 d-block d-lg-none">
+                                </p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description type01">미용수술<br />동시 진행 가능<br /><span class="font-weight-light">(이마거상)</span></p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type25">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">내시경 이마지방종 제거술</p>
+                <p class="cms-title">전후 사진</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-column-list text-type-2 row">
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0401.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0401_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0402.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0402_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0403.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0403_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0404.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0404_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type15 sub0403">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">수술 후</p>
+                <p class="cms-title">조직검사</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-column-list text-type-1 row">
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0501.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0501_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">조직보관</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0502.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0502_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">조직 검사 기관 발송</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0503.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_img_0503_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">조직 검사 결과 수신</p>                            
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type02 type-bg">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">수술 후</p>
+                <p class="cms-title">실비보험</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-description-box em-box">
+                <p class="cms-description">합리적인 비용으로 수술 부담을 낮춰드립니다.</p>
+            </div>
+            <div class="cms-list-wrap">
+                <ol class="cms-figure-list text-type-1 row justify-content-center sub0401">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-figure sub0401">
+                            <div class="cms-figure-text">
+                                <p class="cms-description">
+                                    <span class="num">01</span>
+                                    <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0201.png" alt="" class="img-fluid d-none d-lg-block m-auto">
+							        <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0201_m.png" alt="" class="w-100 d-block d-lg-none">
+                                </p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description">가입 내역에 따라 실비보험<br />청구가 가능합니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-figure sub0401">
+                            <div class="cms-figure-text">
+                                <p class="cms-description">
+                                    <span class="num">02</span>
+                                    <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0202.png" alt="" class="img-fluid d-none d-lg-block m-auto">
+							        <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0202_m.png" alt="" class="w-100 d-block d-lg-none">
+                                </p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description">정확한 내용은 가입하신 보험의<br />약관을 확인하세요.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-figure sub0401">
+                            <div class="cms-figure-text">
+                                <p class="cms-description">
+                                    <span class="num">03</span>
+                                    <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0203.png" alt="" class="img-fluid d-none d-lg-block m-auto">
+							        <img src="https://fxfile.drline.net/local/13286/cms/lipomaforehead_icon_0203_m.png" alt="" class="w-100 d-block d-lg-none">
+                                </p>
+                            </div>
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-description">제출 서류는 데스크에서<br />받아 보실 수 있습니다.</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <section class="cms type17">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-title">수술방법</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-row-list text-type-1">
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-auto">01</p>
+                            <p class="cms-description col">두피 쪽에 절개를 가하고 내시경 기구를 삽입합니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-auto">02</p>
+                            <p class="cms-description col">지방종의 위치를 확인 후 주변조직과 박리하여 지방종을 제거합니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box row">
+                            <p class="cms-title col-auto">03</p>
+                            <p class="cms-description col">세척 및 지혈 후 깔끔하게 두피를 봉합합니다.</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+	<section class="cms type33 type-bg bg-color-2">
+		<div class="cms-inner">
+			<!-- 제목 영역 [s] -->
+			<div class="cms-header top-border">
+                <p class="cms-eyebrow">내시경 이마지방종 제거술</p>
+				<p class="cms-title">수술 정보</p>
+			</div>
+			<!-- 제목 영역 [e] -->
+			<!-- 콘텐츠 영역 [s] -->
+			<div class="cms-list-wrap">
+				<ol class="cms-figure-list item-between-border text-type-3 row justify-content-center">
+					<!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+					<!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+					<!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_01.png" alt="" class="d-none d-lg-block m-auto">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_01_m.png" alt="" class="d-block d-lg-none m-auto">
+								</div>
+								<div class="cms-figure-text">
+									<p class="cms-eyebrow">수술시간</p>
+									<p class="cms-description">30분</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_02.png" alt="" class="d-none d-lg-block m-auto">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_02_m.png" alt="" class="d-block d-lg-none m-auto">
+								</div>
+								<div class="cms-figure-text">
+									<p class="cms-eyebrow">마취 방법</p>
+									<p class="cms-description">수면마취</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_03.png" alt="" class="d-none d-lg-block m-auto">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_03_m.png" alt="" class="d-block d-lg-none m-auto">
+								</div>
+								<div class="cms-figure-text">
+									<p class="cms-eyebrow">입원여부</p>
+									<p class="cms-description">필요시 입원</p>
+								</div>
+							</div>
+						</div>
+					</li>
+                    <li class="cms-list-item col-6 col-lg-3 d-block d-lg-none">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+									<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_05.jpg" alt="" class="d-none d-lg-block m-auto">
+									<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_05_m.jpg" alt="" class="d-block d-lg-none m-auto">
+								</div>
+								<div class="cms-figure-text">
+									<p class="cms-eyebrow">실밥제거</p>
+									<p class="cms-description">7일 후</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3 d-block d-lg-none">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_04.png" alt="" class="d-none d-lg-block m-auto">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_04_m.png" alt="" class="d-block d-lg-none m-auto">
+								</div>
+								<div class="cms-figure-text">
+									<p class="cms-eyebrow">회복기간</p>
+									<p class="cms-description">7일</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3 d-block d-lg-none">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+									<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_06.jpg" alt="" class="d-none d-lg-block m-auto">
+									<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_06_m.jpg" alt="" class="d-block d-lg-none m-auto">
+								</div>
+								<div class="cms-figure-text">
+									<p class="cms-eyebrow">통원치료</p>
+									<p class="cms-description">1~2회</p>
+								</div>
+							</div>
+						</div>
+					</li>
+                </ol>
+                <ol class="cms-figure-list item-between-border text-type-3 row justify-content-center mt-3 mt-lg-5 d-none d-lg-flex">
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+									<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_05.jpg" alt="" class="d-none d-lg-block m-auto">
+									<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_05_m.jpg" alt="" class="d-block d-lg-none m-auto">
+								</div>
+								<div class="cms-figure-text">
+									<p class="cms-eyebrow">실밥제거</p>
+									<p class="cms-description">7일 후</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_04.png" alt="" class="d-none d-lg-block m-auto">
+									<img src="https://fxfile.drline.net/cms/public/images/temp/type33_icon_04_m.png" alt="" class="d-block d-lg-none m-auto">
+								</div>
+								<div class="cms-figure-text">
+									<p class="cms-eyebrow">회복기간</p>
+									<p class="cms-description">7일</p>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="cms-list-item col-6 col-lg-3">
+						<div class="cms-figure circle">
+							<div class="cms-inner">
+								<div class="cms-icon mb-3 mb-lg-4 pb-lg-1">
+									<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_06.jpg" alt="" class="d-none d-lg-block m-auto">
+									<img src="https://fxfile.drline.net/cms/public/images/contents/cms/corset_06_m.jpg" alt="" class="d-block d-lg-none m-auto">
+								</div>
+								<div class="cms-figure-text">
+									<p class="cms-eyebrow">통원치료</p>
+									<p class="cms-description">1~2회</p>
+								</div>
+							</div>
+						</div>
+					</li>
+				</ol>
+			</div>
+			<!-- 콘텐츠 영역 [e] -->
+		</div>
+	</section>
+
+    <section class="cms type23">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-title font-weight-light">초이성형외과 TV</p>                                        
+                <div class="cms-description-box text-center">
+                    <p class="cms-description text-title">내시경 이마지방종 제거<span class="type01">내시경으로 흉터없이 제거하기!</span></p>
+                </div>
+            </div>
+            <div class="cms-visual video">
+                <div class="visual video-container">
+                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/TnhCq6ugESg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+	<!-- contents area [e] -->
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

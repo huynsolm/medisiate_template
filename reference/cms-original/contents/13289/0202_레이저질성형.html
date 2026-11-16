@@ -1,0 +1,533 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style>
+    .cms-container .cms .cms-header .cms-thin-title {background:#323d59;padding:45px 0;font-size:2.5rem;line-height:1.25;;color:#fff}
+    .cms-container .cms em {color:#feef9c !important;font-weight:700}
+    .cms-graybox {background:#feede3;padding:80px 70px;}
+    .cms-graybox .cms-text-box {padding:0;margin-bottom:40px;}
+    .cms-graybox .cms-text-box .cms-title {font-size:3rem;font-weight:700;letter-spacing:-0.05rem;color:#f55e89;text-align:center;}
+    .cms-graybox .cms-text-box .cms-copy {font-family:"Montserrat";font-size:3rem;font-weight:400;line-height:2.75rem;letter-spacing:-0.05rem;color:#f55e89;text-align:center;}
+    .cms-graybox .cms-text-box .cms-description {font-size:1.063rem;font-weight:300;line-height:1.688rem;color:#444446;margin-top:40px;}
+    .cms-container .cms.type01 .cms-description-box {margin-top:60px}
+    .cms-graybox .visual {padding:0;}
+    .cms-container .cms .cms-header .cms-title {font-weight:700;}
+    .cms-container .cms .cms-header .cms-title strong {color:#f55e89;}
+    .cms-container .cms .cms-list-item .cms-figure-text .cms-icon {display:flex;display:-ms-flexbox;min-height:55px;-webkit-box-pack:center;-ms-flex-pack: center;justify-content:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center}
+    .cms-container .cms .cms-header .cms-title.cms-type01 {font-size:3.125rem;}
+    .cms-container .cms .cms-header .cms-title.cms-type01 em {color:#ff6e86 !important;position:relative;}
+    .cms-container .cms .cms-header .cms-title.cms-type01 em span {position:relative;z-index:2;}
+    .cms-container .cms .cms-header .cms-title.cms-type01 em:after {content:"";display:inline-block;width:100%;height:13px;background:#ffdce2;position:absolute;left:0;bottom:7px;z-index:0;}
+    @media (min-width: 992px){
+        .cms-container .cms.sub0201_type3 .cms-tile-list .cms-list-item.row>* {padding:0;}
+        .cms-container .cms.sub0201_type3 .cms-tile-list.array-zigzag .cms-list-item.row {margin-bottom:0;background:#fafafa}
+    }
+    .cms-container .cms.sub0201_type3 .cms-description-box .cms-eyebrow {font-size:1rem;background:#fb7ca0;padding:0 30px;border-radius:30px;font-family:"Montserrat",sans-serif;text-transform:none;} 
+    .cms-container .cms.sub0201_type3 .cms-description-box .cms-eyebrow.type-number {width:auto;height:100%;}
+    .cms-container .cms.sub0201_type3 .cms-tile-list .cms-description-box .cms-title {color:#2c2e3a;font-size:2rem;line-height:1.25;font-weight:500}
+    .cms-container .cms.sub0201_type3 .cms-tile-list.text-type-1 .cms-description-box .cms-title:before, .cms-container .cms.sub0201_type3 .cms-tile-list.text-type-1 .cms-description-box .cms-title:after {display:none;}
+    .cms-container .cms.sub0201_type3 .cms-description-box .cms-description strong {color:#f55e89;}
+    .cms-container .cms.sub0201_type3 .cms-tile-list.reverse  .cms-description-box .cms-title {text-align:left;}
+    .cms-container .cms.type-bg.type09 {background:#fafafa}
+    .cms-container .cms .cms-header .cms-title strong {color:#f55e89;}
+    .cms-container .cms .cms-column-list.text-type-3 .cms-list-item .cms-inner-box {background:#f97fa0;color:#fff;align-items:center;border-radius:3px;}
+    .cms-container .cms .cms-column-list.text-type-3 li.cms-list-item:nth-child(2) .cms-inner-box,
+    .cms-container .cms .cms-column-list.text-type-3 li.cms-list-item:nth-child(3) .cms-inner-box {background:#817b79}
+    .cms-container .cms .cms-column-list.text-type-3 .cms-list-item .cms-inner-box .cms-description-box {text-align:center;align-items:center;}
+    .cms-container .cms .cms-column-list.text-type-3 .cms-list-item .cms-description {color:#fff;font-weight:500;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-content {margin:50px 0 0 0;padding:0;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item {list-style:none;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 {background:url(https://fxfile.drline.net/local/13289/cms/sub0202_img_03.jpg) no-repeat;text-align:center;min-height:310px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-title {font-size:1.875rem;font-weight:500;color:#ff7c28;letter-spacing:-0.05rem;text-align:center;margin-bottom:20px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-description {font-size:1.125rem;color:#444446;margin:0;padding:0;text-align:center;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton {margin:0 auto;display:inline-block;position:relative;padding:15px 60px 15px 30px;text-align:center;margin-top:50px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton:before {content:"";display:inline-block;background:rgb(255, 124, 40, 0.9);width:100%;height:100%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;border-radius:30px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton a {font-size:1.063rem;letter-spacing:-0.05rem;color:#fff;position:relative;z-index:2;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton a:before {content:"";display:block;width:25px;height:1px;background:#fff;position:absolute;right:-35px;top:50%;transform:translateY(-50%)}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton a:after {content:"";display:block;width:7px;height:1px;background:#fff;position:absolute;right:-37px;top:10px;transform:rotate(45deg);}
+    .cms-container .cms.type33  .cms-description-box.type01 .cms-description:before {display:none;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .text-area {padding-top:65px;width:100%;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 {background:url(https://fxfile.drline.net/local/13289/cms/sub0201_img_0502.jpg) no-repeat;text-align:center;min-height:310px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-title {font-size:1.875rem;font-weight:500;color:#637166;letter-spacing:-0.05rem;text-align:center;margin-bottom:20px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-description {font-size:1.125rem;color:#637166;margin:0;padding:0;text-align:center;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton {margin:0 auto;display:inline-block;position:relative;padding:15px 60px 15px 30px;text-align:center;margin-top:50px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton:before {content:"";display:inline-block;background:rgb(255, 255, 255, 0.9);width:100%;height:100%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;border-radius:30px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton a {font-size:1.063rem;letter-spacing:-0.05rem;color:#637166;position:relative;z-index:2;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton a:before {content:"";display:block;width:25px;height:1px;background:#637166;position:absolute;right:-35px;top:50%;transform:translateY(-50%)}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton a:after {content:"";display:block;width:7px;height:1px;background:#637166;position:absolute;right:-37px;top:10px;transform:rotate(45deg);}
+    .cms-container .cms.type33  .cms-description-box.type01 .cms-description:before {display:none;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .text-area {padding-top:65px;width:100%;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 {background:url(https://fxfile.drline.net/local/13289/cms/sub0201_img_0503.jpg) no-repeat;text-align:center;min-height:310px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-title {font-size:1.875rem;font-weight:500;color:#709cef;letter-spacing:-0.05rem;text-align:center;margin-bottom:20px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-description {font-size:1.125rem;color:#536381;margin:0;padding:0;text-align:center;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton {margin:0 auto;display:inline-block;position:relative;padding:15px 60px 15px 30px;text-align:center;margin-top:50px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton:before {content:"";display:inline-block;background:rgb(255, 255, 255, 0.9);;width:100%;height:100%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;border-radius:30px;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton a {font-size:1.063rem;letter-spacing:-0.05rem;color:#536381;position:relative;z-index:2;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton a:before {content:"";display:block;width:25px;height:1px;background:#536381;position:absolute;right:-35px;top:50%;transform:translateY(-50%)}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton a:after {content:"";display:block;width:7px;height:1px;background:#536381;position:absolute;right:-37px;top:10px;transform:rotate(45deg);}
+    .cms-container .cms.type33 .cms-description-box.type01 .cms-description:before {display:none;}
+    .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .text-area {padding-top:65px;width:100%;}
+    .cms-container .cms .cms-description-box .cms-button-wrap a.cms-square-button {background:#323d59}
+    .cms-container .cms .cms-table thead tr:first-child th.type03 {background:#f55e89;border-left:3px solid #f55e89;border-right:3px solid #f55e89}
+    .cms-container .cms .cms-table tbody th:first-child.type01 {background:#fff;color:#444446;font-weight:300;}
+    .cms-container .cms .cms-table tbody td.type02 {background:#f8f8f8;color:#b79b77;font-weight:500;}
+    .cms-container .cms .cms-table tbody td.type03 {border-left:3px solid #f55e89;border-right:3px solid #f55e89;background:#fffef6;font-weight:500;color:#f55e89;}
+    .cms-container .cms .cms-table tbody tr:last-child td.type03 {border-bottom:3px solid #f55e89}
+    @media (max-width:991px){
+        .cms-container .cms .cms-header .cms-thin-title {font-size:1.625rem;padding:5% 0;}
+        .cms-graybox {padding:6.25%;}
+        .cms-graybox .cms-text-box {padding:0;}
+        .cms-graybox .cms-text-box .cms-title {font-size:1.719rem;letter-spacing:-0.05rem;text-align:center;font-weight:700}
+        .cms-graybox .cms-text-box .cms-copy {font-size:1.563rem;line-height:1.875rem;letter-spacing:-0.05rem;text-align:center;}
+        .cms-graybox .cms-text-box .cms-description {font-size:1.063rem;line-height:1.688rem;margin-top:4%;text-align:center;}
+        .cms-container .cms.type01 .cms-description-box {margin-top:5%}
+        .cms-graybox .visual {margin-top:5%;}
+        .cms-container .cms .cms-column-list.text-type-3 li.cms-list-item:nth-child(n) .cms-inner-box {background:#f97fa0;}
+        .cms-container .cms .cms-column-list.text-type-3 li.cms-list-item:nth-child(2n) .cms-inner-box {background:#817b79}
+        .cms-container .cms.sub0201_type3 .cms-description-box .cms-eyebrow {font-size:0.875rem;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon {min-height:45px;padding: 0 10px;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon img {zoom:.5;-moz-transform:scale(0.5);}
+        .cms-container .cms .cms-tile-list .cms-visual {max-width:100%;margin:0;}
+        .cms-container .cms .cms-tile-list .cms-description-box {background:#fafafa;padding:5%;}
+        .cms-container .cms .cms-header .cms-title.cms-type01 {font-size:2.188rem;line-height:2.563rem;}
+        .cms-container .cms.sub0201_type3 .cms-tile-list .cms-description-box .cms-title {font-size:1.5rem;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-content {margin:0;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item {margin-top:3%;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 {background:url(https://fxfile.drline.net/local/13289/cms/sub0202_img_03_m.jpg) no-repeat;background-size:cover;text-align:left;min-height:160px;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .text-area {position:absolute;top:50%;left:35px;transform:translate(0,-50%);width:100%;padding:0}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-title {text-align:left;font-size:1.563rem;margin-bottom:3.6%}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-description {text-align:left;width:50%;font-size:1.063rem;line-height:1.563rem;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton {position:absolute;top:50%;right:15%;transform:translate(0,-50%);margin:0;padding:4%}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton:before {width:100%;padding-bottom:100%;border-radius:50%;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton a:before {display:none}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton a:after {display:none}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 {background:url(https://fxfile.drline.net/local/13289/cms/sub0201_img_0502_m.jpg) no-repeat;background-size:cover;text-align:left;min-height:160px}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .text-area {position:absolute;top:50%;left:35px;transform:translate(0,-50%);width:100%;padding:0}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-title {text-align:left;font-size:1.563rem;margin-bottom:3.6%}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-description {text-align:left;width:50%;font-size:1.063rem;line-height:1.563rem;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton {position:absolute;top:50%;right:15%;transform:translate(0,-50%);margin:0;padding:4%}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton:before {width:100%;padding-bottom:100%;border-radius:50%;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton a:before {display:none}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton a:after {display:none}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 {background:url(https://fxfile.drline.net/local/13289/cms/sub0201_img_0503_m.jpg) no-repeat;background-size:cover;text-align:left;min-height:160px}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .text-area {position:absolute;top:50%;left:35px;transform:translate(0,-50%);width:100%;padding:0}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-title {text-align:left;font-size:1.563rem;margin-bottom:3.6%}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-description {text-align:left;width:50%;font-size:1.063rem;line-height:1.563rem;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton {position:absolute;top:50%;right:15%;transform:translate(0,-50%);margin:0;padding:4%}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton:before {width:100%;padding-bottom:100%;border-radius:50%;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton a:before {display:none}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton a:after {display:none}
+    }
+    @media (max-width:479px){
+        .cms-container .cms .cms-header .cms-thin-title {font-size:1.083rem;}
+        .cms-graybox {padding:6.25%;}
+        .cms-graybox .cms-text-box {padding:0;}
+        .cms-graybox .cms-text-box .cms-title {font-size:1.375rem;letter-spacing:-0.05rem;}
+        .cms-graybox .cms-text-box .cms-copy {font-size:1.125rem;line-height:1.25rem;letter-spacing:-0.05rem;}
+        .cms-graybox .cms-text-box .cms-description {font-size:0.708rem;line-height:1.146rem;}
+        .cms-graybox .visual {margin-top:5%;}
+        .cms-container .cms .cms-description-box .cms-button-wrap a.cms-square-button {padding:10px 20px 10px 20px;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon {min-height:40px;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon img {zoom:.33;-moz-transform:scale(0.33);}
+        .cms-container .cms .cms-header .cms-title.cms-type01 {font-size:1.458rem;line-height:1.708rem;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 {min-height:107px;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-title,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-title,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-title {text-align:left;font-size:1.042rem;margin-bottom:3.6%}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-description,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-description,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-description {font-size:0.708rem;line-height:1.042rem;}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton {right:17%}
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type01 .cms-botton a,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type02 .cms-botton a,
+        .cms-container .cms.type33 .cms-list-wrap .cms-list-item .cms-description-box.type03 .cms-botton a {font-size:0.667rem}
+        .cms-container .cms.sub0201_type3 .cms-description-box .cms-eyebrow {font-size:0.625rem;}
+        .cms-container .cms.sub0201_type3 .cms-tile-list .cms-description-box .cms-title {font-size:1rem;}
+    }
+</style>
+<div class="cms-container">
+    <!-- contents area [s] -->
+    <section class="cms type00">
+        <div class="cms-inner">
+            <div class="cms-header bottom-border">
+                <p class="cms-page-title">레이저질성형</p>
+            </div>
+        </div>
+    </section>
+    <section class="cms type01">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header">
+                <p class="cms-thin-title">질입구에서부터<br /><em>질안쪽까지 레이저로 타이트하게 복원</em><br />질주름형성, 골반근육보강으로 성감향상</p>
+            </div> <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-visual">
+                <div class="cms-graybox">
+                    <div class="cms-text-box">
+                        <div class="cms-title">질성형</div>  
+                        <div class="cms-copy">Before & After</div>
+                    </div>
+                    <div class="visual">
+                        <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_01.jpg" alt="" class="img-fluid d-none d-lg-block">
+                        <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_01_m.jpg" alt="" class="w-100 d-block d-lg-none">    
+                    </div>
+                    <div class="cms-description-box text-center">
+                        <p class="cms-button-wrap">
+                            <a href="/Module/Board/Board.asp?ModuleID=2" class="cms-square-button">시술 후기 및 전후사진 보러가기<i class="arrow"></i></a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="cms-description-box">
+                <p class="cms-description larger">여성은 성관계, 임신, 출산 그리고 나이가 들어감에 따라 질의 탄력이 떨어지는 경향이 있습니다. 이에 따라 성관계시 바람빠지는 소리가 들리기도 하며 성적 만족감이 떨어지게 됩니다. 따라서 질을 이전처럼 좁고 탄력있는 상태로 만들어 성적 만족감을 극대화 시켜주는 수술입니다.</p>
+            </div> <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>    
+
+    <section class="cms type09 type-bg">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">3D입체 레이저 질성형</p>
+                <p class="cms-title">이런분들께 <strong>추천</strong>드립니다</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-column-list item-bg-box text-type-3 row justify-content-start">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">출산 이후 늘어진 질 점막 골반근육으로 인해 부부관계에 지장이 있으신 분</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">성관계시 오르가즘이 거의 안 느껴지시는 분</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">성관계시 바람 빠지는 소리가 신경쓰이시는 분</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-6">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">미혼이지만 잦은 성생활 또는 중절수술 등의 경험이 있으신분</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type26">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">에스여성의원의 3D입체 레이저 질성형</p>
+                <p class="cms-title">3D 질축소 특징</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-table-wrap">
+                <table class="cms-table">
+                    <caption class="sr-only">테이블 제목</caption>
+                    <!-- 테이블 셀 너비는 colgroup으로 설정 -->
+                    <colgroup>
+                        <col style="width:40%">
+                        <col style="width:20%">
+                        <col style="width:40%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="type01">기존 질축소</th>
+                            <th scope="col" class="type02">VS</th>
+                            <th scope="col" class="type03">3D질축소</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row" class="type01">질 입구만 좁히는 방법</th>
+                            <td class="type02">수술방법</td>
+                            <td class="type03">질입구-자궁경부전까지 전체적으로 좁히는 방법</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="type01">점막만 줄이는 기존방식</th>
+                            <td class="type02">봉합방법</td>
+                            <td class="type03">점막과 함께 이중봉합하여 근육을 재건하는 방식</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="type01">입원필요</th>
+                            <td class="type02">입원여부</td>
+                            <td class="type03">입원 불필요</td>
+                        </tr>
+                        <tr class="">
+                            <th scope="row" class="type01">수술당일 일상생활이 힘듬</th>
+                            <td class="type02">일상생활</td>
+                            <td class="type03">수술 당일부터 일상생활가능</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type03 sub0201_type3">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">에스여성의원의 레이저질성형</p>
+                <p class="cms-title">특장점</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <!-- 지그재그 방향 뒤집으려면 reverse 클래스 추가 -->
+                <ol class="cms-tile-list array-zigzag text-type-1">
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_0201.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_0201_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow type-number">Special 1</p>
+                                <p class="cms-title">20년 경력 여성성형 전문의</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_0202.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_0202_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow type-number">Special 2</p>
+                                <p class="cms-title">엠보싱질성형술 + 회음부 성형술 + 골반근육재건수술</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_0203.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_0203_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow type-number">Special 3</p>
+                                <p class="cms-title">질안쪽까지 복원</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_0204.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_0204_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow type-number">Special 4</p>
+                                <p class="cms-title">최소통증시술</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type27 type-bg">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">3D입체 레이저 질성형</p>
+                <p class="cms-title">수술정보</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-figure-list item-between-plus item-even-bg text-type-3 row justify-content-center sub0204">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item  col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0401.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0401_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">수술시간</p>
+                                <p class="cms-description">1시간 이내</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circletype1">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0406.png" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0406_m.png" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">수술방식</p>
+                                <p class="cms-description">레이저 이용</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0402.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0402_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">마취방법</p>
+                                <p class="cms-description">수면/국소마취</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circletype1">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0403.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0403_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">회복시간</p>
+                                <p class="cms-description">당일 일상생활 가능</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0405.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0405_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">성관계 가능</p>
+                                <p class="cms-description">6주 후</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type11 type-bg bg-image-2 text-white mt-0">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">3D입체 레이저 질성형</p>
+                <p class="cms-title">전후 관리법</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-bullet-list list-bg-box">
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">수면 마취를 위해 4시간 금식 후 내원하시면 됩니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">수술 직후 활동하시는 데에 지장이 없으며 혼자 방문하셔도 문제 없습니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">수술 후 다음날 부터 하루 2회 좌욕을 권해드립니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">수술 후 첫 1주간은 약간의 통증 출혈이 발생할 수 있습니다. (해당 사항이 지속되면 병원 내원 후 진찰받는 것이 좋습니다.)</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">수술 후 1주가 지나면 분비물이 나오고 냄새가 날 수 있으나 이는 남아있는 봉합사가 녹으며 생기는 증상으로 자주 좌욕을 하고 건조시켜주시면 됩니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">부부 관계는 수술 후 6주 후에 하시는 것이 권장됩니다.</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item">
+                        <div class="cms-description-box">
+                            <p class="cms-description">수술 후 4주 후 부터 골반근육강화운동을 받으실 수 있으며, 이는 수술과 질의 탄력 회복이 더 탄탄해지는 시너지 효과를 냅니다.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type33">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header">
+                <p class="cms-title cms-type01">3D입체 레이저 질성형과 <br /><em><span>함께 받으면 좋은 시술</span></em></p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-content row justify-content-center">
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-description-box type03">
+                            <div class="text-area">
+                            <p class="cms-title">질필러</p>
+                            <p class="cms-description">간단 + 안전 + 효과 3박자를 갖춘<br />주사 이쁜이수술</p>
+                            <p class="cms-botton"><a href="/Module/CMS/CMS.asp?IDX=688">보러가기</a></p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-description-box type01">
+                            <div class="text-area">
+                            <p class="cms-title">레이저질타이트닝</p>
+                            <p class="cms-description">콜라겐 합성을 증진하여<br />질벽의 탄력을 개선, 질염 치료 효과</p>
+                            <p class="cms-botton"><a href="/Module/CMS/CMS.asp?IDX=690">보러가기</a></p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type23">
+        <div class="cms-inner">
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-visual">
+                <a href="https://www.youtube.com/watch?v=h4mg0JuQf1U" target="_blank"><img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_04.jpg" alt="이쁜이수술(질 성형) 시 꼭 고려해야 하는 것 5가지 유투브영상" class="img-fluid d-none d-lg-block m-auto">
+                <img src="https://fxfile.drline.net/local/13289/cms/sub0202_img_04_m.jpg" alt="이쁜이수술(질 성형) 시 꼭 고려해야 하는 것 5가지 유투브영상" class="w-100 d-block d-lg-none"></a>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->

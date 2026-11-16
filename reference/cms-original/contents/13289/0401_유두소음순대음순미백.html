@@ -1,0 +1,560 @@
+<!--#include virtual="/FlexX/cms/contents/include/header.html" -->
+<style>
+    .cms-container .cms .cms-header .cms-thin-title {background:#323d59;padding:45px 0;font-size:2.5rem;line-height:1.25;;color:#fff}
+    .cms-container .cms em {color:#feef9c !important;font-weight:700}
+    .cms-container .cms .cms-description-box .cms-eyebrow.type-number.type01 {width:auto;}
+    .cms-graybox {background:#f3f3f3;padding:80px 70px;}
+    .cms-graybox .cms-text-box {padding:0 40px 0 0;}
+    .cms-graybox .cms-text-box .cms-title {font-size:3rem;font-weight:700;letter-spacing:-0.05rem;color:#f55e89}
+    .cms-graybox .cms-text-box .cms-copy {font-family:"Montserrat";font-size:3rem;font-weight:400;line-height:2.75rem;letter-spacing:-0.05rem;color:#f55e89}
+    .cms-graybox .cms-text-box .cms-description {font-size:1.063rem;font-weight:300;line-height:1.688rem;color:#444446;margin-top:40px;}
+    .cms-graybox .visual {padding:0;}
+    .cms-container .cms.type-bg.type09 {background:#fafafa}
+    .cms-container .cms .cms-header .cms-title {font-weight:700;}
+    .cms-container .cms .cms-header .cms-title strong {color:#f55e89;}
+    .cms-container .cms .cms-column-list.text-type-3 .cms-list-item .cms-inner-box {background:#f97fa0;color:#fff;align-items:center;border-radius:3px;}
+    .cms-container .cms .cms-column-list.text-type-3 li.cms-list-item:nth-child(2n) .cms-inner-box {background:#817b79}
+    .cms-container .cms .cms-column-list.text-type-3 .cms-list-item .cms-inner-box .cms-description-box {text-align:center;align-items:center;}
+    .cms-container .cms .cms-column-list.text-type-3 .cms-list-item .cms-description {color:#fff;font-weight:500;}    
+    .cms-container .cms.sub0201_type3 .cms-description-box .cms-eyebrow {font-size:1rem;background:#fb7ca0;padding:0 30px;border-radius:30px;font-family:"Montserrat",sans-serif;text-transform:none;} 
+    .cms-container .cms.sub0201_type3 .cms-description-box .cms-eyebrow.type-number {width:auto;height:100%;}
+    .cms-container .cms.sub0201_type3 .cms-tile-list .cms-description-box .cms-title {color:#2c2e3a;font-weight:700;}
+    .cms-container .cms.sub0201_type3  .cms-tile-list.text-type-1 .cms-description-box .cms-title:before, .cms-container .cms.sub0201_type3  .cms-tile-list.text-type-1 .cms-description-box .cms-title:after {background:#2c2e3a}
+    @media (min-width: 992px){
+        .cms-container .cms.sub0201_type3 .cms-tile-list .cms-list-item.row>* {padding:0;}
+        .cms-container .cms.sub0201_type3 .cms-tile-list.array-zigzag .cms-list-item.row {margin-bottom:0;background:#fafafa}
+    }
+    .cms-container .cms .cms-list-item .cms-figure-text .cms-icon {display:flex;display:-ms-flexbox;min-height:55px;-webkit-box-pack:center;-ms-flex-pack: center;justify-content:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center}
+    .cms-container .cms .cms-header .cms-title {font-weight:700;}
+    .cms-container .cms .cms-header .cms-title.cms-type01 {font-size:3.125rem;line-height:1.2}
+    .cms-container .cms .cms-header .cms-title.cms-type01 em {color:#f55e89 !important;position:relative;}
+    .cms-container .cms .cms-header .cms-title.cms-type01 em span {position:relative;z-index:2;}
+    .cms-container .cms .cms-header .cms-title.cms-type01 em:after {content:"";display:inline-block;width:100%;height:13px;background:#ffdce2;position:absolute;left:0;bottom:7px;z-index:0;}
+    .cms-container .cms.sub0401 .cms-img-list.text-type-3 .cms-list-item .cms-visual-text .cms-description {text-align:left;line-height:2;}
+    .cms-container .cms.sub0401 .cms-img-list.text-type-3 .cms-list-item .cms-visual-text .cms-description span {position:relative;text-indent:-9999em;}
+    .cms-container .cms.sub0401 .cms-img-list.text-type-3 .cms-list-item .cms-visual-text .cms-description span:before {content:"";display:block;background:url(https://fxfile.drline.net/local/13289/cms/icon_check.jpg);width:29px;height:29px;position:absolute;top:0;left:-39px;}
+    @media (max-width:991px){
+        .cms-container .cms .cms-header .cms-thin-title {font-size:1.625rem;padding:5% 0;}
+        .cms-graybox {padding:6.25%;}
+        .cms-graybox .cms-text-box {padding:0;}
+        .cms-graybox .cms-text-box .cms-title {font-size:1.719rem;letter-spacing:-0.05rem;text-align:center;}
+        .cms-graybox .cms-text-box .cms-copy {font-size:1.563rem;line-height:1.875rem;letter-spacing:-0.05rem;text-align:center;}
+        .cms-graybox .cms-text-box .cms-description {font-size:1.063rem;line-height:1.688rem;margin-top:4%;text-align:center;}
+        .cms-graybox .visual {margin-top:5%;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon {min-height:45px;padding: 0 10px;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon img {zoom:.5;-moz-transform:scale(0.5);}
+        .cms-container .cms .cms-header .cms-title.cms-type01 {font-size:2.188rem;line-height:2.563rem;} 
+        .cms-container .cms.sub0401 .cms-img-list.text-type-3 .cms-list-item .cms-visual-text .cms-description {padding:0 10%;}    
+        .cms-container .cms.sub0401 .cms-img-list.text-type-3 .cms-list-item .cms-visual-text .cms-description span:before{background-size:cover;width:17px;height:17px;left:-25px;}
+    }
+    @media (max-width:479px){
+        .cms-container .cms .cms-header .cms-thin-title {font-size:1.083rem;}
+        .cms-graybox {padding:6.25%;}
+        .cms-graybox .cms-text-box {padding:0;}
+        .cms-graybox .cms-text-box .cms-title {font-size:1.146rem;letter-spacing:-0.05rem;}
+        .cms-graybox .cms-text-box .cms-copy {font-size:1.042rem;line-height:1.25rem;letter-spacing:-0.05rem;}
+        .cms-graybox .cms-text-box .cms-description {font-size:0.708rem;line-height:1.146rem;}
+        .cms-graybox .visual {margin-top:5%;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon {min-height:40px;}
+        .cms-container .cms .cms-list-item .cms-figure-text .cms-icon img {zoom:.33;-moz-transform:scale(0.33);}
+        .cms-container .cms .cms-header .cms-title.cms-type01 {font-size:1.458rem;line-height:1.708rem;}
+        .cms-container .cms.type30 .cms-img-list .cms-list-item .cms-visual-text {left:45%;width:50%;}
+        .cms-container .cms.type30 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-eyebrow.type-number {font-size:16px;}
+        .cms-container .cms.type30 .cms-column-list .cms-list-item .cms-inner-box .cms-description-box .cms-description {font-size:14px;}
+        .cms-container .cms.sub0401 .cms-img-list.text-type-3 .cms-list-item .cms-visual-text .cms-description {padding:0 0 0 20px;line-height:1.3}
+        .cms-container .cms.sub0401 .cms-img-list.text-type-3 .cms-list-item .cms-visual-text .cms-description span:before{background-size:cover;width:13px;height:13px;left:-19px;}
+        .cms-container .cms.sub0401 .cms-img-list.text-type-3 {background:#fff;padding:5% 0;}
+        .cms-container .cms.sub0401 .cms-column-list {margin:0;}
+        .cms-container .cms.type15.sub0401 .cms-column-list {margin:0}
+    }
+</style>
+<div class="cms-container">
+    <!-- contents area [s] -->
+    <section class="cms type00">
+        <div class="cms-inner">
+            <div class="cms-header bottom-border">
+                <p class="cms-page-title">유두, 소음순, 대음순 미백</p>
+            </div>
+        </div>
+    </section>
+    <section class="cms type01">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header">
+                <p class="cms-thin-title">3회의 듀얼레이저 시술로<br /><em>핑크빛 유두/ 소음순/ 대음순을 자신</em>합니다.</p>
+            </div> <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-visual">
+                <div class="row cms-graybox">
+                    <div class="cms-text-box col-12 col-lg-4 align-self-center">
+                        <div class="cms-title">유두 미백</div>  
+                        <div class="cms-copy">Before &<br class="d-none d-lg-block" />After</div>
+                    </div>
+                    <div class="visual col-12 col-lg-8">
+                        <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_01.jpg" alt="" class="img-fluid d-none d-lg-block">
+                        <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_01_m.jpg" alt="" class="w-100 d-block d-lg-none">    
+                    </div>
+                </div>
+
+            </div>
+            <div class="cms-description-box">
+                <p class="cms-description larger">유두, 소음순, 대음순이 유전적 혹은 환경적 이유로 검게 색소 침착된 경우와 타병원에서 소음순 수술 후 실밥자국이 남았거나 색소침착이 생긴 경우에 미백레이저를 활용하여 필요부위에 미백효과를 줄 수 있습니다. </p>
+            </div> <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>    
+    
+    <section class="cms type03 sub0201_type3">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">유두, 소음순, 대음순 미백</p>
+                <p class="cms-title"><strong>특장점</strong></p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <!-- 지그재그 방향 뒤집으려면 reverse 클래스 추가 -->
+                <ol class="cms-tile-list array-zigzag text-type-1">
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0201.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0201_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow type-number">Special 1</p>
+                                <p class="cms-title">단 3회의 시술로 미백효과</p>
+                                <p class="cms-description">3회 시술로 유두, 유륜 및 고민부위의 색깔이 밝아집니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0202.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0202_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow type-number">Special 2</p>
+                                <p class="cms-title">듀얼레이저 사용</p>
+                                <p class="cms-description">표피와 진피 색소 모두 파괴할 수 있도록 듀얼 레이저로 진행합니다. 2가지 레이저를 사용, 3회 조사하여 멜라닌만 선택적으로 레이저로 파괴하여 핑크빛 피부를 자신합니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item row align-items-center">
+                        <div class="cms-visual col-lg-6">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0203.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0203_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box col-lg-6">
+                            <div class="cms-box-inner">
+                                <p class="cms-eyebrow type-number">Special 3</p>
+                                <p class="cms-title">성적 자신감 상승</p>
+                                <p class="cms-description">얼룩덜룩한 증상 없이 균일한 톤으로 돌아와 깨끗한 이미지로 성적자신감이 상승합니다.</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type27 type-bg">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">유두,소음순,대음순 미백</p>
+                <p class="cms-title">시술정보</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-figure-list item-between-plus item-even-bg text-type-3 row justify-content-center sub0204">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0401.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0401_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">시술시간</p>
+                                <p class="cms-description">30~40분</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circletype1">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0402.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0402_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">마취방법</p>
+                                <p class="cms-description">마취크림</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0403.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0403_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">회복시간</p>
+                                <p class="cms-description">당일 일상생활 가능</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circletype1">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0404.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0404_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">통원치료</p>
+                                <p class="cms-description">1달 간격 3회</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0405.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0405_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">성관계 가능</p>
+                                <p class="cms-description">당일 부터</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type25">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">에스여성의원의</p>
+                <p class="cms-title">다양한 레이저</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-column-list text-type-2 row">
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0301.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0301_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <!-- <div class="cms-description-box">
+                            <p class="cms-title">15년 경력 여성성형 전문의</p>
+                        </div> -->
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0302.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0302_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <!-- <div class="cms-description-box">
+                            <p class="cms-title">흉터없는 핑크빛 소음순</p>
+                        </div> -->
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0303.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0303_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <!-- <div class="cms-description-box">
+                            <p class="cms-title">전문레이저 장비</p>
+                        </div> -->
+                    </li>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0304.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0304_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <!-- <div class="cms-description-box">
+                            <p class="cms-title">최소통증시술</p>
+                        </div> -->
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0305.jpg" alt="" class="w-100 d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0305_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <!-- <div class="cms-description-box">
+                            <p class="cms-title">최소통증시술</p>
+                        </div> -->
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type30 type-bg bg-color-3 sub0401">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">미백</p>
+                <p class="cms-title">바디토닝</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-img-list text-type-3 row">
+                    <li class="cms-list-item">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_04.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_04_m.jpg" alt="" class="w-100 d-block d-lg-none">
+                        </div>
+                        <div class="cms-visual-text">
+                            <p class="cms-eyebrow">헬리오스 레이저</p>
+                            <p class="cms-line"></p>
+                            <p class="cms-description"><span>1</span>기존의 레이저 토닝과 차별화된 RTP 방식</p>
+                            <p class="cms-description"><span>2</span>프락셔널 에너지 조사로 부작용없이 색소탈락</p>
+                            <p class="cms-description"><span>3</span>표피와 진피 색소 모두 치료</p>
+                            <p class="cms-description"><span>4</span>색소의 자연스러운 탈락</p>
+                        </div>
+                    </li>
+                <!-- </ol>
+                <p class="cms-sub-title">시술정보</p>
+                <ul class="cms-column-list item-color-box row">
+                    <li class="cms-list-item col-6 col-lg-4">
+                    <div class="cms-inner-box">
+                        <div class="cms-description-box">
+                        <p class="cms-eyebrow type-number type01">시술시간</p>
+                        <p class="cms-description">15분 내외</p>
+                        </div>
+                    </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                    <div class="cms-inner-box">
+                        <div class="cms-description-box">
+                        <p class="cms-eyebrow type-number type01">시술횟수</p>
+                        <p class="cms-description">1~2주 간격 5회 이상</p>
+                        </div>
+                    </div>
+                    </li>
+                    <li class="cms-list-item col-6 col-lg-4">
+                    <div class="cms-inner-box">
+                        <div class="cms-description-box">
+                        <p class="cms-eyebrow type-number type01">회복</p>
+                        <p class="cms-description">당일 일상생활 가능</p>
+                        </div>
+                    </div>
+                    </li>
+                </ul> -->
+            </div>
+        </div>
+    </section>
+
+    <section class="cms type27 type-bg mt-0">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-title">시술정보</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ol class="cms-figure-list item-between-plus item-even-bg text-type-3 row justify-content-center sub0204">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0401.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0401_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">시술시간</p>
+                                <p class="cms-description">15분 내외</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circletype1">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0404.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0404_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">시술횟수</p>
+                                <p class="cms-description">1~2주 간격<br />5회 이상</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circle">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0402.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0402_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">마취방법</p>
+                                <p class="cms-description">필요없음</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item minus col-6 col-lg-4 sub0204">
+                        <div class="cms-figure circletype1">
+                            <div class="cms-figure-text">
+                                <div class="cms-icon">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0403.jpg" alt="" class="d-none d-lg-block">
+                                    <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0403_m.jpg" alt="" class="d-block d-lg-none">
+                                </div>
+                                <p class="cms-eyebrow">회복시간</p>
+                                <p class="cms-description">당일 일상생활 가능</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+    <!-- <section class="cms type15 sub0401">
+        <div class="cms-inner">
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">바디토닝</p>
+                <p class="cms-title">시술부위</p>
+            </div>
+            <div class="cms-list-wrap">
+                <ul class="cms-column-list text-type-1 row">
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0501.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0501_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">겨드랑이</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0502.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0502_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">팔/팔꿈치</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0503.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0503_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">무릎/허벅지/종아리</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0504.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0504_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">발/발꿈치</p>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-visual">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0505.jpg" alt="" class="img-fluid d-none d-lg-block">
+                            <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_0505_m.jpg" alt="" class="img-fluid d-block d-lg-none">
+                        </div>
+                        <div class="cms-description-box">
+                            <p class="cms-title">복부/사타구니</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section> -->
+
+    <section class="cms type09 type-bg">
+        <div class="cms-inner">
+            <!-- 제목 영역 [s] -->
+            <div class="cms-header top-border">
+                <p class="cms-eyebrow">바디토닝</p>
+                <p class="cms-title">시술부위</p>
+            </div>
+            <!-- 제목 영역 [e] -->
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-list-wrap">
+                <ul class="cms-column-list item-bg-box text-type-3 row justify-content-start">
+                    <!-- col-lg-n : n의 숫자에 따라 데스크탑 해상도의 item의 너비가 달라집니다. item의 너비는 통일시켜주세요 -->
+                    <!-- 2 : 16.66667% / 3 : 25% / 4 : 33% / 5 : 41.66667% / 6 : 50% / 없음 : 20% -->
+                    <!-- col-n : n의 숫자에 따라 모바일 해상도의 item의 너비가 달라집니다. (기본설정: 6) -->
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">겨드랑이 부위</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">팔꿈치 부위</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">무릎 뒤쪽 / 허벅지 팬티라인 부위</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">발꿈치 부위</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">사타구니 라인 부위</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cms-list-item col-12 col-lg-4">
+                        <div class="cms-inner-box row">
+                            <div class="cms-description-box col">
+                                <p class="cms-description">몸에 마찰로 생기는 모든 색소부위</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+
+    <section class="cms type23">
+        <div class="cms-inner">
+            <!-- 콘텐츠 영역 [s] -->
+            <div class="cms-visual">
+                <a href="https://www.youtube.com/watch?v=GpgNL9O3fPE" target="_blank"><img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_06.jpg" alt="미백 레이저 전후 유투브영상" class="img-fluid d-none d-lg-block m-auto">
+                <img src="https://fxfile.drline.net/local/13289/cms/sub0401_img_06_m.jpg" alt="미백 레이저 전후 유투브영상" class="w-100 d-block d-lg-none"></a>
+            </div>
+            <!-- 콘텐츠 영역 [e] -->
+        </div>
+    </section>
+</div>
+<!--#include virtual="/FlexX/cms/contents/include/footer.html" -->
