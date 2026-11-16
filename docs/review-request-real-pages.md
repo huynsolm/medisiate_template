@@ -77,3 +77,10 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - R-I-2는 type29만 고치지 않고 **변환 중 섹션별 글 순서 검사**(모든 타입)로 막았다. 이 검사가 정상 원본을 잘못 fallback시키는 경우(서식·공백·생성 글 차이 등)와, 순서가 바뀌었는데도 통과하는 경우가 있는지 봐 주세요.
 - type15 "문단이 글머리 앞" 입력은 이제 fallback이다(3단계 순서 정규화 합의를 더 안전한 쪽으로 변경).
 - 기대 수치: `npm test` 804 passed, `npm run test:browser` 180 passed, 703페이지 success 314 / partial 374 / failed 15.
+
+## 9. 3차 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `237d543..` 이후.
+- 순서 검사: 생성 순번은 렌더러가 검사용 출력에서만 빼고(`orderCheck`), 비교에 링크 위치·주소를 넣었다. 다른 역할(이미지 위치, 표 칸 등)끼리 같은 글로 바뀌는 경우가 또 있는지 봐 주세요.
+- type33 Q&A(섹션별 모드, `strategyFor`, `orderCheckIgnores`)도 범위에 넣었다. 일반 모드 블록이 프리셋 블록과 섞인 페이지에서 감싸개가 나뉘는지, Q·A 표시 예외가 실제 글을 숨기지 않는지 봐 주세요.
+- 기대 수치: `npm test` 811 passed, `npm run test:browser` 180 passed, 703페이지 success 317 / partial 371 / failed 15.

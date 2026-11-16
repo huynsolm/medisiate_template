@@ -110,3 +110,33 @@ describe('R-I-2 a section whose text order would change is preserved (runtime or
     expect(result.page.sections[0]!.type).toBe('type29');
   });
 });
+
+// ---- 순서 검사 재검수(b5ae00b) 지적 ----
+
+describe('order check: authored numbers are compared, only generated ones are skipped (I-1)', () => {
+  const t24 = '<section class="cms type24"><div class="cms-inner"><ol class="cms-ordered-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-title">YEAR</p><p class="cms-description"><span class="mig-num">2026</span> BODY</p></div></li></ol></div></section>';
+
+  it('a written <span class="mig-num">2026</span> in type24 converts normally', () => {
+    const result = convert(t24);
+    expect(result.page.sections[0]!.type).toBe('type24');
+    expect(result.html).toContain('2026');
+  });
+
+  it('the generated item numbers are still in the real output', () => {
+    expect(convert(t24).html).toMatch(/<span class="mig-num">1<\/span>/u);
+  });
+});
+
+describe('order check: a link and plain text with the same words are not interchangeable (I-2)', () => {
+  it('type29 button "예약" and paragraph "예약" swapping places falls back', () => {
+    const result = convert('<section class="cms type29"><div class="cms-inner"><div class="cms-description-box"><p class="cms-description">FIRST</p><p class="cms-button-wrap"><a class="cms-square-button" href="/go">예약</a></p><p class="cms-description">예약</p></div></div></section>');
+    expect(result.page.sections[0]!.type).toBe('fallback');
+    expect(result.page.diagnostics.some((d) => d.code === 'LOSSY_PARSE' && /순서/u.test(d.message))).toBe(true);
+  });
+
+  it('an unsafe link is compared as plain text (the link is removed on purpose, with a warning)', () => {
+    const result = convert('<section class="cms type11"><div class="cms-inner"><div class="cms-header"><p class="cms-title">T</p></div><ul class="cms-bullet-list"><li class="cms-list-item"><p class="cms-description">see <a href="javascript:alert(1)">link</a></p></li></ul></div></section>');
+    expect(result.page.sections[0]!.type).toBe('type11');
+    expect(result.page.diagnostics.some((d) => d.code === 'UNSAFE_LINK_REMOVED')).toBe(true);
+  });
+});

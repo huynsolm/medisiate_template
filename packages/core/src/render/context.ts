@@ -37,6 +37,8 @@ export interface RenderContext {
   /** resolveImageSrc. 지금은 identity */
   image: (img: ImageRef) => ImageRef;
   fluid: (min: number, max: number) => string;
+  /** 글 순서 검사용 출력이면 true. 원본에 없는 생성 글(type24 순서 번호)은 이때 출력하지 않는다 */
+  orderCheck: boolean;
 }
 
 export interface RenderContextOptions {
@@ -45,6 +47,7 @@ export interface RenderContextOptions {
   idPrefix?: string;
   fluidRange?: FluidRange;
   defs?: DefsCollector;
+  orderCheck?: boolean;
 }
 
 export const DEFAULT_THEME: Theme = { primary: '#c7b195', source: 'default' };
@@ -55,6 +58,7 @@ export function createRenderContext(options: RenderContextOptions = {}): RenderC
   return {
     theme: options.theme ?? DEFAULT_THEME,
     mode: options.mode ?? 'general',
+    orderCheck: options.orderCheck ?? false,
     defs: options.defs ?? new DefsCollector(idPrefix),
     idPrefix,
     fluidRange,

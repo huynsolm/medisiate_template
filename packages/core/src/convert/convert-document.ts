@@ -1,11 +1,11 @@
 import { parse } from 'parse5';
 import type { Diagnostic, FileStatus, ImageKind, PageMeta, PageModel, SectionModel, Theme } from '../model/index.ts';
 import { renderPage } from '../page/render-page.ts';
-import { attr, descendants, hasClass, outerHtml, parseHtmlFragment, plainText, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
+import { attr, descendants, hasClass, parseHtmlFragment, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
 import { sectionTypeId } from '../parse/sections.ts';
 import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
-import { richTextToPlain } from '../html/rich-text.ts';
+import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
 import type { TypeRegistry } from '../types/definition.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
@@ -186,27 +186,37 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
   };
 }
 
-const squashText = (html: string) => plainText(parseHtmlFragment(html.replace(/<!--[\s\S]*?-->|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gu, '')) as never).replace(/\s+/gu, '');
-
-/** 섹션 하나를 출력했을 때 원본과 글 순서가 다르면 이유를, 같으면 undefined. type24 순서 번호는 합의된 생성 글이라 뺀다. */
-/** 원본 요소의 글(공백 없이). ignore가 고른 요소(호스트가 다시 그리는 표시)와 주석·script·style은 뺀다 */
-function sourceText(node: DomNode, ignore: ((el: DomElement) => boolean) | undefined): string {
+/**
+ * 글 순서 비교용 표현: 공백 없는 글 + 링크 위치·주소(⟦주소⟧글⟦/⟧). 같은 글이라도 링크와 일반 글이 자리를 바꾸면 다르게 나온다
+ * (재검수 I-2: 버튼 "예약"과 문단 "예약"이 바뀌어도 글자열만 비교하면 같았다).
+ * 원본 쪽 위험한 링크는 출력에서 의도적으로 링크를 빼고(UNSAFE_LINK_REMOVED) 글만 두므로 일반 글로 본다.
+ * ignore가 고른 원본 요소(호스트 CSS가 다시 그리는 표시)와 주석·script·style·template은 뺀다.
+ */
+function orderSignature(node: DomNode, ignore?: (el: DomElement) => boolean): string {
   if (node.nodeName === '#text') return ((node as { value?: string }).value ?? '').replace(/\s+/gu, '');
   if (!('childNodes' in node)) return '';
-  if ('tagName' in node && (['script', 'style', 'template'].includes(node.tagName) || ignore?.(node as DomElement))) return '';
-  return (node.childNodes as DomNode[]).map((c) => sourceText(c, ignore)).join('');
+  const inner = () => (node.childNodes as DomNode[]).map((c) => orderSignature(c, ignore)).join('');
+  if (!('tagName' in node)) return inner();
+  const el = node as DomElement;
+  if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return '';
+  if (el.tagName === 'a') {
+    const href = safeHref(attr(el, 'href'));
+    if (href !== undefined) return `⟦${href}⟧${inner()}⟦/⟧`;
+  }
+  return inner();
 }
 
+/** 섹션 하나를 출력했을 때 원본과 글·링크 순서가 다르면 이유를, 같으면 undefined. */
 export function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions, ignore?: (el: DomElement) => boolean): string | undefined {
   const single: PageModel = {
     version: 1, theme: options.theme, sections: [section], diagnostics: [],
     meta: { coreVersion: options.coreVersion, hostCss: options.hostCss },
   };
-  const rendered = renderPage(single, { registry: options.registry });
+  // orderCheck: 원본에 없는 생성 글(type24 순서 번호)을 렌더러가 빼고 출력한다(재검수 I-1: 출력에서 문자열로 지우면 작성된 숫자까지 지웠다)
+  const rendered = renderPage(single, { registry: options.registry, orderCheck: true });
   if (rendered.fallbackCount > 0) return undefined; // 데이터 검증 실패는 아래 전체 렌더가 INVALID_DATA로 따로 보고한다
-  const output = section.type === 'type24' ? rendered.html.replace(/<span class="mig-num">\d+<\/span>/gu, '') : rendered.html;
-  const a = ignore ? sourceText(element, ignore) : squashText(outerHtml(element));
-  const b = squashText(output);
+  const a = orderSignature(element, ignore);
+  const b = orderSignature(parseHtmlFragment(rendered.html) as unknown as DomNode);
   if (a === b) return undefined;
   let at = 0;
   while (at < a.length && a[at] === b[at]) at++;

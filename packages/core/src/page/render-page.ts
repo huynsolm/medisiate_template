@@ -11,6 +11,8 @@ import { richTextToPlain } from '../html/rich-text.ts';
 
 export interface RenderPageOptions {
   registry: TypeRegistry;
+  /** 글 순서 검사용 출력(생성 글 생략). 변환기 내부에서만 쓴다 */
+  orderCheck?: boolean;
   fluidRange?: FluidRange;
   idPrefix?: string;
   /** 일반 모드 .inner 스타일 (샘플 기본값: row-gap) */
@@ -135,6 +137,7 @@ export function renderPage(page: PageModel, options: RenderPageOptions): RenderP
     const ctx: RenderContext = createRenderContext({
       theme: page.theme,
       mode: group.mode,
+      orderCheck: options.orderCheck ?? false,
       idPrefix,
       defs: new DefsCollector(idPrefix),
       ...(options.fluidRange ? { fluidRange: options.fluidRange } : {}),

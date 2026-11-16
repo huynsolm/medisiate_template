@@ -48,13 +48,14 @@ export const type24: TypeDefinition<Type24Data> = {
     const data: Type24Data = { ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}), image: pair, items };
     return finish(src, data, [...header.used, ...items.flatMap((i) => [i.title ?? '', i.desc ?? ''])], extra, { modifiers, diagnostics });
   },
-  render(section) {
+  render(section, ctx) {
     const d = section.data;
     return presetSection('type-24', section, [
       visualPcMo(d.image),
       h('ol', { class: 'mig-list', style: LIST_RESET }, d.items.map((item, i) =>
         h('li', { class: 'mig-item' }, [
-          h('span', { class: 'mig-num' }, [String(i + 1)]),
+          // 순서 번호는 원본 CSS 카운터를 대신하는 생성 글이라 글 순서 검사용 출력에서는 뺀다(작성된 같은 모양의 숫자는 그대로 비교됨)
+          !ctx.orderCheck && h('span', { class: 'mig-num' }, [String(i + 1)]),
           h('div', { class: 'mig-text-wrap' }, [
             !isBlank(item.title) && h('strong', { class: 'mig-title' }, [rich(item.title)]),
             !isBlank(item.desc) && h('p', { class: 'mig-desc' }, [rich(item.desc)]),
