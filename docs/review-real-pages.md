@@ -1,3 +1,202 @@
+# 실제 원본·703페이지 3차 재검수 — 2dd9193
+
+- 검수일: 2026-11-16 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `2dd919391ede5d46d2d54424ed60f8546ac85270`.
+- 범위: `237d543..2dd9193`. 기준: 반영 기록 마지막 장 및 검수 요청서 9장.
+- 로컬 cms/는 reference/cms-original 복사본이며 gitignore다. 코드·테스트·원본 자료는 수정하지 않았다. 이번 변경은 이 검수 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 두 입력은 해결됐다. 다만 실제 페이지의 반응형 이미지 링크가 새로 fallback되는 회귀와, Q&A 답 경계·링크 비교 표현·이미지 위치에 관한 잔여 문제를 직접 재현했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 4 | I-1 실제 이미지 링크 오탐, I-2 Q&A 답 경계 소실, I-3 비교 표현 충돌, I-4 이미지/강조 글 위치 변경 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+I-1은 실제 703페이지에서 새로 발생했다. I-2~I-4는 추가 최소 입력이며 실제 페이지에서 동일한 손실이 발생했다고 주장하지 않는다. 각 항목의 실행 근거와 정적 원인 설명을 구분했다.
+
+## 이전 입력 수정 확인 — 직접 실행
+
+- type24 본문의 `<span class="mig-num">2026</span>`: success, fallback 0. 작성 숫자는 유지하고 검사용 렌더에서 생성 순번만 생략한다.
+- type29 같은 글 예약의 링크/일반 문단 위치 변경: 이제 LOSSY_PARSE 및 섹션 fallback이다.
+- type15 문단 선행 입력: 계속 fallback으로 원본 보존. 새 정책 유지.
+
+## Important
+
+### I-1. 하나의 링크 안 PC/MO 이미지 쌍을 새 링크 비교가 오탐하여 실제 4개 섹션을 fallback함
+
+**위치:** `packages/core/src/convert/convert-document.ts:202`~`:204`, `:218`~`:220`; 반응형 링크 생성은 `packages/core/src/helpers/image.ts`와 `parse/common.ts`의 imageFromElement 경로다.
+
+**재현 입력 — 직접 실행:** 아래 실제 원본을 그대로 변환했다.
+
+| 파일(cms/contents 기준) | 섹션 |
+|---|---:|
+| 13289/0201_소음순수술.html | 9 |
+| 13289/0202_레이저질성형.html | 9 |
+| 13289/0203_음핵수술.html | 8 |
+| 13289/0401_유두소음순대음순미백.html | 9 |
+
+대표 입력의 구조는 다음과 같다. 원본 파일 전체 및 섹션 단독 변환을 모두 사용했다.
+
+```html
+<section class="cms type23"><div class="cms-inner">
+  <div class="cms-visual">
+    <a href="https://www.youtube.com/watch?v=CPSXRASy7yg" target="_blank">
+      <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0305.jpg"
+           class="img-fluid d-none d-lg-block m-auto" alt="소음술수술 유투브영상">
+      <img src="https://fxfile.drline.net/local/13289/cms/sub0201_img_0305_m.jpg"
+           class="w-100 d-block d-lg-none" alt="소음술수술 유투브영상">
+    </a>
+  </div>
+</div></section>
+```
+
+**실제:** 이전 237d543의 대표 섹션은 success, 경고 없음, fallback 0. 현재는 failed, LOSSY_PARSE, fallback 1이며 사유는 링크 비교에서의 글 순서 차이다. 네 파일은 원래 다른 미지원 섹션 때문에 partial이어서 파일 상태만 보면 이 회귀가 보이지 않는다.
+
+**기대:** 한 링크를 공유하는 반응형 PC/MO 이미지 쌍을 정상 변환해야 한다. PC/MO 출력용 링크가 두 개라고 해서 실제 활성 링크의 위치나 주소가 달라진 것으로 판단하면 안 된다.
+
+**원인 — 정적 판독:** 원본은 a 하나 안에 img 두 장이다. 기존 renderer는 PC/MO visual을 나누고 각 이미지에 같은 a를 감싼다. 원본 signature에는 빈 링크 표기가 한 번, 출력에는 두 번 들어가 비교가 실패한다. 이미지 자체는 signature에 없고 반응형 조건도 고려하지 않는다.
+
+**Chromium 확인:** 이전 정상 출력에 현재 호스트 CSS를 적용하면 PC 1100에서는 PC visual만 block, 모바일 360에서는 MO visual만 block이다. 보이는 이미지 하나가 같은 YouTube 주소로 연결된다. 새 비교 때문에 본래 정상적인 반응형 출력을 거부하는 경우다. 단순 `<a href="/video">PC img + MO img</a>` 최소 입력으로도 재현했다.
+
+### I-2. type33 Q&A 답 안의 문단·감싼 목록 경계가 경고 없이 사라짐
+
+**위치:** `packages/core/src/types/type33.ts:28`~`:35`, 특히 `:29`와 `:33`; `parse/common.ts`의 readInParts 구조 검사 제외와 연결된다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type33"><div class="cms-inner">
+    <div class="cms-list-wrap"><div class="cms-list-item">
+      <dl class="cms-inner-box">
+        <dt><span>Q</span><div class="cms-description"><button>QUESTION</button></div></dt>
+        <dd><div class="copy"><span>A</span>
+          <div class="cms-description"><p>FIRST</p><p>SECOND</p></div>
+        </div></dd>
+      </dl>
+    </div></div>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics [], fallback 0. qna[0].answer는 FIRSTSECOND다. 실제 Chromium 원본 답은 `FIRST\n\nSECOND`, 출력 답은 FIRSTSECOND로 합쳐진다.
+
+답의 내부를 아래처럼 바꿔도 success·무경고이며 FIRSTSECOND가 된다.
+
+```html
+<div><ul><li>FIRST</li><li>SECOND</li></ul></div>
+```
+
+**기대:** 문단은 기존 합의대로 br 경계를 남기고, 표현하지 못하는 목록 구조는 fallback으로 보존해야 한다. 직접 자식 ul만 지원하더라도 감싼 ul을 조용히 텍스트로 풀어서는 안 된다.
+
+**원인 — 정적 판독:** readAnswer는 본문을 richFrom으로 읽지 않고 nodesHtml→sanitizeRichText로 처리해 블록 태그를 경계 없이 푼다. markReadInParts로 바깥 답 요소는 구조 검사에서 제외됐지만, 나눈 본문 부분을 공통 경계 보존 도우미로 검사·기록하지 않는다. 직접 자식이 아닌 ul도 목록으로 분리하지 못한다. 새 순서 비교는 글자열이 같으면 통과하므로 이 경계 소실을 막지 못한다.
+
+### I-3. 본문이 링크 signature 표기와 같으면 실제 글 순서 변경이 통과함
+
+**위치:** `packages/core/src/convert/convert-document.ts:196`, `:204`, `:218`~`:220`.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type29"><div class="cms-inner">
+    <div class="cms-description-box">
+      <p class="cms-description">FIRST</p>
+      <p class="cms-button-wrap"><a class="cms-square-button" href="/go">예약</a></p>
+      <p class="cms-description">⟦/go⟧예약⟦/⟧</p>
+    </div>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics [], fallback 0. Chromium 원본은 FIRST→예약 링크→`⟦/go⟧예약⟦/⟧` 일반 글, 출력은 FIRST→그 일반 글→예약 링크다. 이번에는 눈에 보이는 글자열의 순서도 실제로 다르다.
+
+**기대:** 본문의 임의 문자와 비교용 구조 표시를 구분해야 한다. 이전 type29의 같은 순서 변경이므로 순서를 유지하거나 fallback해야 한다.
+
+**원인 — 정적 판독:** 텍스트 노드를 그대로 문자열에 넣고, 링크도 `⟦주소⟧글⟦/⟧` 문자열로 덧붙인다. 일반 글에 같은 표기를 쓰면 원본·출력이 모두 아래 signature가 된다.
+
+```text
+FIRST⟦/go⟧예약⟦/⟧⟦/go⟧예약⟦/⟧
+```
+
+이는 위험 URL 실행 문제라는 지적이 아니라, 데이터와 비교용 구분자의 표현 충돌로 순서 검사가 누락되는 문제다. 이 문자는 입력에서 금지되거나 특별 취급되는 글자가 아니다.
+
+### I-4. type28 이미지와 강조 글의 위치 변경은 새 signature에도 나타나지 않음
+
+**위치:** `packages/core/src/convert/convert-document.ts:195`~`:206`(img/역할 위치 미기록), `packages/core/src/types/type28.ts:72`~`:76`(강조 글을 항상 이미지보다 먼저 출력).
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type28"><div class="cms-inner">
+    <div class="cms-visual"><img src="https://example.com/image.png" alt="PIC"></div>
+    <div class="cms-description-box em-box-3"><p class="cms-title">BADGE</p></div>
+    <div class="cms-description-box"><p class="cms-description">BODY</p></div>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics [], fallback 0. 원본 이미지→BADGE→BODY가 출력 BADGE→이미지→BODY로 바뀐다. signature는 둘 다 BADGEBODY다.
+
+**Chromium 확인:** 외부 이미지 대신 같은 로컬 data SVG(100×80)를 사용해 실제 배치를 측정했다. 원본은 이미지 y=98 / 강조 상자 y=222, 출력은 강조 글 y=64 / 이미지 y=112로 순서가 반대다. 이미지 확대·모양 차이를 결함으로 센 것이 아니라 위아래 순서의 역전을 확인한 것이다.
+
+**기대:** 이 원본 변형의 이미지/강조 글 위치를 유지하거나, 지원하지 않는 순서라면 fallback으로 보존해야 한다.
+
+**원인 — 정적 판독:** signature는 글과 링크만 기록하므로 링크 없는 이미지의 위치를 구분하지 못한다. type28의 textFirst는 설명 상자/이미지 위치만 다루고 badge 위치는 반영하지 않는다. type30처럼 CSS column-reverse를 위한 의도된 DOM 재배치와 달리 이 입력은 실제 화면 순서도 바뀐다.
+
+해당 type28 renderer는 이번 범위에서 새로 바뀐 코드가 아니다. 요청서가 명시한 다른 역할·이미지 위치에 대한 새 순서 검사의 검출 범위를 대조하여 찾은 기존 재배치의 잔여 사례로 집계했다.
+
+## type33 모드·표시 예외 확인
+
+**직접 실행:** 프리셋 원 목록→Q&A→프리셋 원 목록을 한 페이지에 넣었다.
+
+- renderPage 블록 모드: preset→general→preset.
+- Chromium의 `.migration-content > div`: mig-container→inner→mig-container.
+- FAQ 질문/답의 ::before content는 각각 Q와 A.
+- 답은 display flex, 높이 약 58.4px로 열린 상태이며 ANSWER가 표시됨.
+- 실제 답 글 Q / A / Q 등급은 높습니다. / span 안 Q·A / strong 안 Q를 각각 넣은 6종은 정상 변환되어 본문이 유지됨.
+
+이 정상 구조에서 orderCheckIgnores가 실제 본문 Q/A를 지운 사례는 없었다. 다만 이는 모든 Q&A 변형의 안전 보증은 아니며, I-2의 별도 경계 손실이 남아 있다. 펼치기 동작을 제거하고 답을 항상 보이는 FAQ로 출력하는 결정 자체는 정적 표현 원칙으로 수용한다.
+
+## 전체 결과 및 회귀 비교
+
+| 직접 실행한 검사 | 결과 |
+|---|---|
+| npm test(임시 Playwright 경로) | 종료 0, **811 passed**, 건너뜀 0, 33파일 통과 |
+| npm run test:browser | 종료 0, **180 passed**, 4파일 통과 |
+| npm run lint / npm run typecheck | 각각 종료 0 |
+| npm run convert -- --all | 종료 0, **success 317 / partial 371 / failed 15** |
+| 기본 fixture 116조합 | 이전 237d543과 HTML 동일 |
+| 일반 공백·이미지 제거·서식·문단 변형 112조합 | 이전과 HTML 동일, 모두 fallback 0 |
+| 실제 703파일 이전/현재 비교 | 8파일의 섹션 타입 변화: Q&A 4개 새 변환, 이미지 링크 4개 새 fallback |
+| 추가 브라우저 | I-1~I-4, 혼합 모드 및 FAQ 표시 확인 |
+
+기본 fixture 비교에는 type33의 별도 실제 Q&A를 넣지 않았다. Q&A는 위 혼합 모드·본문 변형·실제 페이지 비교 및 공식 검사로 확인했다. 116/112조합의 동일성이 I-1의 실제 이미지 링크 오탐을 부정하지 않는다.
+
+파일 상태는 314/374/15→317/371/15로 좋아졌지만, 네 이미지 섹션은 원래 partial인 파일 안에 있어 새 회귀가 집계에 가려졌다. Q&A 지원 4개와 이미지 fallback 4개가 상쇄되어 전체 섹션 fallback 수만으로도 회귀를 파악할 수 없다. 따라서 파일별·섹션별 비교 결과를 함께 기록했다.
+
+## 범위·한계
+
+- 코드·테스트·reference 자료는 수정하지 않았다. 로컬 cms/와 출력 산출물은 커밋하지 않는다.
+- 전체 테스트에 브라우저 검사가 포함되므로 811과 180을 합산하지 않는다.
+- Linux, Node v24.22.1, Chromium 156.0.8078.79에서 실행했다. 외부 요청은 차단했으며 필요한 이미지 배치는 data SVG로 확인했다. Windows·외부 사이트 접속 성공·전수 시각 등급 비교는 실행하지 않았다.
+- 별도 웹 편집기 저장·가져오기 흐름은 이번에는 다시 실행하지 않았다.
+- 임시 입력·스크립트·관측값은 /tmp/real4-review, 공식 검사 로그는 /tmp/real4-*.log에 있다. 핵심 재현 입력과 결과는 위에 직접 기재했다.
+
+**최종 판정: 수정 후 재확인 필요.**
+
+## 이전 재검수 기록 보존
+
+아래는 b5ae00b의 과거 검수 원문(보고 커밋 237d543)과 그 안의 이전 기록이다. 과거 원문 입력은 수정 확인됐으며 현재 지적은 위 I-1~I-4다.
+
+<details>
+<summary>이전 재검수 원문 — b5ae00b</summary>
+
 # 실제 원본·703페이지 2차 재검수 — b5ae00b
 
 - 검수일: 2026-11-16 (KST).
@@ -430,6 +629,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
