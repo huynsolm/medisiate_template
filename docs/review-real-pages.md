@@ -1,3 +1,148 @@
+# 실제 원본·703페이지 재검수 결과 — f497c31
+
+- 검수일: 2026-11-16 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `f497c31ff52bfd410036b68339da3f79802668ba`.
+- 범위: `8abbcbd..f497c31`. 기준: `docs/review-real-pages-fixes.md` 및 검수 요청서 7장.
+- 이전 I-1~I-3, type01 머리글 순서,글 순서 검사, type27·28·29·30·33, safeHref 링크 보존을 포함한다.
+- reference/cms-original의 로컬 cms/ 복사본으로 실행했다. cms/는 gitignore이며 커밋하지 않는다. 애플리케이션·테스트·원본 자료는 수정하지 않았고 검수 문서만 갱신했다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 세 재현 입력과 실제 페이지 순서는 수정됐다. 실제 페이지 수치·자동 검사는 재현했지만, 추가 입력에서 단위 없는 CSS 너비의 잘못된 적용과 type29 문단/버튼 순서 변경을 확인했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 2 | R-I-1 단위 없는 CSS 너비 우선 적용, R-I-2 type29 버튼 뒤 문단 순서 변경 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+두 항목은 **추가 최소 입력**이며 실제 703페이지에서 같은 문제가 발생했다고 주장하지 않는다. 직접 실행과 정적 판독을 아래에 구분했다.
+
+## 이전 I-1~I-3 및 type01 — 직접 실행
+
+| 이전 입력 | 현재 결과 | 판정 |
+|---|---|---|
+| 표시용 caption, sr-only 없음 | success, 경고 없음. Chromium에서 static·clip auto, 1px 숨김 해제 | 수정 확인 |
+| sr-only caption | 공식 회귀 검사에서 화면 낭독기용 숨김 유지 | 수정 확인 |
+| col width=80%, style=width:* | 80% 보존. 같은 외부 측정 조건에서 원본/출력 모두 약 80% 폭 | 원문 I-2 수정 확인. 다른 무효 CSS 값은 R-I-1 참조 |
+| 실제 13256/02_02_입원생활안내.html 2번째 섹션 | success, 표→주의문 순서. Chromium 원본/출력 순서 일치 | 수정 확인 |
+| type01 기존 14개 글 순서 차이 | 실제 섹션 글 대조에서 불일치 없음 | 수정 확인 |
+
+이전 재현 HTML을 그대로 다시 실행했으며, 원문은 아래 과거 검수 기록에 보존했다. 표시용 caption은 원본/출력 모두 눈에 보이고, 출력 높이는 약 25.6px로 확인했다. 호스트 서체·표 디자인까지 픽셀 동일하다는 뜻은 아니다.
+
+## Important
+
+### R-I-1. 단위 없는 CSS width를 px로 인정하여 유효한 HTML width 속성을 여전히 가림
+
+**위치:** `packages/core/src/types/type26.ts:134`~`:141`. style과 HTML 속성이 같은 validWidth 함수를 사용한다.
+
+**재현 입력 — 직접 실행:** 표준 모드 문서에서 다음 HTML을 변환한다.
+
+```html
+<!doctype html>
+<div class="cms-container">
+  <section class="cms type26"><div class="cms-inner">
+    <div class="cms-table-wrap"><table>
+      <colgroup><col width="80%" style="width:20"><col></colgroup>
+      <tbody><tr><td>FIRST</td><td>SECOND</td></tr></tbody>
+    </table></div>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics [], fallback 0. 첫 열을 `colWidths[0].width="20px"`로 저장한다. Chromium 표준 모드에서 동일한 외부 측정 CSS(table width 1000px·fixed layout)를 적용하면 원본 첫 열은 약 **795.2px**(80%에 해당하는 표 내부 폭), 출력은 **20px**다.
+
+**기대:** 표준 CSS의 `width:20`은 무효이므로 무시하고, 유효한 HTML 속성 width=80%를 적용해야 한다. HTML 속성의 숫자 20을 px로 변환하는 것과, 단위 없는 비영 CSS 길이를 유효하다고 인정하는 것은 구분해야 한다. 해석 불가라면 경고·fallback으로 보존할 수 있지만 성공·무경고로 20px를 적용하면 안 된다.
+
+**원인 — 정적 판독:** validWidth는 style 값에도 숫자 문자열이면 px를 붙인다. 무효한 *는 거부하게 됐지만 20은 잘못 유효 판정되어 속성값보다 우선한다. width style 경고 필터도 그대로 적용된다.
+
+**측정 조건:** `<!doctype html>` 표준 모드를 명시했다. 실제 원본 `cms/contents/include/header.html` 첫 줄과 미리보기 previewDocument도 doctype을 쓴다. Quirks 모드의 단위 없는 CSS 허용 동작을 근거로 하지 않았다. 측정 CSS는 입력 HTML에 주입하지 않고 브라우저 문서에만 공통 적용했다.
+
+### R-I-2. type29에서 버튼 뒤 문단이 버튼 앞으로 이동하지만 success
+
+**위치:** `packages/core/src/types/type29.ts:55`~`:62`, `:68`~`:72`.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type29"><div class="cms-inner">
+    <div class="cms-description-box">
+      <p class="cms-description">FIRST</p>
+      <p class="cms-button-wrap"><a class="cms-square-button" href="/go">BUTTON</a></p>
+      <p class="cms-description">LAST</p>
+    </div>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics [], fallback 0. paragraphs는 FIRST·LAST, buttons는 BUTTON으로 저장한다. 실제 Chromium 원본 표시 순서는 **FIRST→BUTTON→LAST**, 출력은 **FIRST→LAST→BUTTON**이다. 링크 /go는 보존되지만 순서가 달라진다.
+
+**기대:** 원본의 문단·버튼 순서를 유지해야 한다. 현재 모델이 섞인 순서를 표현하지 못한다면 섹션 fallback으로 보존해야 하며, 글을 모두 담았다는 이유로 순서가 바뀐 결과를 성공 처리해서는 안 된다.
+
+**원인 — 정적 판독:** 파서가 설명 문단과 버튼을 별도 배열로 모으고, renderer는 모든 문단 다음에 모든 버튼을 출력한다. finish의 남은 글·중복 읽기 검사는 서로 다른 요소의 위치 변경을 감지하지 않는다. 새 실제 페이지 글 순서 테스트도 이 입력이 703페이지에 없으면 실패하지 않는다.
+
+원본 컴포넌트의 기본형처럼 버튼이 끝에 있는 경우는 정상이다. 이 항목은 추가 사용자 편집 변형의 조용한 순서 변경이며, type15에 별도로 합의한 순서 정규화와는 구분한다.
+
+## 실제 703페이지·글 순서 대조
+
+**직접 실행:** 요청서의 수치를 재현했다.
+
+- success **314**, partial **374**, failed **15**, 합계 703.
+- INVALID_DATA 0 및 새 글 순서 테스트 통과.
+- 이전 검수의 독립 대조 스크립트도 현재 코드로 다시 실행했다. 별도 변환으로 비교 가능한 **3027개 섹션의 공백 제거 글 순서 불일치 0**.
+- 원시 non-fallback 후보 3040개 중 따로 떼어 변환하면 fallback되는 13개는 비교에서 제외했다. 이 대조는 전수 시각 검증은 아니다.
+- 변환 보고서 typeStats 기준 섹션 3391개 중 fallback 441개, 약 **13.01%**. 알려진 미구현·변형 범위가 남으므로 기존 전체 목표 5% 이하까지 완료됐다고 판단하지 않는다. 이 수치를 새 결함에 중복 집계하지 않았다.
+
+## 새 타입·링크 검토
+
+### type27·28·29·30·33
+
+- **직접 실행:** 추가 25건 검사(각 타입의 기본 지원형, 고유 글 추가, 이미지 추가, 문단 2개, 중첩 목록). 기본 지원형은 변환되고, 지원하지 않는 글/이미지/목록이 남으면 fallback이었다. 문단은 br로 보존되거나 fallback됐다.
+- type33 추가 입력은 지원하는 type27형 원 목록 구조를 사용했다. 원본 컴포넌트의 dl·상자·Q&A형이 모두 지원된다고 보지 않았다.
+- **직접 실행:** 실제 Chromium 웹에서 5개 타입의 제목 편집→JSON 저장→가져오기→새로고침을 수행했고, 값과 출력 HTML이 유지됐다. type33은 지원하는 원 목록 구조로 검사했다.
+- **공식 검사 실행:** 실제 컴포넌트·스냅샷·배치 검사 통과. type27 복합 묶음과 type33 dl/Q&A 등 명시된 fallback은 현재 모델/모드가 지원하지 않는 구조의 보존으로 수용한다.
+- **정적 판독:** 새 파서는 richFrom 또는 기존 글 도우미를 경유하며 finish를 호출한다. type33이 type-27 카드 프리셋을 사용하는 결정은 요청서가 명시한 호스트 디자인 대체로 수용했다.
+
+### safeHref 및 링크
+
+- **직접 실행:** 위험 주소 14건(javaScript 대소문자·선행 제어문자·탭/줄바꿈·HTML 엔티티·data/vbscript/file/blob 등)은 링크를 제거하고 TEXT는 유지했다.
+- **직접 실행:** 안전 주소 12건(http/https·mailto·tel·루트/상대/fragment/query·프로토콜 상대 등)은 보존됐다. target=_blank에는 noopener noreferrer가 남고 이벤트 속성은 제거됐다.
+- 추가 이상 주소 7건(NUL·수직 탭·NBSP·percent 인코딩 colon·이중 엔티티·역슬래시·전각 colon)을 포함한 **총 33건**을 Chromium에서 base URL 아래 파싱해 실제 a.protocol을 확인했다. javascript/data/vbscript/file 프로토콜로 남는 우회는 없었다.
+- HTML 입력의 NUL은 HTML 파서에서 대체 문자로 변한다. 이 경우 문자열이 남더라도 브라우저가 상대 URL로 해석하는지 확인했으며, 제거 여부만으로 위험을 판정하지 않았다.
+- 이미지 링크 및 JSON 이미지 링크 검증, 위험 링크 경고는 공식 links.test.ts를 실제 실행해 확인했다. 이미지가 감싼 링크의 target/rel 출력 경로도 정적으로 대조했다.
+- 이 검사는 href 처리와 DOM 프로토콜 해석이다. 외부 사이트의 리다이렉트·메일/전화 앱 동작까지 검증한 것은 아니다. 이번 입력군에서는 안전 주소 검사 우회 결함을 찾지 못했다.
+
+## 실행 결과와 한계
+
+| 직접 실행한 검사 | 결과 |
+|---|---|
+| 로컬 cms/ | reference/cms-original 복사본, gitignore 확인. 커밋하지 않음 |
+| npm ci | 임시 캐시 지정, 종료 0 |
+| npm test | 종료 0, **799 passed**, 건너뜀 0, 33파일 통과 |
+| npm run test:browser | 종료 0, **180 passed**, 4파일 통과 |
+| npm run lint | 종료 0 |
+| npm run typecheck | 종료 0 |
+| npm run convert -- --all | 종료 0, 314 / 374 / 15 |
+| 독립 글 대조 | 3027개 비교, 순서 불일치 0 |
+| 추가 안전 검사 | 새 타입 25건, 주소 33건 |
+| 실제 웹 편집 | 새 타입 5개 저장·재로드 유지 |
+
+- 전체 테스트에 브라우저 검사가 포함되므로 799와 180을 합산하지 않는다.
+- Linux, Node v24.22.1, Chromium 156.0.8078.79 사용. 저장소 런처는 변경하지 않았고 기존 임시 Playwright 경로를 사용했다.
+- Windows·외부 사이트 접속 성공·전수 시각 등급 비교는 실행하지 않았다. 원본 자료 자체를 수정하거나 정확성을 평가하지 않았다.
+- 임시 입력·스크립트·관측값은 /tmp/real2-review, 공식 검사 로그는 /tmp/real2-*.log에 있다. 핵심 재현 입력과 실제 결과는 위에 기재했다.
+
+**최종 판정: 수정 후 재확인 필요.**
+
+## 이전 검수 원문 보존
+
+아래는 eb16fea의 과거 검수 원문(보고 커밋 dc1f8c1)이다. 과거 I-1~I-3의 원문 입력은 수정 확인됐으며, 현재 미해결 항목은 위 R-I-1·R-I-2다.
+
+<details>
+<summary>이전 검수 원문 — eb16fea</summary>
+
 # 실제 원본·703페이지 대조 검수 결과
 
 - 검수일: 2026-11-16 (KST).
@@ -146,3 +291,5 @@
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
