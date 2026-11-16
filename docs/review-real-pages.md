@@ -1,3 +1,149 @@
+# 실제 원본·703페이지 4차 재검수 — cadc0ef
+
+- 검수일: 2026-11-16 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `cadc0efca61d7f3512fb7d3ca44e2b6f0abd444f`, 범위: `242b7b6..cadc0ef`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장, `docs/review-request-real-pages.md` 10장.
+- 로컬 `cms/`는 `reference/cms-original` 복사본이며 `diff -qr reference/cms-original cms` 차이 없음. gitignore 대상이다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 커밋은 이 검수 문서만 변경한다.
+
+## 판정
+
+**수정 후 재확인 필요.** 지난 네 지적의 입력은 해결됐다. 다만 글 토큰이 역할·경계를 합쳐 실제 재배치를 놓치는 사례, Q&A 번호 목록의 의미 소실, PC/MO 이미지의 DOM 나열 순서만으로 정상 반응형 입력을 거부하는 오탐을 직접 재현했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 3 | I-1 제목/본문 역할 경계 누락, I-2 Q&A 번호 목록 소실, I-3 반응형 이미지 순서 오탐 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+세 항목 모두 **추가 최소 입력**이다. 실제 703페이지에 같은 결함이 발생했다고 주장하지 않는다. type01의 합의 대기 중인 제목 → 이미지 배치 예외는 결함으로 집계하지 않았다. I-1·I-2의 출력 문제 자체는 이전 기준에서도 존재하나, 이번 요청의 토큰 비교가 놓치는 역할·경계에 대한 잔여 사례다. I-3은 이전 기준 242b7b6에서는 success인 새 오탐이다.
+
+## 이전 네 지적 확인 — 직접 실행
+
+| 이전 항목 | 동일 입력의 현재 결과 |
+|---|---|
+| I-1 한 링크 안 PC/MO 이미지 | 최소 입력 success·무경고·fallback 0. 실제 네 섹션도 fallback → type23으로 복구됨 |
+| I-2 Q&A 답의 문단 / 감싼 목록 | `<p>FIRST</p><p>SECOND</p>`는 answer `FIRST<br>SECOND`, success. `<div><ul>…</ul></div>`는 LOSSY_PARSE·섹션 fallback |
+| I-3 본문과 링크 비교 표시의 충돌 | type29 `FIRST → 예약 링크 → ⟦/go⟧예약⟦/⟧` 입력은 LOSSY_PARSE·fallback |
+| I-4 이미지와 강조 글의 순서 | type28 `이미지 → BADGE → BODY` 입력은 LOSSY_PARSE·fallback |
+
+복구된 실제 네 섹션(cms/contents 기준): `13289/0201_소음순수술.html#9`, `13289/0202_레이저질성형.html#9`, `13289/0203_음핵수술.html#8`, `13289/0401_유두소음순대음순미백.html#9`.
+
+## Important
+
+### I-1. 제목·본문의 경계를 합친 토큰 때문에 서로 다른 길이의 글이 실제로 앞뒤가 바뀌어도 success
+
+**위치:** `packages/core/src/convert/convert-document.ts:200`~`:206` (역할/블록 경계 없이 인접 글 병합), `packages/core/src/types/type10.ts:64`~`:68`, `:85`~`:87` (역할별 읽기와 고정 출력 순서).
+
+**재현 입력 — 직접 실행:** 아래 전체 문자열을 `convertDocument`에 전달했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type10"><div class="cms-inner">
+    <ol class="cms-figure-list"><li class="cms-list-item">
+      <div class="cms-description-box"><p class="cms-description">검사검사</p></div>
+      <div class="cms-figure-text"><p class="cms-title">검사</p></div>
+    </li></ol>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics `[]`, fallback 0. 원본의 `본문 검사검사 → 제목 검사`가 출력에서는 `<strong class="mig-title">검사</strong> → <p class="mig-desc">검사검사</p>`다. 서로 다른 길이의 글 블록이 실제로 역전됐다. 동일 입력을 Chromium에서 원본 cms.css / 출력 host-style.css와 함께 확인했다. 1100px에서 원본 본문 y=74, 제목 y=120; 출력 제목 y=65, 본문 y=123이다. 360px에서도 같은 역전이다.
+
+**대조 입력 — 직접 실행:** 본문만 `다른 설명`으로 바꾸면 LOSSY_PARSE·fallback 1이다. 따라서 원래 순서를 지원하는 것이 아니라, 반복 문자열의 결합이 같을 때 검사가 누락되는 경우다.
+
+**기대:** 제목/본문 역할과 해당 글 경계를 구분하여 순서 변경을 찾아 원본 순서를 유지하거나 fallback해야 한다. 이미지·링크가 없는 글 사이의 역할 변경도 비교 범위에서 빠지면 안 된다.
+
+**원인 — 정적 판독:** 같은 href의 인접 텍스트는 DOM의 블록·역할 경계를 무시하고 한 토큰으로 합친다. 원본과 출력 모두 `['t', '', '검사검사검사']`가 된다. 토큰 배열로 바꾸어 문자열 구분자 충돌은 고쳤지만, 글의 역할과 경계는 여전히 비교하지 않는다. type01 예외와 무관한 type10 사례다.
+
+### I-2. type33이 번호 목록을 읽은 뒤 불릿 목록으로 바꾸며 토큰 검사도 통과
+
+**위치:** `packages/core/src/types/type33.ts:30`~`:39` (ul/ol을 구분 없이 읽음), `:12`~`:18` (번호 정보 없는 모델), `:112` (항상 ul/disc 출력); `packages/core/src/convert/convert-document.ts:200`~`:221` (목록 종류·시작 번호 미기록).
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type33"><div class="cms-inner">
+    <dl class="cms-inner-box">
+      <dt><span>Q</span><div class="cms-description"><button>QUESTION</button></div></dt>
+      <dd><div class="copy"><span>A</span><div class="cms-description">
+        <ol start="3"><li>FIRST</li><li>SECOND</li></ol>
+      </div></div></dd>
+    </dl>
+  </div></section>
+</div>
+```
+
+**실제:** success, diagnostics `[]`, fallback 0. qna 모델에는 list의 text만 남고, 출력은 `<ul style="list-style: disc; …">…</ul>`이다. Chromium 1100px·360px에서 원본은 OL / start=3 / computed list-style-type=decimal, 출력은 UL / start 없음 / disc다. 원본의 3·4번 항목이라는 정보가 사라진다. 직접 자식 ul로 바꾼 대조 입력은 정상적으로 success다.
+
+**기대:** 순서 있는 목록 및 시작 번호를 표현할 수 있어야 하며, 현재 모델로 표현할 수 없다면 적어도 fallback으로 보존해야 한다. 글자열만 같다고 번호 목록의 의미 변경까지 무경고로 허용하면 안 된다.
+
+**원인 — 정적 판독:** readAnswer가 첫 ul/ol을 모두 지원 대상으로 분리하여 일반 구조 검사에서 빼지만, listEl의 태그·start 및 li의 번호 정보를 모델에 담지 않는다. renderer는 ul을 고정 생성한다. 비교 토큰에도 목록 경계·번호 역할이 없으므로 같은 항목 글만 남아 검사를 통과한다. 이번 문단/감싼 목록 수정은 해결됐으나 직접 자식 번호 목록은 남는다.
+
+### I-3. 모바일 이미지를 먼저 쓴 정상 PC/MO 쌍을 이미지 토큰의 원시 DOM 순서로 오탐
+
+**위치:** `packages/core/src/convert/convert-document.ts:215`~`:216`, `:234`~`:237`; `packages/core/src/helpers/image.ts:41`~`:47` (출력은 PC → MO로 정규화).
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner"><div class="cms-visual">
+    <img src="https://example.com/mo.png" alt="" class="d-block d-lg-none">
+    <img src="https://example.com/pc.png" alt="" class="d-none d-lg-block">
+  </div></div></section>
+</div>
+```
+
+**실제:** 242b7b6에서는 success·무경고·fallback 0. cadc0ef에서는 failed·LOSSY_PARSE·fallback 1이며 사유는 원본 mo.png 자리에 출력 pc.png라는 순서 차이다. 파서는 두 이미지의 PC/MO 역할을 올바르게 읽지만, 원본 MO → PC와 출력 PC → MO의 숨겨진 대안 이미지 순서가 달라 거부된다.
+
+**Chromium 대조 — 직접 실행:** 원본에 cms.css와 위 Bootstrap 표시 클래스의 표준 규칙(992px 경계)만 보충하고, 242b7b6의 정상 출력에는 host-style.css를 적용했다. 1100px에서는 양쪽 모두 pc.png 하나, 360px에서는 양쪽 모두 mo.png 하나가 표시됐다. 출력 후보가 같은 반응형 결과임을 비교한 것이며, **현재 fallback 출력을 정상 출력이라고 측정한 것은 아니다**. 외부 이미지는 내려받지 않고 표시 여부·src를 DOM에서 측정했다. 실제 운영 사이트의 모든 CSS를 확보한 시각 비교로 주장하지 않는다.
+
+**기대:** 같은 PC/MO 역할로 묶인 상호 배타적 대안 이미지의 DOM 나열 순서만 달라진 경우에는 정상 변환해야 한다. 이 쌍과 주변 글의 실제 앞뒤 변화는 계속 검사해야 한다.
+
+**원인 — 정적 판독:** orderTokens는 모든 img를 조건과 무관한 독립 순서 토큰으로 남긴다. 반면 visualPcMo는 입력 DOM 나열 순서와 관계없이 PC 먼저 출력한다. 글·이미지 위치 검출을 추가하면서 반응형 대안 이미지의 동등성은 정규화하지 않았다. 이번 실제 703페이지에서는 이 최소 입력과 같은 새 오탐을 찾지 못했다.
+
+## type01 명시적 예외 범위 — 직접 실행·정적 판독 구분
+
+요청서가 지정한 617개 섹션의 제목 → 이미지 배치 차이는 사용자 결정 대기 중인 예외로 취급했다. 예외 자체를 지적하거나 전체 fallback 전환을 요구하지 않는다.
+
+추가 최소 입력 세 개를 변환했다(각각 같은 이미지 한 장 사용).
+
+| 원본 순서 | 실제 결과 |
+|---|---|
+| 제목 TITLE → 이미지 → 설명 BODY | success·무경고·fallback 0. 명시적 예외 허용 |
+| 제목 TITLE → 설명 BEFORE → 이미지 | LOSSY_PARSE·fallback 1. 설명의 이동까지 예외로 숨기지 않음 |
+| 이미지 → 제목 TITLE → 설명 BODY | success·무경고·fallback 0. titleAfterImage=true |
+
+**정적 판독:** `type01.ts:66`~`:69`는 원본 제목이 첫 이미지 뒤인지 기록하고, `:83`~`:93`의 검사용 렌더만 제목을 선택적으로 이미지 앞으로 옮긴다. 설명은 계속 이미지 뒤에 있어 별도의 위치 변경은 토큰 비교에 남는다. 위 대조 입력 및 703페이지에서 이 예외가 설명의 이동까지 가리는 사례는 찾지 못했다. I-1처럼 역할 경계가 합쳐지는 일반 비교의 한계가 모두 해결됐다는 뜻은 아니다.
+
+## 실제 페이지·회귀 대조 — 직접 실행
+
+- 원본 703페이지를 242b7b6과 cadc0ef 양쪽으로 변환해 파일 상태뿐 아니라 섹션 type/fallback도 비교했다.
+- 이전 네 반응형 링크 섹션이 복구됐고, 별도 9개 섹션이 정상 타입 → fallback으로 바뀌었다. 순서 사유 fallback 9개 목록은 현재 real-pages 테스트의 고정 목록과 일치한다(type01 8개, type10 1개). 이들은 원본 글/이미지 재배치를 새로 검출한 결과이며 오탐으로 집계하지 않았다.
+- 11개 파일에서 섹션 타입 변화가 있었으며, 집계는 success 317 → 312, partial 371 → 376, failed 15 유지다. 파일 상태만 비교하면 복구된 네 섹션을 놓치므로 섹션 단위 대조도 사용했다.
+- 기존 29타입 × 4개 모드(원 fixture·일반·이미지 배경·색 배경), 총 116개 입력의 출력 HTML이 242b7b6과 byte 단위로 같다.
+- 기존 28타입 × 4개 변형(공백·이미지 없음·인라인 서식·문단 블록), 총 112개 추가 입력 모두 fallback 0이며 이전 HTML과 같다. 이는 해당 표본의 회귀 확인이며 모든 마크업의 무손실 증명은 아니다.
+
+## 실행 결과
+
+다음 명령은 cadc0ef의 코드에서 직접 실행했고 모두 종료 코드 0이었다. 브라우저 경로는 기존 로컬 Playwright 설치를 사용했다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 33 files / 817 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 4 files / 180 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 총 703 / success 312 / partial 376 / failed 15 |
+| 추가 최소 입력 및 Chromium 검사 | 위 I-1~I-3, 이전 네 입력, type01 예외·대조 입력 확인 |
+
+I-1~I-3은 기존 테스트가 모두 통과해도 남는 직접 재현 결과다. 자동 테스트 통과와 검수 판정을 구분한다. 아래는 이전 판정의 원문 보관이며 현재 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — 2dd9193 및 그 이전 기록</summary>
+
 # 실제 원본·703페이지 3차 재검수 — 2dd9193
 
 - 검수일: 2026-11-16 (KST).
@@ -629,6 +775,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
