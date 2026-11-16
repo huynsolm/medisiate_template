@@ -212,3 +212,24 @@ describe('I-2 type33 Q&A keeps an ordered list and its start number', () => {
     expect(convert(qna('<ul><li>FIRST</li></ul>')).html).toMatch(/<ul[^>]*>\s*<li class="mig-desc">FIRST/u);
   });
 });
+
+// ---- 6차 재검수(37773d8) 지적: 블록 단위·화면별(PC/MO) 순서 비교 ----
+
+describe('order check v5', () => {
+  const fellBackForOrder = (r: ReturnType<typeof convert>) => r.page.sections[0]!.type === 'fallback' && r.page.diagnostics.some((d) => d.code === 'LOSSY_PARSE' && /순서/u.test(d.message));
+
+  it('I-1 title/description swap is caught even when the description has a line break', () => {
+    const result = convert('<section class="cms type10"><div class="cms-inner"><ol class="cms-figure-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">검사<br>검사</p></div><div class="cms-figure-text"><p class="cms-title">검사</p></div></li></ol></div></section>');
+    expect(fellBackForOrder(result)).toBe(true);
+  });
+
+  it('I-2A two images visible at the same time (icon list, then a big image) swapping places is caught', () => {
+    const result = convert('<section class="cms type16"><div class="cms-inner"><ul class="cms-column-list"><li class="cms-list-item"><div class="cms-icon"><img src="https://example.com/icon.png" alt="ICON"></div></li></ul><div class="cms-visual"><img src="https://example.com/big.png" alt="BIG" class="d-none d-lg-block"></div></div></section>');
+    expect(fellBackForOrder(result)).toBe(true);
+  });
+
+  it('I-2B a real PC/MO pair with different links, mobile written first, converts', () => {
+    const result = convert('<section class="cms type23"><div class="cms-inner"><div class="cms-visual"><a href="/mobile"><img src="https://example.com/mo.png" alt="" class="d-block d-lg-none"></a><a href="/desktop"><img src="https://example.com/pc.png" alt="" class="d-none d-lg-block"></a></div></div></section>');
+    expect(result.page.sections[0]!.type).toBe('type23');
+  });
+});

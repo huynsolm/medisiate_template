@@ -36,6 +36,7 @@ export const imageRefSchema = z.object({
 export const imagePairSchema = z.object({
   pc: imageRefSchema.optional(),
   mo: imageRefSchema.optional(),
+  only: z.enum(['pc', 'mo']).optional(),
 });
 
 export const themeSchema = z.object({

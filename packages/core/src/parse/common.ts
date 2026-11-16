@@ -69,6 +69,14 @@ export function imageFromElement(el: DomElement): ImageRef {
 const PC_MARK = /^(pc|pc-only|only-pc|show-pc|visible-lg|visible-md|hidden-xs|d-lg-block|d-md-block|img-pc|pc-img)$|[-_]pc$/u;
 const MO_MARK = /^(mo|m|mobile|mo-only|only-mo|show-mo|visible-xs|visible-sm|d-lg-none|d-md-none|img-mo|mo-img|m-img)$|[-_](mo|m|mobile)$/u;
 
+/** 요소 자신의 클래스만 보고 PC 전용·MO 전용 표시를 판정한다(조상은 보지 않음). 글 순서 검사의 화면별 비교에 쓴다 */
+export function ownDevice(el: DomElement): 'pc' | 'mo' | undefined {
+  const classes = classesOf(el);
+  if (classes.some((c) => PC_MARK.test(c))) return 'pc';
+  if (classes.some((c) => MO_MARK.test(c))) return 'mo';
+  return undefined;
+}
+
 export function deviceOf(el: DomElement): 'pc' | 'mo' | undefined {
   for (const node of [el, ...ancestors(el)]) {
     const classes = classesOf(node);
@@ -104,6 +112,13 @@ export function pairImages(images: DomElement[], src: SourceSection, diagnostics
     if (images.length > 1) {
       diagnostics.push({ level: 'info', code: 'PARSE_HEURISTIC', message: `PC/MO 표시가 없어 순서로 ${slot.toUpperCase()} 이미지로 판단`, sectionIndex: src.index, detail: { src: attr(el, 'src') } });
     }
+  }
+  // 한 장뿐인데 원본에서 한쪽 화면 전용으로 표시돼 있으면 그 화면에서만 보이게 기록한다
+  // (예: PC 전용 이미지가 출력에서는 모바일에도 보이던 문제. 6차 재검수 대응 중 화면별 비교로 발견)
+  // 화면 전용 여부는 표시 클래스(원본 브라우저가 실제로 숨기는 근거)로만 정한다. 파일 이름(_m.png)은 칸 배정 짐작일 뿐 숨기지 않는다.
+  if (images.length === 1 && extra.length === 0) {
+    const device = [images[0]!, ...ancestors(images[0]!)].map(ownDevice).find(Boolean);
+    if (device) pair.only = device;
   }
   return { pair, extra };
 }

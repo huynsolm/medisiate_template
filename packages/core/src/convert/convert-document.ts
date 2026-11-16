@@ -7,6 +7,7 @@ import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
+import { ownDevice } from '../parse/common.ts';
 import type { TypeRegistry } from '../types/definition.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
 
@@ -186,108 +187,114 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
   };
 }
 
-type OrderToken = ['t' | 'i', string, string];
-
-/**
- * 글 순서 비교용 토큰 목록. 문자열로 이어 붙이지 않는다(본문 글이 구분 표시와 같으면 충돌했다: 3차 재검수 I-3).
- * - ['t', 링크 주소 또는 '', 공백 없는 글]: 글 조각. 같은 링크(또는 링크 없음)의 이어진 글은 하나로 합친다.
- * - ['i', 링크 주소 또는 '', 이미지 주소]: 이미지. 글과의 앞뒤 위치도 비교된다(I-4).
- * 링크는 여닫는 표시가 아니라 **글·이미지마다 붙은 주소**로 기록한다. 그래서 원본의 "링크 하나 안 PC/MO 이미지 두 장"과
- * 출력의 "이미지마다 같은 링크"가 같은 토큰이 된다(I-1).
- * 원본 쪽 위험한 링크는 출력에서 의도적으로 링크를 빼고(UNSAFE_LINK_REMOVED) 글만 두므로 링크 없는 글로 본다.
- * ignore가 고른 원본 요소(호스트 CSS가 다시 그리는 표시)와 주석·script·style·template은 뺀다.
- */
-function orderTokens(node: DomNode, ignore: ((el: DomElement) => boolean) | undefined, href: string, out: OrderToken[]): OrderToken[] {
-  if (node.nodeName === '#text') {
-    const text = ((node as { value?: string }).value ?? '').replace(/\s+/gu, '');
-    if (text) {
-      const last = out[out.length - 1];
-      if (last && last[0] === 't' && last[1] === href) last[2] += text;
-      else out.push(['t', href, text]);
-    }
-    return out;
-  }
-  if (!('childNodes' in node)) return out;
-  let link = href;
-  if ('tagName' in node) {
-    const el = node as DomElement;
-    if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return out;
-    if (el.tagName === 'img') {
-      out.push(['i', href, attr(el, 'src') ?? '']);
-      return out;
-    }
-    if (el.tagName === 'a') link = safeHref(attr(el, 'href')) ?? href;
-  }
-  for (const child of node.childNodes as DomNode[]) orderTokens(child, ignore, link, out);
-  return out;
-}
-
-/**
- * 연달아 있는 이미지 토큰 중 같은 링크 아래 것들은 화면 크기에 따라 하나만 보이는 반응형 후보(PC/MO)다.
- * 원본 DOM 나열 순서(MO 먼저 등)와 출력 순서(PC 먼저)가 달라도 같은 결과이므로 묶음 안에서는 정렬해 비교한다 (4차 재검수 I-3).
- * 묶음과 주변 글의 앞뒤는 그대로 비교된다.
- */
-function normalizeImageRuns(tokens: OrderToken[]): OrderToken[] {
-  const out: OrderToken[] = [];
-  for (let i = 0; i < tokens.length;) {
-    if (tokens[i]![0] !== 'i') { out.push(tokens[i]!); i++; continue; }
-    let j = i;
-    while (j < tokens.length && tokens[j]![0] === 'i' && tokens[j]![1] === tokens[i]![1]) j++;
-    out.push(...tokens.slice(i, j).sort((x, y) => x[2].localeCompare(y[2])));
-    i = j;
-  }
-  return out;
-}
+type Run = [href: string, text: string];
+type Segment = { kind: 't'; runs: Run[] } | { kind: 'i'; href: string; src: string };
 
 const BLOCK_TAGS = new Set(['p', 'div', 'li', 'dt', 'dd', 'td', 'th', 'tr', 'caption', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'section', 'article', 'header', 'footer', 'ul', 'ol', 'dl', 'table', 'figure', 'blockquote', 'pre', 'address', 'aside', 'nav', 'main']);
 
 /**
- * 공백 없는 글 흐름과 블록 경계 위치(글자 수 기준). 블록 요소의 시작·끝과 <br>이 경계다.
- * 이어진 글만 비교하면 "본문 검사검사 → 제목 검사"와 "제목 검사 → 본문 검사검사"가 같게 나온다(4차 재검수 I-1).
+ * 한 화면(PC 또는 MO)에서 보이는 내용을 글 덩어리·이미지 순서로 나눈다.
+ * - 블록 요소가 덩어리를 나눈다. <br>은 나누지 않는다(같은 덩어리 안의 줄바꿈).
+ * - 덩어리 = 글 조각 목록([링크 주소, 공백 없는 글]). 같은 링크의 이어진 글은 합친다.
+ * - 이미지 = 따로 하나의 덩어리(링크 주소, 이미지 주소).
+ * - 다른 화면 전용 요소(원본 d-lg-none/d-lg-block 등, 출력 common-display-pc/mo)는 그 화면에서 뺀다.
+ *   그래서 PC/MO 대안 이미지는 각 화면에 하나씩만 남아 나열 순서가 비교에 영향을 주지 않고,
+ *   동시에 보이는 독립 이미지들의 앞뒤는 그대로 비교된다(6차 재검수 I-2).
+ * - 원본 쪽 위험한 링크는 출력에서 링크를 빼므로(UNSAFE_LINK_REMOVED) 링크 없는 글로 본다.
+ * - ignore가 고른 원본 요소(호스트 CSS가 다시 그리는 표시)와 주석·script·style·template은 뺀다.
  */
-function textBoundaries(node: DomNode, ignore: ((el: DomElement) => boolean) | undefined, acc: { text: string; bounds: Set<number> } = { text: '', bounds: new Set() }) {
+function segments(node: DomNode, view: 'pc' | 'mo', ignore: ((el: DomElement) => boolean) | undefined, href = '', out: Segment[] = [], state = { open: false }): Segment[] {
+  const close = () => { state.open = false; };
   if (node.nodeName === '#text') {
-    acc.text += ((node as { value?: string }).value ?? '').replace(/\s+/gu, '');
-    return acc;
+    const text = ((node as { value?: string }).value ?? '').replace(/\s+/gu, '');
+    if (!text) return out;
+    let last = out[out.length - 1];
+    if (!state.open || !last || last.kind !== 't') {
+      last = { kind: 't', runs: [] };
+      out.push(last);
+      state.open = true;
+    }
+    const runs = last.runs;
+    const prev = runs[runs.length - 1];
+    if (prev && prev[0] === href) prev[1] += text;
+    else runs.push([href, text]);
+    return out;
   }
-  if (!('childNodes' in node)) return acc;
-  const el = 'tagName' in node ? (node as DomElement) : undefined;
-  if (el && (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el))) return acc;
-  if (el?.tagName === 'br') {
-    acc.bounds.add(acc.text.length);
-    return acc;
+  if (!('childNodes' in node)) return out;
+  let link = href;
+  let block = false;
+  if ('tagName' in node) {
+    const el = node as DomElement;
+    if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return out;
+    const device = ownDevice(el);
+    if (device && device !== view) return out;
+    if (el.tagName === 'img') {
+      close();
+      out.push({ kind: 'i', href, src: attr(el, 'src') ?? '' });
+      return out;
+    }
+    if (el.tagName === 'a') link = safeHref(attr(el, 'href')) ?? href;
+    block = BLOCK_TAGS.has(el.tagName);
   }
-  const block = el ? BLOCK_TAGS.has(el.tagName) : false;
-  if (block) acc.bounds.add(acc.text.length);
-  for (const child of node.childNodes as DomNode[]) textBoundaries(child, ignore, acc);
-  if (block) acc.bounds.add(acc.text.length);
-  return acc;
+  if (block) close();
+  for (const child of node.childNodes as DomNode[]) segments(child, view, ignore, link, out, state);
+  if (block) close();
+  return out;
 }
 
-/** 섹션 하나를 출력했을 때 원본과 글·링크·이미지 순서가 다르면 이유를, 같으면 undefined. */
+const joinRuns = (list: Run[][]): Run[] => {
+  const out: Run[] = [];
+  for (const runs of list) for (const [h, t] of runs) {
+    const prev = out[out.length - 1];
+    if (prev && prev[0] === h) prev[1] += t;
+    else out.push([h, t]);
+  }
+  return out;
+};
+const sameRuns = (a: Run[], b: Run[]) => a.length === b.length && a.every((r, i) => r[0] === b[i]![0] && r[1] === b[i]![1]);
+const runText = (runs: Run[]) => runs.map((r) => r[1]).join('');
+const showSeg = (s: Segment | undefined) => (!s ? '(없음)' : s.kind === 'i' ? `이미지 ${s.src.slice(-30)}${s.href ? ' (링크)' : ''}` : `"${runText(s.runs).slice(0, 24)}"${s.runs.some((r) => r[0]) ? ' (링크 포함)' : ''}`);
+
+/**
+ * 출력 덩어리 하나하나가 원본에서 **연속된 덩어리 몇 개를 이어 붙인 것**과 정확히 같아야 한다.
+ * 원본 문단 둘 → 출력 한 문단(줄바꿈)·머리글 두 블록 → 줄 안 요소 묶음 같은 합침은 허용하고,
+ * 덩어리의 앞뒤가 바뀌면(같은 글자라도) 맞지 않는다(6차 재검수 I-1). 맞지 않는 첫 자리를 돌려준다.
+ */
+function matchSegments(source: Segment[], output: Segment[]): string | undefined {
+  let i = 0;
+  for (const o of output) {
+    const s = source[i];
+    if (!s) return `원본에 없는 ${showSeg(o)}`;
+    if (o.kind === 'i' || s.kind === 'i') {
+      if (o.kind !== s.kind || (o.kind === 'i' && s.kind === 'i' && (o.href !== s.href || o.src !== s.src))) return `원본 ${showSeg(s)} 자리에 출력 ${showSeg(o)}`;
+      i++;
+      continue;
+    }
+    const target = runText(o.runs);
+    const parts: Run[][] = [];
+    let k = i;
+    while (k < source.length && source[k]!.kind === 't' && runText(joinRuns(parts)).length < target.length) {
+      parts.push((source[k] as { runs: Run[] }).runs);
+      k++;
+    }
+    if (!sameRuns(joinRuns(parts), o.runs)) return `원본 ${showSeg(s)} 자리에 출력 ${showSeg(o)}`;
+    i = k;
+  }
+  return i < source.length ? `출력에 없는 원본 ${showSeg(source[i])}` : undefined;
+}
+
 export function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions, ignore?: (el: DomElement) => boolean): string | undefined {
   const single: PageModel = {
     version: 1, theme: options.theme, sections: [section], diagnostics: [],
     meta: { coreVersion: options.coreVersion, hostCss: options.hostCss },
   };
-  // orderCheck: 렌더러가 원본에 없는 생성 글(type24 순서 번호)을 빼고, CSS로 화면 순서를 뒤집는 타입(type30)은 화면 순서대로 출력한다
+  // orderCheck: 렌더러가 원본에 없는 생성 글(type24 순서 번호 등)을 빼고, CSS로 화면 순서를 뒤집는 타입(type30)은 화면 순서대로 출력한다
   const rendered = renderPage(single, { registry: options.registry, orderCheck: true });
   if (rendered.fallbackCount > 0) return undefined; // 데이터 검증 실패는 아래 전체 렌더가 INVALID_DATA로 따로 보고한다
   const outputRoot = parseHtmlFragment(rendered.html) as unknown as DomNode;
-  const a = normalizeImageRuns(orderTokens(element, ignore, '', []));
-  const b = normalizeImageRuns(orderTokens(outputRoot, undefined, '', []));
-  const at = a.findIndex((token, i) => !b[i] || token[0] !== b[i]![0] || token[1] !== b[i]![1] || token[2] !== b[i]![2]);
-  if (at < 0 && a.length === b.length) {
-    // 글이 같아도, 출력에 원본에 없던 블록 경계가 생겼다면 글 덩어리의 앞뒤가 바뀐 것이다.
-    // 경계가 줄어드는 것(원본 문단 두 개 → 줄바꿈으로 이은 한 문단, 머리글 블록 → 줄 안 요소)은 허용한다.
-    const src = textBoundaries(element, ignore);
-    const out = textBoundaries(outputRoot, undefined);
-    const extra = [...out.bounds].filter((n) => n > 0 && n < out.text.length && !src.bounds.has(n));
-    if (extra.length === 0) return undefined;
-    const n = extra[0]!;
-    return `원본과 글 순서가 다름: 출력에서 "${out.text.slice(Math.max(0, n - 12), n)}|${out.text.slice(n, n + 12)}" 사이가 나뉨(원본에는 이 경계가 없음)`;
+  for (const view of ['pc', 'mo'] as const) {
+    const problem = matchSegments(segments(element, view, ignore), segments(outputRoot, view, undefined));
+    if (problem) return `원본과 글 순서가 다름(${view === 'pc' ? 'PC' : '모바일'} 화면): ${problem}`;
   }
-  const show = (t: OrderToken | undefined) => (t ? `${t[0] === 'i' ? '이미지 ' : ''}${t[2].slice(0, 24)}${t[1] ? ' (링크)' : ''}` : '(없음)');
-  const i = at < 0 ? a.length : at;
-  return `원본과 글 순서가 다름: 원본 "${show(a[i])}" 자리에 출력 "${show(b[i])}"`;
+  return undefined;
 }

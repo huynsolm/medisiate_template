@@ -117,3 +117,11 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 순서 검사의 type01 예외는 없앴다. 이제 예외 없이 검사한다.
 - 확인 요청: 제목을 머리글/이미지 위로 올리는 조건(이미지 있음, 원본에서 제목이 이미지 앞, 머리글 자리 유무)이 실제 페이지 형태에서 틀리는 경우.
 - 기대 수치: `npm test` 867 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
+
+## 14. 7차 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 두 장(type01 결정 반영, 6차 재검수 반영). 범위: `5e1d49b..` 이후.
+- 순서 비교를 다시 짰다: 화면별(PC/모바일) + 글 덩어리 단위(출력 덩어리 = 원본 연속 덩어리를 이어 붙인 것). 남는 우회·오탐을 봐 주세요. 특히 화면 전용 판정(요소 자신의 클래스)이 실제 페이지의 다른 표시 클래스 조합에서 틀리는 경우.
+- 한쪽 화면 전용 이미지(`only`) 출력.
+- type01은 사용자 결정에 따라 원본 순서(제목 → 이미지)로 바꿨고 순서 검사 예외는 없앴다.
+- 기대 수치: `npm test` 870 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.

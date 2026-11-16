@@ -119,7 +119,8 @@ describe('type01', () => {
   it('parses background variants, single images and reports what it dropped', async () => {
     const { result, section, def } = parseFixture('type01/bg-single.source.html');
     expect(result.modifiers).toEqual({ background: { kind: 'color', value: '#f4f4f4', token: 'bg-color-2' } });
-    expect((result.data as { image: unknown }).image).toEqual({ pc: { src: 'http://old.example.com/single.jpg', alt: '', kind: 'http' } });
+    // 원본 이미지가 PC 전용 표시(d-lg-block 등)면 출력도 PC에서만 보이게 only: 'pc'
+    expect((result.data as { image: unknown }).image).toEqual({ pc: { src: 'http://old.example.com/single.jpg', alt: '', kind: 'http' }, only: 'pc' });
     expect(result.diagnostics.map((d) => d.code).sort()).toEqual(['IMAGE_HTTP', 'SCRIPT_REMOVED', 'UNKNOWN_CLASS']);
     expect(result.lossless).toBe(false);
     const html = serialize(def.render(section, ctx()));

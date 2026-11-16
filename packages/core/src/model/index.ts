@@ -27,6 +27,8 @@ export interface ImageRef {
 export interface ImagePair {
   pc?: ImageRef | undefined;
   mo?: ImageRef | undefined;
+  /** 이미지가 한 장뿐이고 원본에서 한쪽 화면 전용으로 표시돼 있었으면 그 화면(예: d-none d-lg-block → 'pc'). 출력도 그 화면에서만 보인다 */
+  only?: 'pc' | 'mo' | undefined;
 }
 
 /** allowlist(em, strong, b, i, br, span)를 통과한 HTML 문자열 */

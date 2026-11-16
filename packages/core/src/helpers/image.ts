@@ -44,5 +44,6 @@ export function visualPcMo(pair: ImagePair, options: VisualOptions = {}): Fragme
     h('div', { class: visualClass(options, display), ...options.attrs }, [renderImage(img, imgOpts)]);
   if (pair.pc && pair.mo) return fragment(one(pair.pc, 'pc'), one(pair.mo, 'mo'));
   const single = pair.pc ?? pair.mo;
-  return single ? fragment(one(single)) : fragment();
+  // 원본에서 한쪽 화면 전용이던 한 장은 출력도 그 화면에서만 보이게(common-display-pc/mo)
+  return single ? fragment(one(single, pair.only)) : fragment();
 }
