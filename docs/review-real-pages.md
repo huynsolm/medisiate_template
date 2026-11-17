@@ -1,3 +1,135 @@
+# 본문 앞뒤 설명 상자 검수 — b8e6c54
+
+- 검수일: 2026-11-18 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `b8e6c54`, 범위: `7ff8874..b8e6c54`.
+- 기준: `docs/real-pages-baseline.md` 10장, `docs/review-request-real-pages.md` 26장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 정상 설명의 글·링크·강조·문단과 기본 호스트 배치는 검사한 입력에서 유지된다. 그러나 설명 상자를 떼는 동안 그 안의 제거 경고가 사라지며, 편집기는 설명을 출력하지 않는 타입에도 공통 설명 칸을 제공한다. 기존 설명 칸과 새 공통 설명 칸의 HTML ID 중복도 있다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 2 | I-1 편집한 공통 설명이 type01 HTML에서 누락, I-2 분리한 상자의 제거 경고 누락 |
+| Minor | 1 | M-1 기존·공통 설명 칸 ID 중복으로 라벨 포커스 오동작 |
+
+아래 결함은 추가 최소 입력·편집기 조작으로 확인했다. 실제 703페이지에 해당 결함이 발생했다고 집계하지 않는다.
+
+## Important
+
+### I-1. type01에 공통 설명을 입력·저장해도 미리보기와 HTML에는 출력되지 않음
+
+**위치:** `apps/web/src/App.tsx:173`~`:176` (strategy만 보고 편집 칸 노출); `packages/core/src/types/type01.ts:80`~`:115` (notes를 읽지 않는 자체 렌더러). 공통 출력은 `packages/core/src/types/preset.ts:54`~`:62`에만 추가됐다.
+
+**재현 — Chromium에서 직접 실행:**
+
+1. 편집기에 type01 기본 섹션을 불러온다. 기본 데이터는 defaultRegistry.get('type01').defaults를 사용했다.
+2. “본문 앞뒤 설명 (섹션 공통)”의 앞 칸에 `EDITOR INTRO`, 뒤 칸에 `EDITOR NOTE`를 입력한다.
+3. HTML 소스를 확인하고 JSON 저장 → 새 페이지 → 저장한 JSON 불러오기를 실행한다.
+
+저장되는 섹션의 핵심 입력은 다음과 같다.
+
+```json
+{
+  "id": "s1",
+  "type": "type01",
+  "variant": "default",
+  "modifiers": {},
+  "notes": { "intro": "EDITOR INTRO", "note": "EDITOR NOTE" }
+}
+```
+
+위 예시는 핵심 필드 발췌이며 실제 입력에는 type01 기본 data와 정상 PageModel 메타데이터도 포함했다.
+
+**실제:** 입력 직후와 JSON 재불러오기 후 모두 두 값이 필드·저장 JSON에 남지만, HTML 소스에는 둘 다 없다. 기본 데이터에 notes를 넣어 core renderPage를 직접 실행해도 두 글이 없고 관련 진단도 없다. type01은 preset 전략이지만 presetSection을 사용하지 않아 notes를 출력하지 않는다.
+
+**기대:** 사용자가 입력할 수 있는 설명은 미리보기·내보내기에도 반영되어야 한다. 렌더링을 지원하지 않는 타입/모드라면 해당 입력을 제공하지 않거나 명확하게 제한해야 한다. JSON에만 남는 것으로는 충분하지 않다.
+
+**범위 — 정적 판독과 추가 실행 구분:** type00도 기본 모델 렌더 실행에서 notes 두 값을 출력하지 않았다. type33 Q&A는 일반 모드 자체 렌더러를 쓰면서 정의의 strategy는 preset이라 같은 UI 조건에 걸리는 경로가 있다(이 Q&A 편집 경로는 정적 판독이며 브라우저 재현 건수에 추가하지 않았다). 자동 변환의 순서 검사가 notes 미출력을 거르는 것과, 편집기에서 나중에 새 값을 입력하는 경로는 별개다.
+
+### I-2. 설명 상자를 떼고 재파싱하면 그 안에서 제거한 링크·style의 경고가 사라짐
+
+**위치:** `packages/core/src/convert/convert-document.ts:119`~`:136`. 기존 진단 생성은 `packages/core/src/parse/common.ts:8`~`:32`의 scanSection이다.
+
+**최소 재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type09"><div class="cms-inner">
+    <div class="cms-list-wrap"><ul class="cms-column-list">
+      <li class="cms-list-item"><p class="cms-description">BODY</p></li>
+    </ul></div>
+    <div class="cms-description-box"><p class="cms-description">
+      <a href="javascript:alert(1)">NOTE</a>
+    </p></div>
+  </div></section>
+</div>
+```
+
+**실제:** status=success, type=type09, notes.note=`NOTE`, diagnostics는 빈 배열이다. 안전하지 않은 주소 자체는 제거되지만 `UNSAFE_LINK_REMOVED` 경고가 없다.
+
+링크 부분을 아래로 바꾸어도 status=success, notes.note=`<span>NOTE</span>`, diagnostics 빈 배열이다. 제거된 position·top에 대한 `INLINE_STYLE_DROPPED`가 없다.
+
+```html
+<span style="position:fixed;top:0">NOTE</span>
+```
+
+**기대:** 설명을 section.notes로 옮기는 경로에서도 실제 제거한 주소·스타일의 기존 warn 진단을 보존해야 한다. 사용자가 조정·검수할 내용이 있는데 success로 분류되어서는 안 된다.
+
+**원인 — 정적 판독:** def.parse의 scanSection은 상자를 뗀 DOM만 본다. 상자를 되돌린 뒤 richFrom으로 설명을 읽으면서 정리는 적용되지만, 마지막에 반환하는 진단은 축소 DOM에서 나온 local/result.diagnostics뿐이다. 최초 시도의 원본 진단도 성공한 notes 경로에 합쳐지지 않는다. safeHref·정리된 글을 사용하는 순서 검사는 이런 제거를 대신 경고하지 않는다.
+
+**기준 버전 대조 — 직접 실행:** 같은 type09 구조에 제목·두 항목과 추가 설명을 둔 변형을 7ff8874와 b8e6c54 양쪽에서 실행했다. 이전은 blocks·partial이며 각각 UNSAFE_LINK_REMOVED / INLINE_STYLE_DROPPED가 있었다. 현재는 type09·success로 바뀌면서 해당 경고가 사라진다. 단순한 기존 경고 정책의 문제가 아니라 새 notes 경로에서 생긴 회귀다.
+
+## Minor
+
+### M-1. 기존 설명과 공통 설명이 id=intro/note를 공유해 라벨이 다른 칸을 가리킴
+
+**위치:** `apps/web/src/App.tsx:172`~`:176` (FieldForm 두 번 렌더); `apps/web/src/FieldForm.tsx:40`, `:55`~`:57` (path만으로 id/htmlFor 생성).
+
+**재현 — Chromium에서 직접 실행:** type26 기본 섹션을 불러오고, 새 “본문 앞뒤 설명 (섹션 공통)”의 “본문 앞 설명” 라벨 글자 부분을 클릭한다.
+
+**실제:** 문서에 id=intro인 textarea가 2개 존재한다. 공통 설명 라벨의 HTMLLabelElement.control은 공통 textarea가 아니라 기존 data.intro textarea다. 라벨의 좌상단 글자 부분을 클릭했을 때 포커스도 공통 칸 밖의 기존 intro 칸으로 이동했다. note 역시 같은 이름 공간을 사용한다(같은 생성 규칙의 정적 확인).
+
+**기대:** 기존 data 설명과 section.notes 설명의 DOM ID를 구분하고, 각 라벨이 자기 입력 칸에 연결되어야 한다. textarea 내부를 직접 클릭해 입력하는 기능은 동작하지만 라벨·접근성 연결이 잘못된다.
+
+## 정상·방어 동작 확인
+
+| 검사 | 직접 실행 결과 |
+|---|---|
+| type09 본문 전후 설명, 안전한 링크·strong·여러 문단 | notes에 글·주소·서식 보존. 두 문단은 PARA ONE<br>PARA TWO로 저장 |
+| 설명이 머리글보다 먼저 있거나 본문 두 부분 사이에 있음 | notes 경로로 순서를 바꾸지 않고 blocks로 변환 |
+| 설명 안 이미지 | notes로 읽지 않고 blocks로 변환 |
+| 모든 화면에서 숨긴 설명 | 원본 보존. 숨긴 글을 노출하지 않음 |
+| PC 전용 설명 | notes 경로를 채택하지 않고 only를 가진 blocks로 변환 |
+| type09 공통 설명 편집·JSON 저장·재불러오기 | 두 값과 HTML 출력 유지. 둘 다 비우면 notes 제거 |
+| type09 호스트 배치 1100/360px | header와 body가 바로 인접, 목록이 body 첫 자식. notes 유무와 관계없이 항목 폭은 각각 332px / 288px로 동일. 추가 note는 목록 밖·body 끝에 있음 |
+| 재시도 파서에 의도적으로 예외 주입 | 상자를 뗀 상태에서 2번째 parse가 throw하도록 만든 제어 실험. finally 후 원본 직렬화·자식 순서와 객체 identity·parentNode 연결 모두 복원. 실제 원본에서 예외가 발생했다는 뜻은 아님 |
+
+호스트 배치는 DOM/CSS 측정과 360px 캡처를 열어 확인했다. 정상 재시도 실패 후 다음 경로에서 설명·원본이 남는 것도 blocks/fallback 결과로 확인했다. 이 제어 실험은 임의의 다른 DOM 변경까지 복구하는지 검사한 것은 아니다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 37개 파일, 962개 통과 |
+| `npm run test:browser` | 5개 파일, 196개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 346 / partial 343 / failed 14 |
+| 기준 7ff8874와 703페이지 대조 | blocks 352 → 306, fallback 50 → 50. 페이지별 상태 또는 섹션 타입 배열이 바뀐 페이지 43개 |
+| 편집기 실제 조작 | Vite + Chromium으로 type09/type01 입력·JSON 저장·새 페이지·재불러오기·삭제, type26 라벨 클릭 |
+
+테스트 통과는 위 추가 입력의 결함이 없다는 뜻이 아니다. 재현 스크립트·JSON·캡처는 `/tmp/section-notes-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 7ff8874 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (7ff8874)</summary>
+
 # 블록 순서 5차 검수 — 94a0bac
 
 - 검수일: 2026-11-17 (KST).
@@ -2260,6 +2392,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
