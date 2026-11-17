@@ -1,3 +1,84 @@
+# 본문 앞뒤 설명 판정 재검수 — 56a1fbc
+
+- 검수일: 2026-11-18 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `56a1fbc`, 범위: `a662bb6..56a1fbc`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장의 rendersNotes 표시 글 충돌 수정.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**이전 Minor M-1은 해결됐다. 이번 범위에서 추가 수정이 필요한 결함을 확인하지 못했다.**
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 0 | 확정 항목 없음 |
+| Minor | 0 | 이전 고정 문구 충돌 해결, 추가 확정 항목 없음 |
+
+## 이전 재현 입력 대조 — 직접 실행
+
+이전 문서의 정확한 섹션 입력을 정상 PageModel에 넣어 기준 a662bb6와 현재 56a1fbc 양쪽에서 실행했다.
+
+```json
+{
+  "id": "s1",
+  "type": "type01",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "image": {},
+    "title": "제목",
+    "desc": "MIGNOTESPROBEINTRO MIGNOTESPROBENOTE"
+  },
+  "notes": {
+    "intro": "USER INTRO",
+    "note": "USER NOTE"
+  }
+}
+```
+
+| 판정·출력 | 이전 a662bb6 | 현재 56a1fbc / 기대 결과 |
+|---|---|---|
+| rendersNotes | true (오탐) | false / 미지원 판정 충족 |
+| 실제 USER INTRO·USER NOTE 출력 | 둘 다 없음 | 둘 다 없음. 미지원 렌더러 자체는 그대로이며 경고로 알림 |
+| NOTES_NOT_RENDERED | 없음 | warn 있음 / 미출력 진단 기대 충족 |
+| Chromium 편집기에서 같은 JSON 불러오기 | 이전 검수에서 칸 표시·경고 없음 | 공통 설명 칸 0개·경고 1개 / 기대 충족 |
+
+추가로 고정 문구 두 개를 본문(type01 desc) 또는 머리글(type09 heading)에 각각 1·3·20회 반복했다. 모든 반복 수에서 type01은 false, type09는 true로 판정했다. 지원 타입에서 기존 같은 문구 때문에 잘못 미지원으로 판정하는 회귀도 이 입력들에서는 없었다.
+
+## 회귀 검사 — 직접 실행
+
+- preset 정의 전체의 기본 데이터에서 rendersNotes 결과를 실제 USER INTRO·USER NOTE의 출력 및 경고와 대조했다. type00·type01은 미지원·경고, 공통 골격을 쓰는 타입은 지원·실제 출력으로 맞았다. type33 Q&A도 별도로 미지원·경고를 확인했다.
+- Chromium 편집기에서 type09 앞뒤 설명을 수정하고 JSON 저장 → 새 페이지 → 재불러오기를 실행했다. 두 값과 HTML 출력이 유지됐고, 둘 다 비우면 notes가 제거됐다.
+- type01 일반 입력과 type33 Q&A는 설명 칸이 없고 미출력 경고가 있었다. type26 공통 라벨은 section-notes.intro에 포커스를 주었으며 기존 intro·공통 section-notes.intro ID는 각각 1개였다.
+- 이전의 최소 링크·style 입력도 다시 변환했다. type09 설명 상자의 위험한 주소는 UNSAFE_LINK_REMOVED, position/top 제거는 INLINE_STYLE_DROPPED를 남기고 partial로 분류됐다.
+- 이전 순서·내용 방어 입력(안전한 링크·strong·여러 문단, 숨긴/PC 전용 설명, 머리글보다 앞/본문 사이 상자, 이미지 포함 상자)을 재실행했다. 검사한 입력에서 결과 경로 회귀를 확인하지 못했다.
+
+## 정적 판독
+
+`packages/core/src/types/notes.ts:22`~`:35`에서 같은 검증 데이터와 섹션을 notes=undefined로 렌더한 기준 결과, 검사용 notes를 넣은 결과로 나눈다. 기존 section.notes는 기준 렌더에서 명시적으로 덮어쓴다. 두 표시 글 모두 기준보다 개수가 늘어야 true이므로 이전 본문의 고정 문구만으로 참이 되지 않는다. 각각 새 RenderContext를 사용하며 전략 선택과 렌더 예외도 try/catch 안에서 처리된다. 이번 변경은 실제 설명 출력 골격·DOM 분리/복원·편집기 저장 형식을 바꾸지 않는다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 37개 파일, 969개 통과 |
+| `npm run test:browser` | 5개 파일, 197개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 345 / partial 344 / failed 14 |
+| 기준 a662bb6와 703페이지 대조 | 페이지별 상태·섹션 타입 배열 변화 0개, blocks 306 → 306, fallback 50 → 50 |
+| 추가 직접 검증 | 정확한 이전 충돌 입력의 구버전/현재 비교, 표시 글 반복 1·3·20회, 기본 preset·Q&A 판정, 편집기 저장·재불러오기·삭제·라벨 연결 |
+
+확정한 새 결함이 없으므로 새 결함의 위치·재현 입력·실제/기대 결과 항목은 없다. 이전 재현 입력과 현재 실제/기대 결과는 위에 기록했다. 추가 스크립트·JSON·캡처는 `/tmp/section-notes-fix2-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 a662bb6 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (a662bb6)</summary>
+
 # 본문 앞뒤 설명 재검수 — b204ed6
 
 - 검수일: 2026-11-18 (KST).
@@ -2488,6 +2569,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
