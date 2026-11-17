@@ -1,3 +1,102 @@
+# 실제 원본·703페이지 11차 재검수 — 9f452dc
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `9f452dc`, 범위: `4877115..9f452dc`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장 및 `docs/review-request-real-pages.md` 18장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 복사본을 준비했다. cms/는 gitignore 대상이며 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았고 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전의 구간 상쇄 오탐은 해결됐다. 구간별 조상 합성 자체도 추가 브라우저 대조에서 일치했다. 다만 출력 서식에 남은 Bootstrap 표시 클래스를 검사에서는 유효한 것으로 보지만 실제 미리보기 CSS에는 그 규칙이 없어, 숨긴 글이 나타나도 success가 되는 잔여 사례를 확인했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 1 | I-1 출력에 없는 Bootstrap 표시 규칙을 가정해 숨긴 서식 글 노출을 놓침 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+I-1은 **추가 최소 입력**이다. 실제 703페이지에서 발생했다고 주장하지 않는다. 이전 기준 4877115에서도 같은 입력이 success여서 새 회귀로 집계하지 않는다. 이번에 바뀐 화면별 순서 비교가 실제 출력의 보임까지 검증하는지 대조해 찾은 잔여 사례다. 원본의 Bootstrap 표시 계산과 출력 CSS의 지원 범위를 구분한다.
+
+## 이전 오탐 수정 확인 — 직접 실행
+
+- 이전 입력: 부모 `d-block d-sm-none d-lg-block`, 이미지 `d-none d-sm-block`.
+- 현재 success·무경고·fallback 0, only=pc. `visibilityOf` 결과도 모바일 false / 태블릿 false / PC true다. 부모·자식의 서로 반대인 모바일 구간 숨김이 이제 올바르게 합쳐진다.
+- 반대 방향 대조: 부모 `d-block d-xl-none`, 이미지 `d-block d-lg-none d-xl-block`은 success·fallback 0, only=mo다.
+- 합친 뒤에도 모바일 구간 변화가 남는 `d-block d-sm-none d-md-block` 입력은 계속 LOSSY_PARSE·fallback으로 보존된다.
+- 과거 mig-* 역할 경계 위장 입력은 계속 fallback이며, Bootstrap 4에 없는 d-lg-grid를 d-none 위에 붙인 입력도 원본 보존된다.
+
+**구간 합성 추가 대조 — 직접 실행:** 부모·중간 상자·이미지의 3단계 Bootstrap 표시 조합 96개를 고정 seed로 만들었다. 아홉 display 값과 다섯 breakpoint에서 클래스 3개씩을 선택하고, core의 spansOf 결과와 Chromium에서 실제 이미지가 표시되는지를 360/600/800/1100/1300px에서 대조했다. **480건 모두 일치, 불일치 0**이었다. 이는 Bootstrap 4 규칙의 구간별 조상 합성이 해당 표본에서 맞음을 보여 주며, 모든 입력이나 출력 CSS가 검증됐다는 뜻은 아니다.
+
+## Important
+
+### I-1. 출력 서식의 d-none을 실제로 숨길 CSS가 없는데 검사만 Bootstrap 규칙을 적용해 숨긴 글 노출을 통과
+
+**위치:** `packages/core/src/convert/convert-document.ts:234`~`:235`, `:355`~`:359` (원본·출력 모두 visibilityOf로 표시 판단); `packages/core/src/html/rich-text.ts:121`~`:127` (d-* 클래스를 서식에 보존); `apps/web/src/render.ts:15`~`:16` (미리보기 문서에 host-style.css만 제공).
+
+**재현 입력 — 직접 실행:** 아래 전체 입력을 convertDocument에 전달했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner">
+    <div class="cms-description-box"><p class="cms-description">BEFORE<span class="d-none">HIDDEN</span>AFTER</p></div>
+  </div></section>
+</div>
+```
+
+span의 class만 `d-none d-lg-block`으로 바꾼 입력도 별도로 실행했다.
+
+**실제:** 두 입력 모두 success, diagnostics `[]`, fallback 0. 출력은 원본 클래스를 그대로 담은 다음 서식이다.
+
+```html
+<p class="mig-desc">BEFORE<span class="d-none">HIDDEN</span>AFTER</p>
+```
+
+PC 전용 변형도 `<span class="d-none d-lg-block">HIDDEN</span>`을 그대로 출력한다. 현재 미리보기는 host-style.css만 넣으며, 이 스타일에는 Bootstrap의 .d-none / .d-lg-block 표시 유틸리티 정의가 없다. 따라서 실제 출력에서는 span이 inline으로 표시된다.
+
+**Chromium — 직접 실행:** 원본에는 Bootstrap 4.6.2 + cms.css, 출력에는 미리보기와 같은 스타일 소스인 host-style.css를 제공했다. DOM innerText와 computed display 및 실제 표시 여부를 확인했다.
+
+| 입력 span class | 폭 | 원본의 HIDDEN | 출력의 HIDDEN |
+|---|---:|---|---|
+| d-none | 360 / 800 / 1100px | 숨김(display:none) | 표시(display:inline) |
+| d-none d-lg-block | 360 / 800px | 숨김(display:none) | 표시(display:inline) |
+| d-none d-lg-block | 1100px | 표시(display:block) | 표시(display:inline) |
+
+숨겨야 하는 폭에서 원본 body.innerText는 `BEFOREAFTER`, 출력은 `BEFOREHIDDENAFTER`다. 실제 미리보기와 같은 CSS 조건에서 보이지 않던 글이 나타난 것이다. 1100px의 PC 전용 변형은 원본에서 줄도 나뉘지만, 이 항목은 우선 명확한 숨김 손실을 근거로 집계했다.
+
+**기대:** 출력에서도 서식 글의 표시 범위를 실제로 보존하거나, 지원하지 못하면 원본을 보존하고 사유를 남겨야 한다. 출력에 원본 Bootstrap CSS가 없는데 있다고 가정해 동등하다고 판정해서는 안 된다. 출력 형식에 맞게 표시 조건을 옮기는 방법과 현재 후보를 거부하는 방법은 구현에서 선택할 수 있다.
+
+**원인 — 정적 판독:** 입력의 Bootstrap 클래스는 rich-text의 허용 class로 남는다. textOrderDiffers는 원본과 출력 양쪽을 같은 segments → visibilityOf 경로로 읽으므로, 출력의 d-none도 Bootstrap 규칙대로 숨는다고 간주한다. 이에 따라 원본·출력의 숨긴 글을 비교에서 모두 빼고 통과한다. 그러나 렌더링 환경에 해당 CSS가 없어서 출력의 실제 글은 숨지 않는다. 이미지의 common-display-* 변환과 달리, 이 서식 span에는 호스트 표시 규칙으로 옮기는 단계가 없다.
+
+**범위 구분:** 출력 노출 자체는 이번 변경에서 새로 생긴 것이 아니다. 현재 수정한 구간 합성 계산이 맞더라도, ‘출력에서도 동일 클래스가 동일한 CSS 의미를 가진다’는 전제가 틀리면 실제 보임 비교가 성립하지 않는다는 사례다. 원본 Bootstrap 버전이 미확인이라는 한계와 별개로, 프로젝트 미리보기의 CSS 공급 방식은 코드에서 확인된다. 실제 외부 호스트의 모든 추가 CSS에 대한 주장으로 확장하지 않는다.
+
+## 실제 페이지·기존 입력 대조 — 직접 실행
+
+- 703개 파일을 4877115와 현재 코드로 각각 변환해 파일 상태와 섹션 type/fallback을 대조했다. 변화 0개. success 320 / partial 368 / failed 15 유지.
+- 순서 사유 fallback 9개 고정 목록 테스트도 통과했다. 이번 최소 입력의 문제가 실제 703페이지에서 발생했다고 집계하지 않았다.
+- 기존 28타입 × 4변형(공백·이미지 없음·인라인 서식·문단 블록) 총 112개 입력은 전부 fallback 0이며 이전 HTML과 byte 단위로 같다.
+- 구간별 표시 합성 96개 조합/480건 대조는 원본 Bootstrap 4 계산 검증이다. 출력 CSS의 실제 지원 범위는 별도로 검사해 위 I-1을 찾았다.
+- 비교 CSS는 보유한 [Bootstrap 4.6.2 배포 CSS](https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css), reference/cms-original/css/cms.css, reference/host-style.css다. 원본 실사이트 Bootstrap 파일의 버전을 새로 확인한 것은 아니다.
+- type01의 원본 제목 위치 및 과거 검사 예외 제거는 유지되고 관련 기존 테스트가 통과했다. 알려진 992~1023px 호스트 경계 차이는 이번 지적으로 세지 않았다.
+
+## 실행 결과
+
+다음 명령을 9f452dc에서 직접 실행했고 모두 종료 코드 0이었다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 33 files / 902 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 4 files / 192 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 703 / success 320 / partial 368 / failed 15 |
+| 추가 직접 검사 | 이전 오탐·반대 방향 대조, 480건 표시 합성 대조, 서식 글 노출 Chromium 재현 |
+
+임시 실행 스크립트·브라우저 기록은 /tmp에만 두고 커밋하지 않았다. 자동 테스트 통과와 위 검수 지적을 구분한다. 아래는 이전 원문 보관이며 현재 판정 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — 83e2737 및 그 이전 기록</summary>
+
 # 실제 원본·703페이지 10차 재검수 — 83e2737
 
 - 검수일: 2026-11-17 (KST).
@@ -1455,6 +1554,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
