@@ -70,6 +70,12 @@ function onlyOf(el: DomElement): 'pc' | 'mo' | undefined {
   return undefined;
 }
 
+/** 모든 화면에서 숨고(조상 포함) 글·이미지가 하나도 없는 요소 */
+function hiddenAndEmpty(el: DomElement): boolean {
+  const shown = visibilityOf(el);
+  return VIEWS.every((v) => shown[v] === false) && plainText(el).trim() === '' && el.tagName !== 'img' && !descendants(el).some((d) => d.tagName === 'img');
+}
+
 const leafText = (el: DomElement) => descendants(el).every((d) => TEXT_INLINE.has(d.tagName) && d.tagName !== 'img');
 
 function textBlock(el: DomElement, kind: BlockKind, w: Walk): Block | undefined {
@@ -103,6 +109,8 @@ function walk(node: DomElement, w: Walk, depth: number, inHeader: boolean): Bloc
     }
     const tag = child.tagName;
     if (SKIP.has(tag)) continue;
+    // 모든 화면에서 숨은 빈 요소(빈 목록·빈 표 등)는 원본 화면에 아무것도 남기지 않으므로 옮기지 않는다
+    if (hiddenAndEmpty(child)) continue;
     if (tag === 'svg') {
       if (plainText(child).trim()) w.problems.push('도형(svg) 안의 글');
       continue;
@@ -137,11 +145,11 @@ function walk(node: DomElement, w: Walk, depth: number, inHeader: boolean): Bloc
         // 항목 전체가 한쪽 화면 전용이면 항목(li)에 표시를 둔다. 글에만 두면 번호·글머리가 남고 다음 번호가 밀린다 (검수 I-3)
         const only = onlyOf(li);
         if (attr(li, 'value') !== undefined) w.problems.push('항목 번호 지정(li value)');
-        const inner = walk(li, w, depth + 1, false);
-        // 모든 화면에서 숨은 빈 항목은 원본에서 번호·자리를 차지하지 않으므로 옮기지 않는다 (재검수 I-2).
+        // 모든 화면에서 숨은, 글·이미지 없는 항목은 원본에서 번호·자리를 차지하지 않으므로 옮기지 않는다
+        // (빈 목록·빈 표 같은 빈 구조가 들어 있어도 같다. 재검수 I-2, 3차 I-1).
         // 글·이미지가 든 숨은 항목은 남겨 두어 글 순서 검사가 차이를 찾아 원본을 보존하게 한다.
-        const shown = visibilityOf(li);
-        if (inner.length === 0 && VIEWS.every((v) => shown[v] === false)) return [];
+        if (hiddenAndEmpty(li)) return [];
+        const inner = walk(li, w, depth + 1, false);
         return [{ blocks: inner, ...(only && only !== onlyOf(child) ? { only } : {}) }];
       });
       if (children(child).some((c) => c.tagName !== 'li')) w.problems.push('목록 안의 항목 밖 요소');

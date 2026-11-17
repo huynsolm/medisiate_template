@@ -147,3 +147,25 @@ describe('blocks re-review: nested counters and items hidden on every screen', (
     expect(convert(section('type01', '<ol><li class="d-none">HIDDEN ITEM</li><li>ALL ITEM</li></ol>')).page.sections[0]!.type).toBe('fallback');
   });
 });
+
+describe('blocks 3rd review: hidden items holding only empty structure', () => {
+  it.each([
+    ['an empty list', '<li class="d-none"><ul></ul></li>'],
+    ['an empty table', '<li class="d-none"><table><tbody><tr><td></td></tr></tbody></table></li>'],
+    ['an empty nested item', '<li class="d-none"><div><span></span></div></li>'],
+  ])('a hidden item with %s takes no number', (_, hidden) => {
+    const r = convert(section('type01', `<ol>${hidden}<li>ALL ITEM</li></ol>`));
+    expect(r.page.sections[0]!.type).toBe('blocks');
+    expect(data(r).blocks[0]!.items).toHaveLength(1);
+    expect(r.html.match(/<li class="mig-item/gu)).toHaveLength(1);
+  });
+
+  it('a hidden empty list or table outside a list item is not moved either', () => {
+    const r = convert(section('type99', '<p>BEFORE</p><ul class="d-none"></ul><table class="d-none"><tbody><tr><td></td></tr></tbody></table><p>AFTER</p>'));
+    expect(kinds(data(r).blocks)).toEqual(['text', 'text']);
+  });
+
+  it('a hidden item with an image still keeps the original', () => {
+    expect(convert(section('type01', '<ol><li class="d-none"><img src="https://example.com/a.png" alt=""></li><li>ALL ITEM</li></ol>')).page.sections[0]!.type).toBe('fallback');
+  });
+});
