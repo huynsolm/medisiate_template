@@ -1,3 +1,99 @@
+# 본문 앞뒤 설명 재검수 — b204ed6
+
+- 검수일: 2026-11-18 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `b204ed6`, 범위: `a448bc9..b204ed6`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장, `docs/review-request-real-pages.md` 27장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**이전 I-1·I-2·M-1의 재현 입력은 해결됐다.** 일반 입력에서 추가 Critical·Important는 확인하지 못했다. 새 rendersNotes가 고정 검사용 문구와 기존 본문을 구분하지 못하는 드문 충돌을 Minor 1건으로 기록한다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 0 | 이전 두 Important 해결, 추가 확정 항목 없음 |
+| Minor | 1 | M-1 기존 본문에 고정 검사용 문구가 있으면 출력 지원 판정 오탐 |
+
+추가 지적은 의도적으로 검사용 문구를 넣은 최소 입력이다. 일반적인 문장에서 발생하거나 실제 703페이지에 발생했다고 주장하지 않는다.
+
+## 이전 세 지적 확인 — 직접 실행
+
+| 이전 지적·입력 | 현재 실제 결과 / 기대 결과 |
+|---|---|
+| type01에 notes.intro=EDITOR INTRO, notes.note=EDITOR NOTE를 저장한 JSON | rendersNotes=false. 편집기 공통 설명 칸 0개, NOTES_NOT_RENDERED 경고 표시. 저장 데이터의 미출력을 조용히 넘기지 않음 / 기대 충족 |
+| type00 기본 데이터 + notes | core 실행에서 미지원 판정과 NOTES_NOT_RENDERED 경고 확인 / 기대 충족 |
+| type33 Q&A에 notes | core 실행 및 브라우저에서 공통 설명 칸 없음·경고 있음. 기본 목록 모드는 지원 판정 / 섹션 모드별 판정 기대 충족 |
+| type09 뒤 설명의 `<a href="javascript:alert(1)">NOTE</a>` | type09·partial, notes.note=NOTE, UNSAFE_LINK_REMOVED(warn) / 경고 보존 기대 충족 |
+| 같은 자리의 `<span style="position:fixed;top:0">NOTE</span>` | type09·partial, notes.note=&lt;span&gt;NOTE&lt;/span&gt;, INLINE_STYLE_DROPPED(warn) / 경고 보존 기대 충족 |
+| type26의 공통 “본문 앞 설명” 라벨 글자 클릭 | 활성 요소 id=section-notes.intro. 라벨의 control이 자기 textarea를 가리킴. 기존 id=intro와 공통 id=section-notes.intro는 각각 1개 / 기대 충족 |
+
+링크·style은 이전 검수의 정확한 최소 입력을 다시 실행했다. 편집기 type01은 이전에 저장한 동일 JSON을 불러왔다. type09는 앞뒤 설명을 수정하고 JSON 저장 → 새 페이지 → 재불러오기를 실행해 두 값과 HTML이 유지됨을 확인했다. 둘 다 비우면 notes가 제거됐다.
+
+## Minor
+
+### M-1. 본문에 검사용 고정 문구 두 개가 있으면 notes를 출력하지 않아도 지원한다고 판정
+
+**위치:** `packages/core/src/types/notes.ts:6`~`:7`, `:22`~`:26`; 결과 사용처는 `apps/web/src/App.tsx:174`, `packages/core/src/page/render-page.ts:100`~`:103`이다.
+
+**재현 입력 — core·Chromium에서 직접 실행:** 정상 PageModel의 sections에 다음 섹션을 넣는다. 기본 type01 데이터의 desc만 고정 검사용 문구로 바꾼 입력이다.
+
+```json
+{
+  "id": "s1",
+  "type": "type01",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "image": {},
+    "title": "제목",
+    "desc": "MIGNOTESPROBEINTRO MIGNOTESPROBENOTE"
+  },
+  "notes": {
+    "intro": "USER INTRO",
+    "note": "USER NOTE"
+  }
+}
+```
+
+**실제:** rendersNotes(defaultRegistry.get('type01'), section)는 true다. renderPage 출력에는 USER INTRO·USER NOTE가 둘 다 없는데 NOTES_NOT_RENDERED 경고도 없다. 편집기에서 이 JSON을 불러오면 공통 설명 칸이 다시 나타나며 경고는 없다. 충돌 문구를 넣지 않은 type01 입력에서는 false·칸 없음·경고 있음으로 정상이다.
+
+**기대:** 기존 data.desc 내용과 관계없이 type01이 section.notes를 출력하지 않는다고 판정해야 한다. 검사 문구가 기존 본문에서 나온 것과 주입한 notes에서 나온 것을 구별해야 한다.
+
+**원인 — 정적 판독:** 고정 문자열 두 개를 notes에 넣은 출력 HTML에서 includes만 확인한다. 원래 본문에도 같은 문자열이 있으면 notes가 사용됐는지 식별할 수 없다. 따라서 편집 칸 표시와 미출력 경고가 동시에 잘못된다.
+
+**등급 근거:** 두 내부 고정 문자열이 우연히 모두 본문에 등장해야 하므로 일반 사용에서의 발생 가능성이 낮다. 이전 일반 입력의 수정은 유효하며 이 경계 입력을 Important의 재발로 집계하지 않는다.
+
+## 추가 검증과 정적 판독
+
+- **직접 실행:** preset 정의 전체의 기본 데이터를 사용해 rendersNotes 결과와 실제 USER INTRO/USER NOTE 출력, NOTES_NOT_RENDERED를 대조했다. 지원 렌더러는 두 값을 출력하고 경고가 없으며, type00·type01은 미지원·경고로 맞았다. type33 Q&A도 별도 실행했다. 위 고정 문자열 충돌 외의 불일치는 이 대조에서 없었다.
+- **직접 실행:** 정상 type09의 링크·strong·여러 문단, 숨긴 설명, PC 전용 설명, 머리글보다 앞/본문 사이의 상자, 이미지 포함 상자를 이전과 같은 입력으로 재검사했다. 기존 순서·보존 경로에 회귀를 확인하지 못했다.
+- **직접 실행, 제어 실험:** 재시도 parse에 의도적으로 예외를 주입해 finally 후 직렬화·자식 순서와 객체 identity·parentNode 연결이 복원됨을 확인했다. 실제 원본에서 예외가 발생했다는 뜻은 아니다.
+- **정적 판독:** 떼어 낸 boxes를 holder의 자식으로 훑으므로 box 자체와 자손의 style·링크 진단이 포함된다. 실제 원본의 parentNode를 holder로 바꾸지 않는다. 소스 위치와 sectionIndex는 기존 요소/섹션 정보를 사용한다.
+- **정적 판독:** FieldForm의 idPrefix는 반복 필드 자손에도 전달된다. 현재 공통 설명은 section-notes. 이름 공간을 쓰고 데이터 path는 그대로라 저장 위치는 바뀌지 않는다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 37개 파일, 968개 통과 |
+| `npm run test:browser` | 5개 파일, 197개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 345 / partial 344 / failed 14 |
+| 기준 a448bc9와 703페이지 대조 | 섹션 타입 배열 변화 0개. blocks 306 → 306, fallback 50 → 50. 파일 상태 변화 1개 |
+| 상태가 바뀐 파일 재실행 | 10429/08_01_맞춤형영양수액클리닉.html: success → partial, 3번 섹션 p의 word-wrap:break-word 제거에 대한 INLINE_STYLE_DROPPED 복원 |
+| 편집기 실제 조작 | type09 설명 편집·저장·재불러오기·삭제, type01/Q&A 미지원 표시·경고, type26 라벨 포커스, 고정 문구 충돌 입력 |
+
+추가 재현 스크립트·JSON·캡처는 `/tmp/section-notes-fix-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 a448bc9 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (a448bc9)</summary>
+
 # 본문 앞뒤 설명 상자 검수 — b8e6c54
 
 - 검수일: 2026-11-18 (KST).
@@ -2392,6 +2488,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
