@@ -88,3 +88,27 @@ export function imageTextItem(item: {
     ]),
   ]);
 }
+
+/** 설명 덩어리 스키마·편집 칸(readTextParts로 읽음). 문단과 글머리 목록을 원본 순서대로 */
+export const textPartsSchema = z.array(z.object({
+  text: z.string().optional(),
+  bullets: z.array(z.object({ text: z.string().default('') })).optional(),
+})).default([]);
+export const textPartsField: FieldSpec = {
+  key: 'parts', label: '설명 (문단·글머리 목록 순서대로)', kind: 'repeat', min: 0, max: 12,
+  fields: [
+    { key: 'text', label: '문단', kind: 'richText' },
+    { key: 'bullets', label: '글머리 목록', kind: 'repeat', min: 0, max: 20, fields: [{ key: 'text', label: '항목', kind: 'richText' }] },
+  ],
+};
+/**
+ * 설명 덩어리 출력: 문단 → p.mig-desc, 목록 → 글머리가 보이는 ul(li > span.mig-desc).
+ * 목록에 mig-list를 붙이지 않는다: 호스트의 `.mig-item .mig-list .mig-item` 같은 후손 규칙이 카드·격자 모양을 입힌다.
+ */
+export function renderTextParts(parts: Array<{ text?: string | undefined; bullets?: Array<{ text: string }> | undefined }>): Child[] {
+  // 편집기에서는 한 덩어리에 문단과 목록을 함께 넣을 수 있다: 문단 → 목록 순서로 둘 다 출력한다
+  return parts.flatMap((part) => [
+    !isBlank(part.text) && h('p', { class: 'mig-desc' }, [rich(part.text)]),
+    (part.bullets?.length ?? 0) > 0 && h('ul', { style: { listStyle: 'disc', paddingLeft: '1.25em', margin: '0' } }, part.bullets!.map((b) => h('li', {}, [h('span', { class: 'mig-desc' }, [rich(b.text)])]))),
+  ]);
+}

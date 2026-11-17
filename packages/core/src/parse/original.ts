@@ -1,6 +1,6 @@
 import type { Diagnostic, ImagePair, SectionModifiers } from '../model/index.ts';
 import type { ParseResult } from '../types/definition.ts';
-import { duplicateReads, pairImages, richFrom, textStructureProblems, uncoveredText } from './common.ts';
+import { duplicateReads, markReadInParts, pairImages, richFrom, TEXT_BLOCKS, TEXT_INLINE, textStructureProblems, uncoveredText } from './common.ts';
 import { children, classesOf, descendants, hasClass, type DomElement, type SourceSection } from './dom.ts';
 
 /*
@@ -160,4 +160,37 @@ function countImages(value: unknown): number {
 /** 호스트 프리셋이 고정한 배치와 원본 선택이 다를 때 남기는 진단 (내용 손실 없음) */
 export function layoutFixed(src: SourceSection, message: string, detail: Record<string, unknown>): Diagnostic {
   return { level: 'info', code: 'PRESET_LAYOUT_FIXED', message, sectionIndex: src.index, detail };
+}
+
+/** 설명 칸의 한 덩어리: 문단 글 또는 글머리 목록 */
+export interface TextPart { text?: string | undefined; bullets?: Array<{ text: string }> | undefined }
+
+/**
+ * 설명 상자 안에서 문단과 글머리 목록(ul/ol)이 섞인 경우를 원본 순서대로 읽는다.
+ * 실제 페이지(type10 등)는 `p.cms-description` + `ul.list-box > li` 를 번갈아 둔다.
+ * 직접 자식만 본다(skip은 다른 칸으로 읽은 요소, 예: 소제목): 문단(p·글 블록) → text, 목록 → bullets(항목은 줄 안 글만). 그 밖의 요소, 중첩 목록, 목록 밖 글이 있으면 undefined.
+ * 원본의 잘못된 중첩(<p><ul>)으로 생긴 빈 문단은 건너뛴다.
+ */
+export function readTextParts(box: DomElement, skip: DomElement[] = []): TextPart[] | undefined {
+  const parts: TextPart[] = [];
+  for (const node of box.childNodes as Array<{ nodeName: string; value?: string }>) {
+    if (node.nodeName === '#text') {
+      if ((node.value ?? '').trim()) return undefined;
+      continue;
+    }
+    if (node.nodeName === '#comment') continue;
+    const el = node as unknown as DomElement;
+    if (skip.includes(el)) continue;
+    if (el.tagName === 'ul' || el.tagName === 'ol') {
+      const items = children(el);
+      if (items.some((li) => li.tagName !== 'li' || descendants(li).some((d) => !TEXT_INLINE.has(d.tagName) || d.tagName === 'img'))) return undefined;
+      parts.push({ bullets: items.map((li) => ({ text: richFrom(li) })) });
+      continue;
+    }
+    if (!TEXT_BLOCKS.has(el.tagName) || descendants(el).some((d) => !TEXT_INLINE.has(d.tagName) || d.tagName === 'img')) return undefined;
+    const text = richFrom(el);
+    if (text) parts.push({ text });
+  }
+  markReadInParts(box);
+  return parts;
 }

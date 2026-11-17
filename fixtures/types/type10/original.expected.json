@@ -24,6 +24,7 @@
         "title": "핵심 단어",
         "subtitle": "소제목",
         "desc": "설명을 입력해 보세요.",
+        "parts": [],
         "subitems": [
           {
             "text": "목록 1"
@@ -38,6 +39,7 @@
         "title": "핵심 단어",
         "subtitle": "소제목",
         "desc": "설명을 입력해 보세요.",
+        "parts": [],
         "subitems": []
       },
       {
@@ -45,6 +47,7 @@
         "title": "핵심 단어",
         "subtitle": "소제목",
         "desc": "설명을 입력해 보세요.",
+        "parts": [],
         "subitems": []
       }
     ]

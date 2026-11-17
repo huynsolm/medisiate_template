@@ -219,3 +219,9 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `a448bc9..` 이후.
 - 설명 출력 여부는 실제 렌더로 판정(`rendersNotes`), 편집기 칸 표시와 `NOTES_NOT_RENDERED` 경고에 사용. 떼어 낸 상자의 정리 진단 복원. 편집기 칸 id 접두사.
 - 기대 수치: `npm test` 968 passed, `npm run test:browser` 197 passed, 703페이지 success 345 / partial 344 / failed 14, 블록 순서 306, 원본 보존 50개.
+
+## 28. 블록 순서 섹션 줄이기 2 검수 (type10 설명 상자 안 문단·글머리 목록)
+
+- 설계·결과: `docs/real-pages-baseline.md` 11장. 범위: `57c3b7b..` 이후.
+- 확인 요청: `readTextParts`가 읽지 못하는 구조를 조용히 버리는 입력, 원본 순서·서식·링크 보존, type-10 호스트 배치(글머리 목록이 카드 안에 머무는지), 편집기 `parts` 칸 저장.
+- 기대 수치: `npm test` 975 passed, `npm run test:browser` 197 passed, 703페이지 success 356 / partial 333 / failed 14, 블록 순서 294, 원본 보존 50개.

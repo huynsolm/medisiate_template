@@ -43,9 +43,9 @@ describe('type10 · 큰 이미지 + 번호 목록', () => {
   it('parses the original markup including the nested list', async () => {
     const { result, section, data } = check('type10');
     expect(data.items).toEqual([
-      { num: '01', title: '핵심 단어', subtitle: '소제목', desc: '설명을 입력해 보세요.', subitems: [{ text: '목록 1' }, { text: '목록 2' }] },
-      { num: '02', title: '핵심 단어', subtitle: '소제목', desc: '설명을 입력해 보세요.', subitems: [] },
-      { num: '03', title: '핵심 단어', subtitle: '소제목', desc: '설명을 입력해 보세요.', subitems: [] },
+      { num: '01', title: '핵심 단어', subtitle: '소제목', desc: '설명을 입력해 보세요.', parts: [], subitems: [{ text: '목록 1' }, { text: '목록 2' }] },
+      { num: '02', title: '핵심 단어', subtitle: '소제목', desc: '설명을 입력해 보세요.', parts: [], subitems: [] },
+      { num: '03', title: '핵심 단어', subtitle: '소제목', desc: '설명을 입력해 보세요.', parts: [], subitems: [] },
     ]);
     expect(follow(result.html, ['section.type-10', 'div.mig-body', 'div.mig-visual'])).toHaveLength(2);
     const cards = follow(result.html, ['section.type-10', 'div.mig-body', 'div.mig-content', 'ul.mig-list', 'li.mig-item']);
