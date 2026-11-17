@@ -36,8 +36,8 @@ function ImageEditor({ label, value, path, onChange }: { label: string; value: I
   );
 }
 
-function Field({ spec, value, path, onChange }: { spec: FieldSpec; value: unknown; path: Path; onChange: OnChange }) {
-  const id = path.join('.');
+function Field({ spec, value, path, onChange, idPrefix = '' }: { spec: FieldSpec; value: unknown; path: Path; onChange: OnChange; idPrefix?: string }) {
+  const id = idPrefix + path.join('.');
   const help = spec.help && <p className="hint">{spec.help}</p>;
   switch (spec.kind) {
     case 'text':
@@ -124,7 +124,7 @@ function Field({ spec, value, path, onChange }: { spec: FieldSpec; value: unknow
                 </button>
               </div>
               {spec.fields?.map((f) => (
-                <Field key={f.key} spec={f} value={(item as Record<string, unknown>)[f.key]} path={[...path, i, f.key]} onChange={onChange} />
+                <Field key={f.key} spec={f} value={(item as Record<string, unknown>)[f.key]} path={[...path, i, f.key]} onChange={onChange} idPrefix={idPrefix} />
               ))}
             </div>
           ))}
@@ -137,11 +137,12 @@ function Field({ spec, value, path, onChange }: { spec: FieldSpec; value: unknow
   }
 }
 
-export function FieldForm({ fields, data, onChange }: { fields: FieldSpec[]; data: unknown; onChange: OnChange }) {
+/** idPrefix: 한 화면에 폼이 둘 이상일 때(섹션 데이터 + 본문 앞뒤 설명) 입력 칸 id가 겹치지 않게 앞에 붙인다 */
+export function FieldForm({ fields, data, onChange, idPrefix = '' }: { fields: FieldSpec[]; data: unknown; onChange: OnChange; idPrefix?: string }) {
   return (
     <div className="field-form">
       {fields.map((f) => (
-        <Field key={f.key} spec={f} value={(data as Record<string, unknown> | undefined)?.[f.key]} path={[f.key]} onChange={onChange} />
+        <Field key={f.key} spec={f} value={(data as Record<string, unknown> | undefined)?.[f.key]} path={[f.key]} onChange={onChange} idPrefix={idPrefix} />
       ))}
     </div>
   );

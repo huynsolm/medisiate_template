@@ -302,3 +302,24 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트 5개(숨은 빈 칸·빈 행·PC 전용 칸, type26 프리셋, 표 전체 PC 전용). 수정 대상 3개는 수정을 되돌리면 실패(PC 전용 칸은 글 순서 검사가 이미 잡고 있었다).
 - `npm test` 954 passed, `npm run test:browser` 196 passed, lint·typecheck 오류 없음.
 - 703페이지: success 326 / partial 363 / failed 14, 원본 보존 50개(변화 없음).
+
+## 본문 앞뒤 설명 검수(`a448bc9`) 지적 반영
+
+### I-1. 설명을 출력하지 않는 타입(type01 등)에서 편집기 입력이 데이터에만 남음
+- 원인: 편집기가 전략(preset)만 보고 설명 칸을 보였는데, type00·type01과 섹션마다 일반 모드가 되는 type33 Q&A는 자체 렌더러라 `section.notes`를 출력하지 않는다.
+- 수정:
+  - `rendersNotes(def, section)`(`types/notes.ts`, core에서 내보냄): 표시 글을 넣어 **실제로 렌더해 보고** 설명이 출력되는지 판정한다. 타입 목록을 따로 두지 않아 렌더러와 어긋나지 않는다.
+  - 편집기는 `rendersNotes`가 참인 섹션에만 설명 칸을 보인다.
+  - `renderPage`는 설명이 있는데 출력하지 않는 섹션(직접 만든 JSON 등)에 `NOTES_NOT_RENDERED`(warn)를 남긴다.
+
+### I-2. 떼어 낸 설명 상자 안의 위험한 링크·버린 style 경고가 사라짐
+- 원인: 타입 parse(scanSection)는 상자를 뗀 DOM만 훑었다.
+- 수정(`attemptWithNotes`): 떼어 낸 상자들만 따로 `scanSection`으로 훑어 진단을 더한다. 실제 703페이지에서 1개 파일(`10429/08_01_맞춤형영양수액클리닉.html`, 설명 상자의 `word-wrap` style 제거)이 success → partial이 됐다(정상 경고).
+
+### M-1. 섹션 데이터 설명 칸과 공통 설명 칸의 id가 겹침
+- 수정: `FieldForm`에 `idPrefix`를 두고 공통 설명 칸은 `section-notes.` 접두사를 쓴다.
+
+### 검증
+- 새 테스트 7개(core 6: type01·type00 미출력 판정과 경고, type09 출력, 링크·style 경고 / 편집기 e2e 1: type01에는 칸 없음, type26에서 공통 설명 라벨이 자기 칸에 포커스, 입력이 HTML에 반영, `id="intro"` 1개). 수정을 되돌리면 core 4개·e2e 1개 실패.
+- `npm test` 968 passed, `npm run test:browser` 197 passed, lint·typecheck 오류 없음.
+- 703페이지: success 345 / partial 344 / failed 14, 블록 순서 306, 원본 보존 50개.

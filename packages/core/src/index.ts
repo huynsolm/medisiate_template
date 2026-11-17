@@ -12,6 +12,7 @@ export * from './types/definition.ts';
 export { ALL_TYPES, defaultRegistry } from './types/index.ts';
 export { FALLBACK_ID } from './types/fallback.ts';
 export { notesFields } from './types/preset.ts';
+export { rendersNotes } from './types/notes.ts';
 export { convertDocument, fileStatus, type ConvertOptions, type ConvertResult, type ImageRecord } from './convert/convert-document.ts';
 export { sourceSections } from './parse/sections.ts';
 

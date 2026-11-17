@@ -61,4 +61,24 @@ describe.skipIf(!pw)('web editor (built app in Chromium)', () => {
     expect(html).toContain('class="mig-section type-01"');
     await page.close();
   }, 30_000);
+
+  it('shows the section notes form only for types that render it, with its own label targets', async () => {
+    const page: Page = await browser.newPage();
+    await page.goto(server.url);
+    await page.getByRole('button', { name: '새 페이지' }).click();
+    // type01은 자체 렌더러라 설명을 출력하지 않으므로 칸이 없다 (검수 I-1)
+    await page.getByLabel('추가할 타입').selectOption('type01');
+    await page.getByRole('button', { name: '섹션 추가' }).click();
+    expect(await page.getByText('본문 앞뒤 설명 (섹션 공통)').count()).toBe(0);
+    // type26은 자기 intro/note 칸과 공통 설명 칸이 함께 있다. 라벨이 각자 자기 칸을 가리켜야 한다 (검수 M-1)
+    await page.getByLabel('추가할 타입').selectOption('type26');
+    await page.getByRole('button', { name: '섹션 추가' }).click();
+    const notes = page.locator('fieldset', { hasText: '본문 앞뒤 설명 (섹션 공통)' });
+    await notes.getByText('본문 앞 설명').click();
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('section-notes.intro');
+    await page.locator('#section-notes\\.note').fill('EDITOR NOTE');
+    expect(await page.getByLabel('HTML 소스').inputValue()).toContain('EDITOR NOTE');
+    expect(await page.locator('[id="intro"]').count()).toBe(1);
+    await page.close();
+  }, 30_000);
 });

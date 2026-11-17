@@ -2,6 +2,7 @@ import { h, serialize, type HNode } from '../html/h.ts';
 import { cssColor } from '../helpers/background.ts';
 import type { Diagnostic, ImageRef, PageModel, SectionModel, Strategy } from '../model/index.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
+import { rendersNotes } from '../types/notes.ts';
 import { createRenderContext, DefsCollector, type RenderContext } from '../render/context.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
 import type { StyleObject } from '../html/h.ts';
@@ -96,6 +97,10 @@ function prepare(page: PageModel, registry: TypeRegistry, diagnostics: Diagnosti
       return { section: toFallback(section, '데이터 검증 실패'), def: fallbackType as TypeDefinition<unknown>, strategy: 'any' };
     }
     const ready = { ...section, data: parsed.data };
+    // 본문 앞뒤 설명을 출력하지 않는 타입에 설명이 있으면(직접 만든 JSON 등) 조용히 빠지지 않게 알린다 (검수 I-1)
+    if ((section.notes?.intro || section.notes?.note) && !rendersNotes(def, ready)) {
+      diagnostics.push({ level: 'warn', code: 'NOTES_NOT_RENDERED', message: `${section.type}은(는) 본문 앞뒤 설명을 출력하지 않음(설명은 데이터에만 남음)`, sectionIndex });
+    }
     return { section: ready, def, strategy: def.strategyFor ? def.strategyFor(ready) : def.strategy };
   });
 }

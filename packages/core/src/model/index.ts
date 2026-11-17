@@ -91,6 +91,7 @@ export const DIAGNOSTIC_CODES = [
   'UNSAFE_LINK_REMOVED',
   'STRUCTURE_RETYPED',
   'LAYOUT_SIMPLIFIED',
+  'NOTES_NOT_RENDERED',
 ] as const;
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number];

@@ -7,7 +7,7 @@ import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
-import { hostVisibilityOf, resetReads, richFrom, TEXT_BLOCKS, TEXT_INLINE, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
+import { hostVisibilityOf, resetReads, richFrom, scanSection, TEXT_BLOCKS, TEXT_INLINE, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
 import type { TypeDefinition, TypeRegistry } from '../types/definition.ts';
 import { STRUCTURE_CLASSES } from '../types/structure-classes.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
@@ -133,7 +133,10 @@ function attemptWithNotes(def: TypeDefinition<unknown>, src: SourceSection, id: 
   };
   // 설명을 출력하지 않는 타입(프리셋 골격을 쓰지 않는 타입)은 여기서 글이 빠져 걸러진다
   if (textOrderDiffers(src.element, section, options, def.orderCheckIgnores)) return undefined;
-  return { section, diagnostics: [...local, ...result.diagnostics] };
+  // 상자를 뗀 DOM으로 parse했으므로, 떼어 낸 상자 안의 정리(위험한 링크·버린 style 등) 진단은 상자만 따로 훑어 더한다 (검수 I-2)
+  const holder = { nodeName: 'div', tagName: 'div', attrs: [], childNodes: boxes } as unknown as DomElement;
+  const boxScan = scanSection({ ...src, element: holder, classList: [] }).diagnostics;
+  return { section, diagnostics: [...local, ...result.diagnostics, ...boxScan] };
 }
 
 /** 원본 도구의 타입마다 공통인 클래스(구조를 가르지 않음) */

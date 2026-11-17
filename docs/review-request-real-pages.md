@@ -213,3 +213,9 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
   3. DOM 되돌리기: 상자를 뗐다 되돌리는 동안 예외·재시도에서 원본 DOM이 바뀌는 경로.
   4. 편집기: 설명 고치기·지우기·저장·다시 불러오기.
 - 기대 수치: `npm test` 962 passed, `npm run test:browser` 196 passed, 703페이지 success 346 / partial 343 / failed 14, 블록 순서 306, 원본 보존 50개.
+
+## 27. 본문 앞뒤 설명 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `a448bc9..` 이후.
+- 설명 출력 여부는 실제 렌더로 판정(`rendersNotes`), 편집기 칸 표시와 `NOTES_NOT_RENDERED` 경고에 사용. 떼어 낸 상자의 정리 진단 복원. 편집기 칸 id 접두사.
+- 기대 수치: `npm test` 968 passed, `npm run test:browser` 197 passed, 703페이지 success 345 / partial 344 / failed 14, 블록 순서 306, 원본 보존 50개.

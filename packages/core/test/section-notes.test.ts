@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { convertFull as convert } from './support/original.ts';
+import { renderPage } from '../src/page/render-page.ts';
+import { defaultRegistry } from '../src/types/index.ts';
+import { rendersNotes } from '../src/types/notes.ts';
 
 /** 출력은 줄바꿈으로 들여 써지므로 태그 사이 공백을 지우고 비교한다 */
 const flat = (html: string) => html.replace(/>\s+</gu, '><');
@@ -49,5 +52,37 @@ describe('section notes: description boxes outside the type structure', () => {
     expect(r.page.diagnostics.some((d) => d.code === 'INVALID_DATA')).toBe(false);
     // 두 번 변환해도 같은 결과(상자를 떼었다 되돌린 DOM이 그대로)
     expect(convert(type09(box('앞'), box('뒤'))).html).toBe(r.html);
+  });
+});
+
+describe('section notes review fixes', () => {
+  const page = (sections: unknown[]) => ({ version: 1 as const, theme: { primary: '#164aa0', source: 'default' as const }, sections, diagnostics: [], meta: { coreVersion: '0', hostCss: { sha256: 'x', savedAt: 'y' } } });
+  const section = (type: string, notes = { intro: 'EDITOR INTRO', note: 'EDITOR NOTE' }) => ({ id: 's1', type, variant: 'default', modifiers: {}, notes, data: structuredClone(defaultRegistry.get(type)!.defaults) });
+
+  it.each(['type01', 'type00'])('I-1 %s does not render section notes: the probe says so and rendering warns', (type) => {
+    const s = section(type);
+    expect(rendersNotes(defaultRegistry.get(type)!, s as never)).toBe(false);
+    const r = renderPage(page([s]) as never, { registry: defaultRegistry });
+    expect(r.html).not.toContain('EDITOR NOTE');
+    expect(r.diagnostics.some((d) => d.code === 'NOTES_NOT_RENDERED' && d.level === 'warn')).toBe(true);
+  });
+
+  it('I-1 a preset skeleton type renders them and does not warn', () => {
+    const s = section('type09');
+    expect(rendersNotes(defaultRegistry.get('type09')!, s as never)).toBe(true);
+    const r = renderPage(page([s]) as never, { registry: defaultRegistry });
+    expect(r.html).toContain('EDITOR INTRO');
+    expect(r.html).toContain('EDITOR NOTE');
+    expect(r.diagnostics.some((d) => d.code === 'NOTES_NOT_RENDERED')).toBe(false);
+  });
+
+  it.each([
+    ['UNSAFE_LINK_REMOVED', '<a href="javascript:alert(1)">NOTE</a>'],
+    ['INLINE_STYLE_DROPPED', '<span style="position:fixed;top:0">NOTE</span>'],
+  ])('I-2 %s inside a moved description box is still reported', (code, inner) => {
+    const r = convert(type09('', `<div class="cms-description-box"><p class="cms-description">${inner}</p></div>`));
+    expect(r.page.sections[0]!.type).toBe('type09');
+    expect(r.page.diagnostics.some((d) => d.code === code && d.level === 'warn')).toBe(true);
+    expect(r.status).toBe('partial');
   });
 });
