@@ -157,8 +157,13 @@ export function hostVisibilityOf(el: DomElement): Record<View, Shown> {
   const out: Record<View, Shown> = { mo: true, tablet: true, pc: true };
   for (const node of [el, ...ancestors(el)]) {
     const classes = classesOf(node);
-    if (classes.includes('common-display-pc')) { out.mo = false; out.tablet = false; }
-    if (classes.includes('common-display-mo')) out.pc = false;
+    const pc = classes.includes('common-display-pc');
+    const mo = classes.includes('common-display-mo');
+    if (!pc && !mo) continue;
+    // 같은 요소 안에서는 CSS 선언 순서로 먼저 정한다(12차 재검수 I-1). 호스트 CSS는 두 화면 모두 common-display-pc 규칙이
+    // common-display-mo 규칙보다 뒤에 있고 우선순위가 같아, 둘 다 있으면 pc 쪽이 이긴다(= PC 전용).
+    // 1024 미만: pc → none, 아니면 mo → block. 1024 이상: pc → block, 아니면 mo → none. 조상·자손 사이는 그다음 숨김을 합친다.
+    if (pc) { out.mo = false; out.tablet = false; } else out.pc = false;
   }
   return out;
 }

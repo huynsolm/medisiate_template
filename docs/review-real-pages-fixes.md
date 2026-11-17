@@ -233,3 +233,15 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트 5개(Codex 입력 두 가지와 `d-lg-none` 변형, 글 없는 줄바꿈, 렌더러의 호스트 표시 클래스). 수정 대상 3개는 수정을 되돌리면 실패.
 - `npm test` 907 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
 - 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음).
+
+## 12차 재검수(`3eb7113`) 지적 반영
+
+### I-1. 같은 요소에 `common-display-pc`와 `common-display-mo`가 함께 있으면 모든 화면에서 숨는다고 판정
+- 원인: `hostVisibilityOf`가 두 클래스를 서로 다른 숨김으로 보고 합쳤다. 호스트 CSS(`reference/host-style.css` 357~375줄)는 두 화면 모두 `common-display-pc` 규칙이 `common-display-mo` 규칙보다 뒤에 있고 우선순위(specificity·`!important`)가 같아, 한 요소에 둘 다 있으면 pc 쪽이 이긴다(= PC 전용).
+- 수정: 같은 요소 안에서는 CSS 선언 순서로 먼저 정한다. `common-display-pc`가 있으면 PC 전용, 없고 `common-display-mo`만 있으면 모바일·태블릿 전용. 그다음 조상·자손 사이의 숨김을 합친다(부모 mo + 자식 pc는 지금처럼 모든 화면에서 숨음).
+- 원본 쪽 판정(표시 이름은 PC 표시를 먼저 봄)과도 같은 결과다.
+
+### 검증
+- 새 테스트 4개(Codex 입력과 클래스 순서를 바꾼 입력, 부모·자식에 나뉜 경우와 같은 요소인 경우의 판정, 두 클래스가 있는데 원본은 모바일 전용인 입력). 수정 대상 3개는 수정을 되돌리면 실패.
+- `npm test` 911 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
+- 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음).

@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { sourceSections } from '../src/parse/sections.ts';
-import { outerHtml } from '../src/parse/dom.ts';
+import { attr, descendants, outerHtml, parseHtmlFragment, type DomElement } from '../src/parse/dom.ts';
+import { hostVisibilityOf } from '../src/parse/common.ts';
 import { convert } from './support/original.ts';
 
 // 실제 원본 대조 검수(docs/review-real-pages.md) 지적 회귀 테스트
@@ -404,5 +405,25 @@ describe('11th review: the output is judged by the host CSS, which has no Bootst
     const r = convert('<section class="cms type23"><div class="cms-inner"><div class="cms-visual"><img src="https://example.com/image.png" alt="" class="d-none d-lg-block"></div></div></section>');
     expect(r.page.sections[0]!.type).toBe('type23');
     expect(r.html).toContain('common-display-pc');
+  });
+});
+
+describe('12th review: both host display classes on one element follow the host CSS order', () => {
+  const desc = (inner: string) => convert(`<section class="cms type23"><div class="cms-inner"><div class="cms-description-box"><p class="cms-description">${inner}</p></div></div></section>`);
+
+  it.each(['common-display-pc common-display-mo', 'common-display-mo common-display-pc'])('a PC-only text with %s on the same element is fine (PC wins in the host CSS)', (host) => {
+    expect(desc(`BEFORE<span class="d-none d-lg-block ${host}">PC_TEXT</span>AFTER`).page.sections[0]!.type).toBe('type23');
+  });
+
+  it('on different elements (parent and child) the two classes still hide on every screen', () => {
+    const root = parseHtmlFragment('<span class="common-display-mo"><span class="common-display-pc" id="x">TEXT</span></span>') as unknown as DomElement;
+    const inner = descendants(root).find((d) => d.tagName === 'span' && attr(d, 'id') === 'x')!;
+    expect(hostVisibilityOf(inner)).toEqual({ mo: false, tablet: false, pc: false });
+    const same = descendants(parseHtmlFragment('<span class="common-display-mo common-display-pc">T</span>') as unknown as DomElement).find((d) => d.tagName === 'span')!;
+    expect(hostVisibilityOf(same)).toEqual({ mo: false, tablet: false, pc: true });
+  });
+
+  it('a mobile-only text with both classes would show on PC instead, so it is preserved', () => {
+    expect(desc('BEFORE<span class="d-lg-none common-display-pc common-display-mo">MO_TEXT</span>AFTER').page.sections[0]!.type).toBe('fallback');
   });
 });

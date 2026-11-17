@@ -160,3 +160,9 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(11차 재검수 반영). 범위: `bd084d0..` 이후.
 - 순서 검사의 출력 쪽 표시는 호스트 CSS 규칙(`common-display-pc/mo`)으로만 판정한다. 원본 쪽은 Bootstrap 4 규칙 그대로.
 - 기대 수치: `npm test` 907 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
+
+## 20. 13차 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(12차 재검수 반영). 범위: `3eb7113..` 이후.
+- 출력 쪽 호스트 표시 판정이 같은 요소 안에서는 호스트 CSS 선언 순서(pc가 mo보다 뒤)를 따르고, 조상·자손 사이는 그다음 합친다.
+- 기대 수치: `npm test` 911 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
