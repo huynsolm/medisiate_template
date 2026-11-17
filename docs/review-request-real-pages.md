@@ -178,3 +178,9 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
   4. 시도 사이 상태(`resetReads`): 앞선 시도의 읽기 기록이 다음 시도 검사에 남는 경로가 있는지.
   5. 진단 수준: 블록 순서 변환을 warn(partial)으로 두는 것이 맞는지.
 - 기대 수치: `npm test` 933 passed, `npm run test:browser` 194 passed, 703페이지 success 326 / partial 363 / failed 14, 원본 보존 섹션 50개(고정 목록).
+
+## 22. 블록 순서 변환 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `16f0048..` 이후.
+- 번호 목록 시작값은 호스트 카운터로 옮기고, 역순·항목별 번호는 원본 보존. 한쪽 화면 전용 항목은 항목째 숨김. 보존한 열 너비 경고 제거.
+- 기대 수치: `npm test` 940 passed, `npm run test:browser` 196 passed, 703페이지 success 326 / partial 363 / failed 14, 원본 보존 50개.

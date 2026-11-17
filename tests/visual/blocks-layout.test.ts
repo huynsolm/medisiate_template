@@ -19,6 +19,10 @@ const body = `<section class="cms type01"><div class="cms-inner">
 <div class="cms-visual"><img src="${big('PC 2')}" alt="" class="d-none d-lg-block"><img src="${big('MO 2')}" alt="" class="d-block d-lg-none"></div>
 </div></section>`;
 
+// 번호 목록(검수 I-1·I-3): 시작 번호는 호스트 카운터로, 한쪽 화면 전용 항목은 번호까지 함께 숨는다
+const numbered = `<section class="cms type01"><div class="cms-inner"><ol start="3"><li>FIRST</li><li>SECOND</li></ol>
+<ol><li class="d-none d-lg-block">PC ITEM</li><li>ALL ITEM</li></ol></div></section>`;
+
 describe.skipIf(!pw)('blocks (general mode) on the host css', () => {
   let browser: Browser;
   let css: string;
@@ -31,7 +35,25 @@ describe.skipIf(!pw)('blocks (general mode) on the host css', () => {
     const result = convertDocument(`<div class="cms-container">${body}</div>`, 'blocks.html', opts);
     expect(result.page.sections[0]!.type).toBe('blocks');
     html = result.html.replaceAll('loading="lazy"', 'loading="eager"');
+    numberedHtml = convertDocument(`<div class="cms-container">${numbered}</div>`, 'numbered.html', opts).html;
   }, 60_000);
+
+  let numberedHtml: string;
+
+  it.each([[1100, 2], [360, 1]] as const)('%ipx: numbered lists keep the start number and hide a screen-only item with its number', async (width, items) => {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    await page.setContent(`<!doctype html><html><head><style>${css}</style></head><body>${numberedHtml}</body></html>`);
+    const m = await page.evaluate(() => {
+      const lists = Array.from(document.querySelectorAll('ol.mig-list.type-ordered'));
+      return {
+        reset: getComputedStyle(lists[0]!).counterReset,
+        shown: Array.from(lists[1]!.children).filter((li) => getComputedStyle(li).display !== 'none').length,
+      };
+    });
+    await page.close();
+    expect(m.reset).toBe('mig-counter 2');
+    expect(m.shown).toBe(items);
+  });
 
   afterAll(async () => {
     await browser?.close();

@@ -45,7 +45,7 @@ describe('blocks: the last resort keeps every text and image in the original ord
     const list = data(r).blocks[0]!;
     expect(list).toMatchObject({ kind: 'list', ordered: true, start: 3 });
     expect(kinds(list.items![0]!.blocks)).toEqual(['title', 'text', 'list']);
-    expect(r.html).toContain('<ol class="mig-list type-ordered" start="3">');
+    expect(r.html).toContain('<ol class="mig-list type-ordered" start="3" style="counter-reset: mig-counter 2;">');
     expect(flat(r.html)).toContain('<ul class="mig-list type-bullet"><li class="mig-item"><p class="mig-desc">하위 1</p></li>');
   });
 
@@ -88,5 +88,37 @@ describe('blocks: the last resort keeps every text and image in the original ord
     expect(r.page.diagnostics.some((d) => d.code === 'INVALID_DATA')).toBe(false);
     expect(blocks.schema.safeParse(r.page.sections[0]!.data).success).toBe(true);
     expect(blocks.fields.map((f) => f.key)).toEqual(['blocks']);
+  });
+});
+
+describe('blocks review fixes: numbering and list item display', () => {
+  it('I-1 the start number moves into the host counter (the host draws counter(mig-counter), not the native marker)', () => {
+    const r = convert(section('type01', '<ol start="3"><li>FIRST</li><li>SECOND</li></ol>'));
+    expect(r.page.sections[0]!.type).toBe('blocks');
+    expect(r.html).toContain('<ol class="mig-list type-ordered" start="3" style="counter-reset: mig-counter 2;">');
+  });
+
+  it.each([
+    ['reversed', '<ol reversed start="3"><li>FIRST</li><li>SECOND</li></ol>'],
+    ['li value', '<ol><li value="7">FIRST</li><li>SECOND</li></ol>'],
+  ])('I-2 %s cannot be drawn by the host counter, so the original is kept', (_, list) => {
+    const r = convert(section('type01', list));
+    expect(r.page.sections[0]!.type).toBe('fallback');
+    expect(r.page.diagnostics.some((d) => d.code === 'LOSSY_PARSE' && d.message.includes('블록 순서'))).toBe(false);
+  });
+
+  it('I-3 a list item that only one screen shows hides as a whole item (number included)', () => {
+    const r = convert(section('type01', '<ol><li class="d-none d-lg-block">PC ITEM</li><li>ALL ITEM</li></ol>'));
+    const list = data(r).blocks[0]!;
+    expect(list.items![0]!.only).toBe('pc');
+    expect(list.items![1]!.only).toBeUndefined();
+    expect(flat(r.html)).toContain('<li class="mig-item common-display-pc"><p class="mig-desc common-display-pc">PC ITEM</p></li>');
+  });
+
+  it('M-1 table column widths that are kept are not reported as dropped', () => {
+    const r = convert(section('type01', '<p>BEFORE</p><table><colgroup><col style="width:30%"><col></colgroup><tbody><tr><td>A</td><td>B</td></tr></tbody></table><p>AFTER</p>'));
+    expect(r.page.sections[0]!.type).toBe('blocks');
+    expect(r.html).toContain('<col style="width: 30%;">');
+    expect(r.page.diagnostics.some((d) => d.code === 'INLINE_STYLE_DROPPED')).toBe(false);
   });
 });

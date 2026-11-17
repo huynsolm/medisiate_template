@@ -245,3 +245,23 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트 4개(Codex 입력과 클래스 순서를 바꾼 입력, 부모·자식에 나뉜 경우와 같은 요소인 경우의 판정, 두 클래스가 있는데 원본은 모바일 전용인 입력). 수정 대상 3개는 수정을 되돌리면 실패.
 - `npm test` 911 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
 - 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음).
+
+## 블록 순서 변환 검수(`16f0048`) 지적 반영
+
+### I-1. 시작 번호(start)가 화면에서는 1부터
+- 원인: 호스트 번호 목록은 ol의 기본 번호가 아니라 `::before`의 `counter(mig-counter)`를 그린다(`reference/host-style.css` 5155~5180줄). HTML `start` 속성은 이 카운터를 바꾸지 않는다.
+- 수정(`types/blocks.ts`): `start`가 있으면 ol에 `counter-reset: mig-counter (start − 1)`을 함께 준다. 호스트 규칙에 `!important`가 없어 인라인 값이 이긴다.
+
+### I-2. `reversed`·항목별 `value`가 사라짐
+- 호스트 카운터로는 역순과 항목별 번호를 안전하게 그릴 수 없어, 이 속성이 있으면 블록 순서 변환이 원본을 보존한다(실제 703페이지에는 둘 다 없다).
+
+### I-3. 한쪽 화면 전용 항목의 글만 숨어 빈 번호가 남음
+- 수정: 항목(li) 전체가 한쪽 화면 전용이면 항목에 `only`를 두고 `li.mig-item.common-display-pc/mo`로 출력한다. 숨은 항목은 카운터도 올리지 않아 다음 번호가 밀리지 않는다.
+
+### M-1. 보존한 표 열 너비를 "버린 style"로 경고
+- type26의 걸러내기를 공통 함수(`withoutKeptColWidths`)로 빼서 블록 순서 변환에도 쓴다.
+
+### 검증
+- 새 테스트 5개(Codex 입력 그대로)는 수정을 되돌리면 모두 실패. 브라우저 검사 2개 추가(1100/360px: ol의 계산된 `counter-reset`이 `mig-counter 2`, PC 전용 항목은 360px에서 항목째 숨음).
+- `npm test` 940 passed, `npm run test:browser` 196 passed, lint·typecheck 오류 없음.
+- 703페이지: success 326 / partial 363 / failed 14, 원본 보존 50개(변화 없음).

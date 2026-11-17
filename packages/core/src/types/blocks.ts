@@ -10,7 +10,7 @@ import { childNodes, children, descendants, hasClass, isElement, plainText, attr
 import { finish } from '../parse/original.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
-import { colWidthsOf, readTable, renderTable, rowSchema, widthSchema } from './type26.ts';
+import { colWidthsOf, readTable, renderTable, rowSchema, widthSchema, withoutKeptColWidths } from './type26.ts';
 
 /*
  * 블록 순서 변환(일반 모드). 적힌 타입으로도, 같은 구조의 다른 타입으로도 옮기지 못한 섹션을
@@ -27,7 +27,8 @@ export interface Block {
   image?: ImagePair | undefined;
   ordered?: boolean | undefined;
   start?: number | undefined;
-  items?: Array<{ blocks: Block[] }> | undefined;
+  /** 목록 항목. only는 항목(li) 전체가 한쪽 화면 전용일 때(번호·글머리까지 함께 숨는다) */
+  items?: Array<{ blocks: Block[]; only?: 'pc' | 'mo' | undefined }> | undefined;
   caption?: string | undefined;
   captionVisible?: boolean | undefined;
   colWidths?: Array<{ width: string }> | undefined;
@@ -42,7 +43,7 @@ const blockSchema: z.ZodType<Block> = z.lazy(() => z.object({
   image: imagePairSchema.optional(),
   ordered: z.boolean().optional(),
   start: z.number().int().optional(),
-  items: z.array(z.object({ blocks: z.array(blockSchema).default([]) })).optional(),
+  items: z.array(z.object({ blocks: z.array(blockSchema).default([]), only: z.enum(['pc', 'mo']).optional() })).optional(),
   caption: z.string().optional(),
   captionVisible: z.boolean().optional(),
   colWidths: z.array(z.object({ width: widthSchema })).optional(),
@@ -133,9 +134,14 @@ function walk(node: DomElement, w: Walk, depth: number, inHeader: boolean): Bloc
       }
       const items = children(child).filter((li) => li.tagName === 'li').map((li) => {
         markReadInParts(li);
-        return { blocks: walk(li, w, depth + 1, false) };
+        // 항목 전체가 한쪽 화면 전용이면 항목(li)에 표시를 둔다. 글에만 두면 번호·글머리가 남고 다음 번호가 밀린다 (검수 I-3)
+        const only = onlyOf(li);
+        if (attr(li, 'value') !== undefined) w.problems.push('항목 번호 지정(li value)');
+        return { blocks: walk(li, w, depth + 1, false), ...(only && only !== onlyOf(child) ? { only } : {}) };
       });
       if (children(child).some((c) => c.tagName !== 'li')) w.problems.push('목록 안의 항목 밖 요소');
+      // 호스트 번호는 CSS 카운터(mig-counter)라 역순은 옮기지 않는다(원본 보존). 시작 번호는 카운터 시작값으로 옮긴다 (검수 I-1·I-2)
+      if (attr(child, 'reversed') !== undefined) w.problems.push('역순 번호 목록(reversed)');
       const start = Number(attr(child, 'start'));
       const only = onlyOf(child);
       out.push({ kind: 'list', ordered: tag === 'ol', ...(tag === 'ol' && Number.isInteger(start) && attr(child, 'start') ? { start } : {}), items, ...(only ? { only } : {}) });
@@ -202,8 +208,11 @@ function renderBlocks(blocks: Block[], white: boolean, ctx: Parameters<TypeDefin
     else if (b.kind === 'text') out.push(h('p', { class: `mig-desc${display(b)}` }, [rich(b.text)]));
     else if (b.kind === 'image' && b.image) out.push(visualPcMo(b.image));
     else if (b.kind === 'list') {
-      out.push(h(b.ordered ? 'ol' : 'ul', { class: `mig-list ${b.ordered ? 'type-ordered' : 'type-bullet'}${display(b)}`, start: b.start },
-        (b.items ?? []).map((item) => h('li', { class: 'mig-item' }, renderBlocks(item.blocks, white, ctx)))));
+      // 호스트는 ol의 기본 번호 대신 ::before의 counter(mig-counter)를 그린다. start 속성은 그 카운터를 바꾸지 않으므로
+      // 카운터 시작값(start - 1)을 함께 준다 (검수 I-1)
+      const counter = b.ordered && b.start !== undefined ? { counterReset: `mig-counter ${b.start - 1}` } : undefined;
+      out.push(h(b.ordered ? 'ol' : 'ul', { class: `mig-list ${b.ordered ? 'type-ordered' : 'type-bullet'}${display(b)}`, start: b.start, style: counter },
+        (b.items ?? []).map((item) => h('li', { class: `mig-item${item.only ? ` common-display-${item.only}` : ''}` }, renderBlocks(item.blocks, white, ctx)))));
     } else if (b.kind === 'table') {
       const table = renderTable({ caption: b.caption ?? '', captionVisible: b.captionVisible ?? false, colWidths: b.colWidths ?? [], head: b.head ?? [], body: b.body ?? [] });
       out.push(b.only ? h('div', { class: display(b).trim() }, [table]) : table);
@@ -245,7 +254,7 @@ export const blocks: TypeDefinition<BlocksData> = {
     const { modifiers, diagnostics } = scanSection(src);
     const w: Walk = { used: [], problems: [] };
     const data: BlocksData = { blocks: walk(src.element, w, 0, false) };
-    const result = finish(src, data, w.used, [], { modifiers, diagnostics });
+    const result = finish(src, data, w.used, [], { modifiers, diagnostics: withoutKeptColWidths(diagnostics) });
     if (w.problems.length && !result.fallbackReason) {
       return { ...result, lossless: false, fallbackReason: `블록 순서로 옮길 수 없음: ${[...new Set(w.problems)].slice(0, 3).join(', ')}` };
     }

@@ -5,6 +5,7 @@ import { richFrom, scanSection, TEXT_BLOCKS, TEXT_INLINE } from '../parse/common
 import { finish, firstByClass, optional, originalHeader, readNotes, textsOf } from '../parse/original.ts';
 import { attr, children, descendants, hasClass, type DomElement } from '../parse/dom.ts';
 import { CSS_LENGTH, toNumberInput } from '../schema/page.ts';
+import type { Diagnostic } from '../model/index.ts';
 import type { TypeDefinition } from './definition.ts';
 import { headerFields, headerShape, notesFields, notesShape, presetSection, withNotes } from './preset.ts';
 
@@ -110,6 +111,12 @@ export function colWidthsOf(cols: DomElement[]): Array<{ width: string }> {
   return cols.map((col) => ({ width: cssWidth(WIDTH.exec(attr(col, 'style') ?? '')?.[1]) ?? attrWidth(attr(col, 'width')) ?? 'auto' }));
 }
 
+/** 열 너비는 데이터로 옮기므로, width만 있는 col style은 "버린 style" 경고에서 뺀다(type26·블록 순서 공통. 검수 M-1) */
+export function withoutKeptColWidths(diagnostics: Diagnostic[]): Diagnostic[] {
+  return diagnostics.filter((d) => !(d.code === 'INLINE_STYLE_DROPPED' && d.detail?.tag === 'col'
+    && (d.detail.declarations as string[]).every((decl) => WIDTH.test(decl))));
+}
+
 export interface TableData {
   caption: string;
   captionVisible: boolean;
@@ -182,9 +189,7 @@ export const type26: TypeDefinition<Type26Data> = {
     const table = descendants(src.element, (el) => el.tagName === 'table')[0];
     const cols = table ? descendants(table, (el) => el.tagName === 'col') : [];
     const colWidths = colWidthsOf(cols);
-    // 열 너비는 데이터로 옮기므로, width만 있는 col style은 "버린 style" 경고에서 뺀다.
-    const diagnostics = scan.diagnostics.filter((d) => !(d.code === 'INLINE_STYLE_DROPPED' && d.detail?.tag === 'col'
-      && (d.detail.declarations as string[]).every((decl) => WIDTH.test(decl))));
+    const diagnostics = withoutKeptColWidths(scan.diagnostics);
     const header = originalHeader(src.element);
     const wrap = firstByClass(src.element, 'cms-table-wrap');
     // 표 묶음 안 설명 상자: 표 앞이면 설명(desc), 표 뒤면 주의 글(note)로. 순서를 지킨다 (검수 I-3)
