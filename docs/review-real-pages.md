@@ -1,3 +1,97 @@
+# 블록 순서 4차 검수 — 9f87d07
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `9f87d07`, 범위: `f687c61..9f87d07`.
+- 기준: `docs/review-request-real-pages.md` 24장, `docs/review-real-pages-fixes.md` 마지막 장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 I-1의 빈 목록·빈 표를 포함하는 숨긴 li는 해결됐다. 목록 밖의 숨긴 빈 구조도 블록 순회 경로에서는 제외된다. 다만 표 내부의 빈 셀·빈 행은 별도 표 파서로 넘어가 새 규칙을 거치지 않고 출력에 나타난다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 1 | I-1 표 내부의 숨긴 빈 셀·행이 출력에 남음 |
+| Minor | 0 | 확정 항목 없음 |
+
+아래 항목은 **추가 최소 입력**이다. 실제 703페이지에서 발생했다고 집계하지 않는다. 기존에도 있던 잔여 경로이며 새 회귀라는 주장은 아니다.
+
+## 수정 확인 — 직접 실행
+
+| 입력 | 현재 결과 |
+|---|---|
+| `<ol><li class="d-none"><ul></ul></li><li>ALL ITEM</li></ol>` | blocks·partial·fallback 0. 모델·출력에 li 1개만 남고 ALL ITEM은 1번 |
+| 위 첫 li 안에 빈 표(`<table><tbody><tr><td></td></tr></tbody></table>`) | 같은 결과. 이전 정확한 재현 입력 해결 |
+| 목록 앵커 뒤 BEFORE / 숨긴 div 안의 빈 목록·표 / AFTER | blocks로 변환, 숨긴 빈 구조는 제외되고 ANCHOR·BEFORE·AFTER만 남음 |
+| 조상 div가 d-none이고 그 안에 빈 중첩 목록 | blocks 경로에서 숨긴 구조 제외 |
+| 모든 화면에서 숨긴 글 SECRET 또는 img | LOSSY_PARSE·fallback 1로 원본 보존 |
+| 표시 클래스가 없는 빈 항목 | 삭제하지 않고 항목 유지 |
+| d-none d-lg-block인 빈 항목 | only=pc 유지. 모든 화면에서 숨는 항목으로 잘못 삭제하지 않음 |
+
+이전 두 재현 입력은 Chromium 1100/360px에서 DOM/CSS를 측정했고 360px 캡처도 직접 열어 확인했다. 그 밖의 표 항목은 변환 모델·HTML·진단을 직접 확인했다. 목록 밖·조상 숨김 사례에는 정상 목록 ANCHOR를 앞에 두어 blocks 변환 경로를 확인했다.
+
+## Important
+
+### I-1. 표 내부의 숨긴 빈 셀·행은 hiddenAndEmpty를 거치지 않아 다시 나타남
+
+**위치:** `packages/core/src/types/blocks.ts:113` 및 `:163`~`:169`; 위임받는 `packages/core/src/types/type26.ts:85`~`:93`의 rowsOf.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type01"><div class="cms-inner">
+    <table><tbody><tr>
+      <td class="d-none"></td><td>ALL ITEM</td>
+    </tr></tbody></table>
+  </div></section>
+</div>
+```
+
+**실제:** blocks·partial·fallback 0, 진단은 `LAYOUT_SIMPLIFIED`뿐이다. 모델에 빈 첫 셀과 ALL ITEM 셀 두 개가 남는다. 출력에서는 d-none이 사라져 **빈 첫 열이 보이고 ALL ITEM은 두 번째 열**에 놓인다. 원본의 첫 셀은 display:none이어서 표시되는 셀은 ALL ITEM 하나뿐이다.
+
+Chromium 1100/360px에서 원본의 첫 td는 표시되지 않고 출력의 첫 td는 표시됨을 측정했다. 360px 출력에서 첫 셀 x=8.5, ALL ITEM 셀 x=180으로 빈 열이 공간을 차지한다. 원본에서 ALL ITEM 셀은 x=15다. 원본·출력 캡처도 직접 열어 확인했다. 좌표·모양 자체의 호스트 차이가 아니라 **숨긴 셀의 표시 복원**이 지적 대상이다.
+
+다음처럼 빈 행 전체를 숨겨도 같은 우회 경로다.
+
+```html
+<table><tbody>
+  <tr class="d-none"><td></td></tr>
+  <tr><td>ALL ITEM</td></tr>
+</tbody></table>
+```
+
+이 변형도 blocks·partial·fallback 0이고 LAYOUT_SIMPLIFIED만 있다. 출력에는 빈 첫 행이 생긴다. 360px 출력 표 높이는 73.390625px이며 첫 빈 셀도 표시된다. 원본에는 첫 행이 표시되지 않는다.
+
+**기대:** 모든 화면에서 숨긴 글·이미지 없는 구조가 출력의 표 격자·공간에 나타나지 않아야 한다. 셀·행 병합 등을 고려해 안전하게 제외할 수 없다면 원본을 보존해야 한다.
+
+**원인 — 정적 판독:** hiddenAndEmpty는 walk가 방문하는 요소와 목록 항목에 적용된다. 표를 만나면 walk는 자손을 순회하지 않고 readTable에 위임한다. rowsOf는 모든 tr·td·th를 가져오며 숨김을 확인하지 않고 모델에도 표시 상태를 담지 않는다. 빈 셀·행에는 글·이미지가 없어 기존 내용 순서 검사도 차이를 검출하지 못한다. 따라서 새 규칙이 일반 블록·목록에는 적용돼도 표 내부에는 적용되지 않는다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 36개 파일, 949개 통과 |
+| `npm run test:browser` | 5개 파일, 196개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 326 / partial 363 / failed 14 |
+| 기준 f687c61과 703페이지 대조 | 페이지별 상태·섹션 타입 배열 변화 0개 |
+| 원본 보존 섹션 고정 목록 | 50개, 전체 테스트에서 검사 통과 |
+| 추가 최소 입력 | 이전 빈 목록·표 입력, 목록 밖·조상 숨김, 숨긴 글·이미지, 표시되는 빈 항목, PC 전용 빈 항목, 숨긴 빈 셀·행을 직접 실행 |
+
+기존 테스트는 모두 통과하지만 위 표 내부 변형까지 안전하다는 뜻은 아니다.
+
+브라우저 비교는 원본에 Bootstrap 4.6.2와 원본 cms.css, 출력에 저장소 host-style.css를 적용했다. 원본 배포 사이트의 Bootstrap 버전까지 확정한 검사는 아니다. 추가 입력은 실제 703페이지 통계와 구분했다. 재현 스크립트·JSON·캡처는 `/tmp/blocks-fix3-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 f687c61 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (f687c61)</summary>
+
 # 블록 순서 3차 검수 — 93c341e
 
 - 검수일: 2026-11-17 (KST).
@@ -2103,6 +2197,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
