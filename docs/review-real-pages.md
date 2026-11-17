@@ -1,3 +1,89 @@
+# 블록 순서 3차 검수 — 93c341e
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `93c341e`, 범위: `38ff8cf..93c341e`.
+- 기준: `docs/review-request-real-pages.md` 23장, `docs/review-real-pages-fixes.md` 마지막 장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 검수 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 I-1·I-2의 정확한 재현 입력은 해결됐다. 다만 숨긴 항목에 빈 목록 또는 빈 표가 들어 있는 변형에서 빈 번호가 다시 나타난다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 1 | I-1 숨긴 항목 안의 빈 구조 블록이 번호를 차지함 |
+| Minor | 0 | 확정 항목 없음 |
+
+아래 지적은 추가 최소 입력이다. 실제 703페이지에서 발생했다고 집계하지 않는다. 이전 버전에도 있던 잔여 변형이며, 이번 수정으로 새로 발생한 회귀라는 주장은 아니다.
+
+## 이전 지적 및 추가 정상 입력 — 직접 실행
+
+| 입력 | 확인 결과 |
+|---|---|
+| 연속 중첩 ol의 안쪽 start=4 | blocks·partial·fallback 0. computed counter-reset은 `mig-counter-sub 3`, 해당 li는 `mig-counter-sub`를 증가시킨다. 호스트의 lower-alpha 표기에서 시작 순번 4에 맞음 |
+| 3단계 ol start=5 | `mig-counter-sub-sub 4` 적용, 해당 단계의 lower-roman 카운터 사용 |
+| ul 안의 ol start=4 | `mig-counter 3` 적용. 글머리 목록을 지나면 번호 단계가 다시 1단계 |
+| ol → ul → ol start=4 | 안쪽 ol은 역시 `mig-counter 3` 적용 |
+| `<li class="d-none"></li>` 다음에 ALL ITEM | 빈 li가 모델에서 제외됨. 출력에 보이는 항목 1개, 번호 1 |
+| `<li class="d-none">HIDDEN</li>` 다음에 ALL ITEM | 숨긴 글을 노출하지 않고 fallback으로 원본 보존 |
+
+카운터·표시 결과는 Chromium 1100/360px에서 DOM/CSS를 직접 측정했다. 이전 두 입력과 아래 결함 입력은 캡처도 열어 확인했다. 원본에는 Bootstrap 4.6.2 표시 규칙과 원본 cms.css, 출력에는 저장소의 host-style.css를 적용했다. 원본 배포 사이트의 Bootstrap 버전을 확정한 검사는 아니다.
+
+## Important
+
+### I-1. 모든 화면에서 숨긴 li 안에 빈 구조 블록이 있으면 빈 번호가 나타남
+
+**위치:** `packages/core/src/types/blocks.ts:140`~`:145` (빈 항목 제외), `:66`~`:70` (onlyOf), `:225`~`:226` (항목 출력).
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type01"><div class="cms-inner">
+    <ol>
+      <li class="d-none"><ul></ul></li>
+      <li>ALL ITEM</li>
+    </ol>
+  </div></section>
+</div>
+```
+
+**실제:** blocks·partial·fallback 0, 진단은 `LAYOUT_SIMPLIFIED`뿐이다. 첫 항목 모델에 빈 ul 블록이 들어 있고 `only`는 없다. 출력은 두 li 모두 보이며 첫 번째에는 글 없는 **1번**, 다음 ALL ITEM에는 **2번**이 표시된다. 원본은 첫 li가 숨겨져 **1. ALL ITEM**만 보인다. Chromium 1100/360px의 DOM 측정 및 캡처에서 차이를 확인했다.
+
+다음처럼 첫 항목을 빈 표로 바꿔도 같은 결과다.
+
+```html
+<li class="d-none"><table><tbody><tr><td></td></tr></tbody></table></li>
+```
+
+두 입력 모두 숨긴 항목에 글·이미지가 없다. 단순히 자식 노드가 전혀 없는 li만 정상 처리되고, 빈 구조 요소를 가진 항목은 빈 번호와 자리를 차지한다.
+
+**기대:** 모든 화면에서 숨긴 내용 없는 항목이 출력의 번호·공간에 영향을 주지 않아야 한다. 안전하게 생략하거나 숨김을 보존할 수 없다면 원본을 보존해야 한다.
+
+**원인 — 정적 판독:** 제외 조건은 `inner.length === 0`이다. 빈 ul 또는 빈 셀만 든 표도 블록 객체가 생성되므로 이 조건을 통과하지 못한다. 모든 화면이 false인 표시 상태는 onlyOf의 pc/mo 중 어느 쪽도 아니어서 항목에 숨김이 기록되지 않는다. 렌더러는 이를 일반 li로 출력한다. 글·이미지 순서 검사에는 이 빈 구조와 CSS 생성 번호의 차이가 나타나지 않아 fallback도 발생하지 않는다.
+
+## 실행한 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 36개 파일, 944개 통과 |
+| `npm run test:browser` | 5개 파일, 196개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 326 / partial 363 / failed 14 |
+| 기준 38ff8cf와 703페이지 대조 | 페이지별 상태·섹션 타입 배열 변화 0개, 기존 집계 유지 |
+| 추가 최소 입력 | 이전 재현 입력, 3단계·혼합 목록, 숨긴 빈 목록/표를 변환하고 DOM/CSS 확인 |
+
+기존 테스트 통과는 위 추가 변형까지 안전하다는 뜻이 아니다. 원본 보존 50개에 관한 기존 고정 목록 검사는 전체 테스트에서 통과했다. 재현용 스크립트·JSON·캡처는 `/tmp/blocks-fix2-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 ce1baa9 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (ce1baa9)</summary>
+
 # 블록 순서 변환 재검수 — ce1baa9
 
 - 검수일: 2026-11-17 (KST).
@@ -2017,6 +2103,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
