@@ -1,3 +1,164 @@
+# 구조 재분류·블록 순서 변환 검수 — 52cbe1b
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `52cbe1b`, 범위: `78133b4..52cbe1b`.
+- 기준: `docs/real-pages-baseline.md` 9장, `docs/review-request-real-pages.md` 21장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 복사본을 준비했다. cms/는 gitignore 대상으로 커밋하지 않는다. 코드·테스트·원본 자료는 고치지 않았고 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 재분류·일반 모드 분리·읽기 상태 초기화는 아래 대조에서 작동했다. 다만 블록 순서 변환이 목록의 시작 번호, 항목별 번호·역순, 항목 전체의 화면 전용 표시를 보존하지 못하는 입력을 재현했다. 표 열 너비의 보존 여부와 맞지 않는 경고도 있다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 3 | I-1 시작 번호가 실제 화면에 적용되지 않음, I-2 번호 속성 소실, I-3 숨긴 항목의 번호·빈 행 잔존 |
+| Minor | 1 | M-1 보존한 col 너비를 제거했다고 경고 |
+
+모든 항목은 **추가 최소 입력**이다. 실제 703페이지에서 같은 오류가 발생했다고 주장하지 않는다. 새 블록 목록 471개를 포함하는 실제 변환 자료와 해당 원본을 추가 탐색했을 때, 이번 목록 재현과 같은 명시적 start/reversed/ol type/li value 또는 li의 d-* 조합은 발견하지 못했다.
+
+재현된 블록 변환은 대부분 partial·LAYOUT_SIMPLIFIED 경고 상태다. 따라서 ‘진단이 전혀 없다’는 지적이 아니라, **배치 단순화 경고만 남기고 내용·번호·표시 의미의 변경을 검출하지 못한다**는 지적이다. 해당 경고 메시지는 글·이미지·순서가 그대로라고 안내한다.
+
+## Important
+
+### I-1. start=3을 데이터와 HTML에 보존해도 호스트 CSS 카운터는 1부터 표시
+
+**위치:** `packages/core/src/types/blocks.ts:139`~`:141`, `:204`~`:206`; 실제 번호 규칙은 `reference/host-style.css:5155`~`:5180`이다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type01"><div class="cms-inner">
+    <ol start="3"><li>FIRST</li><li>SECOND</li></ol>
+  </div></section>
+</div>
+```
+
+**실제:** blocks로 변환, partial, fallback 0, 진단은 LAYOUT_SIMPLIFIED뿐이다. 모델에는 start:3이 있고 출력 HTML도 `<ol class="mig-list type-ordered" start="3">`다. 그러나 Chromium 1100/360px의 실제 번호는 원본 **3·4**, 출력 **1·2**다. 두 폭의 원본·출력 캡처를 직접 열어 확인했다.
+
+**기대:** 설계에서 보존한다고 한 시작 번호가 실제 출력에도 적용되어야 한다. 구현하지 못하면 원본을 보존해야 하며, start 속성이 HTML에 있다는 것만으로 완료로 판단하면 안 된다.
+
+**원인 — 정적 판독·DOM/CSS 대조:** 호스트는 ol의 native marker 대신 `::before`의 `counter(mig-counter)`를 그린다. `.mig-list.type-ordered`는 counter-reset: mig-counter 0, 각 항목은 counter-increment: mig-counter 1이다. HTML start 값은 별도 CSS 카운터의 시작값을 바꾸지 않는다. Chromium의 computed counterReset/counterIncrement도 해당 값이었다. 텍스트 노드 비교는 생성된 번호를 포함하지 않으므로 변화를 검출하지 못한다.
+
+### I-2. reversed와 li value가 모델에서 사라져 목록의 번호 의미가 바뀜
+
+**위치:** `packages/core/src/types/blocks.ts:24`~`:35`의 모델, `:134`~`:141`의 목록 읽기, `:204`~`:206`의 출력.
+
+**재현 입력 — 직접 실행:** I-1과 같은 바깥 컨테이너·type01·cms-inner 안에 아래 두 목록을 각각 넣었다.
+
+```html
+<ol reversed start="3"><li>FIRST</li><li>SECOND</li></ol>
+```
+
+```html
+<ol><li value="7">FIRST</li><li>SECOND</li></ol>
+```
+
+**실제:** 둘 다 blocks·partial·fallback 0, 진단은 LAYOUT_SIMPLIFIED뿐이다. 첫 모델에는 ordered와 start:3만 남고 reversed가 없다. 두 번째 모델의 항목에는 blocks만 있고 value가 없다. 출력 DOM에서도 reversed=false, li value는 null이다.
+
+Chromium 원본은 각각 3·2와 7·8에 해당하는 native 번호 목록이지만, 출력은 일반 증가 목록으로 생성된다. 현재 CSS에서는 I-1과 겹쳐 1·2로 표시된다. **I-1을 고쳐 start=3이 화면에 적용되더라도 역순 3·2가 3·4로 바뀌는 문제는 별도로 남는다.**
+
+**기대:** 번호에 의미를 주는 reversed·항목별 value를 보존하거나, 지원하지 않는 번호 속성은 fallback으로 보존해야 한다. 번호 모양을 호스트 기본 디자인으로 바꾸는 것과 번호 값·진행 방향을 바꾸는 것은 구분해야 한다.
+
+**원인 — 정적 판독:** 목록 parser는 ordered와 start만 읽고, li는 안쪽 블록만 읽는다. 원본의 번호 속성이 모델·출력에 없으며 w.problems에도 기록되지 않는다. finish의 글·이미지 검사와 순서 검사는 이 속성을 비교하지 않는다. 기존 type33의 제한된 번호 속성 방어와 달리 새 blocks 경로에는 해당 거부 규칙이 없다.
+
+### I-3. 화면 전용 li의 글만 숨겨 빈 번호가 남고 다음 항목 번호도 달라짐
+
+**위치:** `packages/core/src/types/blocks.ts:134`~`:136` (항목은 blocks만 기록), `:204`~`:206` (li에 표시 조건 없음). text 블록의 only는 `:202`에서 p에만 적용된다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type01"><div class="cms-inner">
+    <ol>
+      <li class="d-none d-lg-block">PC ITEM</li>
+      <li>ALL ITEM</li>
+    </ol>
+  </div></section>
+</div>
+```
+
+**실제:** blocks·partial·fallback 0, 진단은 LAYOUT_SIMPLIFIED뿐이다. 첫 항목 안의 text 블록에는 only=pc가 있지만 항목 자체에는 표시 조건이 없다.
+
+Chromium 360px에서 원본은 첫 li가 display:none이라 **1. ALL ITEM 하나만** 표시된다. 출력은 첫 항목의 p만 숨고 li 및 ::before는 남아 **빈 1번 배지 + 2번 ALL ITEM**이 표시된다. 원본·출력 캡처를 직접 확인했다. 표시되는 li 수도 원본 1개 / 출력 2개다. 1100px에서는 두 항목의 글이 모두 보인다.
+
+**기대:** 원본에서 li 전체가 화면 전용이면 번호·불릿·항목 공간을 포함한 항목 전체의 표시를 보존해야 한다. 글만 숨겨 항목을 남기는 것은 같은 표시가 아니다. 현재 모델로 표현하지 못하면 원본을 보존해야 한다.
+
+**원인 — 정적 판독:** walk(li)의 글은 li의 표시를 only로 받아 p에 옮기지만, 목록 items 모델에는 only 필드가 없고 renderer의 li는 항상 생성된다. 호스트 CSS는 이 li 자체에서 번호를 증가시키고 배지를 그린다. 모바일의 글·이미지 스트림은 원본·출력 모두 ALL ITEM이라 순서 검사가 통과한다. 생성된 marker와 빈 항목 존재는 검사하지 않는다.
+
+## Minor
+
+### M-1. 블록 표에서 실제로 보존한 열 너비를 INLINE_STYLE_DROPPED라고 경고
+
+**위치:** `packages/core/src/types/blocks.ts:145`~`:149`, `:244`~`:248`; 비교 경로는 `packages/core/src/types/type26.ts:185`~`:187`이다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container"><section class="cms type01"><div class="cms-inner">
+  <p>BEFORE</p>
+  <table>
+    <colgroup><col style="width:30%"><col></colgroup>
+    <thead><tr><th>A</th><th>B</th></tr></thead>
+    <tbody><tr><td rowspan="2">MERGED</td><td>ONE</td></tr><tr><td>TWO</td></tr></tbody>
+  </table>
+  <p>AFTER</p>
+</div></section></div>
+```
+
+**실제:** blocks로 정상 변환되고 colWidths에 30%가 보존되며, HTML도 `<col style="width: 30%;">`다. 표 앞뒤 글 순서와 rowspan=2도 보존된다. 그런데 진단에는 `INLINE_STYLE_DROPPED` / `col의 inline style 일부 제거: width:30%`가 함께 남는다.
+
+**기대:** 실제로 보존한 속성을 제거했다고 보고하지 않아야 한다. LAYOUT_SIMPLIFIED 경고와 별개로 이 세부 진단의 내용이 결과와 맞아야 한다.
+
+**원인 — 정적 판독:** blocks가 scanSection의 일반 style 제거 진단을 그대로 넘긴다. 같은 너비 읽기·표 출력 helper를 쓰는 type26은 모델로 옮긴 col width 경고를 따로 걸러내지만, blocks에는 이 보정이 없다. 데이터 손실은 아니고 이미 partial인 파일 상태도 바꾸지 않으므로 Minor다.
+
+## 재분류·모드 분리·resetReads 확인
+
+### 직접 실행
+
+- 적힌 타입은 type02이고 안쪽이 cms-row-list / cms-list-item / cms-description-box / 제목·설명인 입력은 **type17**로 변환됐다. STRUCTURE_RETYPED는 info, detail은 declared:type02 / used:type17이며 같은 입력을 3회 더 변환해 HTML이 같았다.
+- 그 입력에 `cms-unregistered-structure`와 추가 글을 넣으면 STRUCTURE_RETYPED가 발생하지 않고 blocks로 간다. 클래스가 맞지 않는 후보를 구조 재분류로 강행하지 않는다.
+- `type01 프리셋 → 글·이미지·글·이미지·글의 blocks → type01 프리셋` 혼합 페이지는 fallback 0, renderPage 블록 모드 preset → general → preset이다. MIXED_MODE_SPLIT 정보 진단은 두 번이다.
+- 같은 혼합 출력의 Chromium 1100/360px 직접 감싸개는 mig-container → inner → mig-container다. 섹션 세 개가 존재하고 일반 모드 selector `.migration-content:not(:has(.mig-container)) .mig-section.type-text`에 해당하는 섹션은 정확히 한 개다. 일반 섹션이 프리셋 컨테이너에 섞이지 않는다.
+- 같은 SourceSection DOM을 type01.parse로 읽은 다음 blocks.parse로 옮기는 분리 실험을 했다. reset 없이 호출하면 `같은 글을 두 칸으로 읽음: <p> 글을 두 번 읽음`이 재현되고, resetReads를 사이에 호출하면 해당 fallbackReason이 사라진다. **이는 의도적으로 reset을 생략한 직접 호출 대조이며, 현재 제품 경로의 실패라고 집계하지 않는다.**
+- 실제 convertDocument의 해당 입력은 blocks로 정상 이동한다. 새로운 attempt 함수가 매 시도 시작 시 resetReads를 호출하는 코드와 일치한다. 상태 초기화에서 추가 누수 경로는 이번 검사에서 확정하지 않았다.
+- 표의 앞 글 → head/body·병합 표 → 뒤 글과 30% 열 너비는 M-1 입력에서 직접 보존을 확인했다. 행 자체의 PC 전용 표시가 옮겨지지 않는 별도 표 입력은 fallback되어 무경고로 내용을 노출하지 않았다.
+
+### 정적 판독·자동 테스트 근거
+
+- 재분류는 cms-* 클래스 허용 집합과 구분 클래스 존재 여부로 후보를 좁힌 다음, 각 후보에 finish와 순서 검사를 적용한다. 구조 표와 원본 component의 일치 테스트가 통과했다.
+- 실제 26개 STRUCTURE_RETYPED의 타입 변경 기록도 확인했다. 위 대표 입력 외에 확정한 재분류 오판은 없다. 클래스 집합만으로 모든 원본 디자인의 픽셀 동일성이 증명된다고 주장하지 않는다.
+- `convert-document.ts:75`~`:77`의 attempt는 적힌 타입·재분류 후보·blocks 모두에서 resetReads를 먼저 호출한다. `common.ts`의 resetReads는 하위 요소들의 readAsText·readInParts·readCount를 모두 지운다.
+- LAYOUT_SIMPLIFIED를 warn으로 두어 partial로 만드는 정책 자체는 타당하다. 배치 단순화는 사용자가 확인해야 한다. 다만 I-1~I-3은 이 경고로 허용할 단순 배치 변경을 넘어서는 번호·항목 표시의 변경이다.
+
+## 실제 703페이지 대조·검증 결과
+
+**직접 실행:** 78133b4와 52cbe1b로 원본 703개를 각각 변환해 파일 상태 및 섹션 type/fallback을 비교했다.
+
+- 파일 259개에서 섹션 타입 변화가 있었고, 원본 보존은 428 → **50**으로 378개 감소했다. 정상 타입에서 fallback으로 새로 바뀐 섹션은 없었다.
+- 새 진단은 STRUCTURE_RETYPED **26개**, LAYOUT_SIMPLIFIED **352개**로 설계와 같다. INVALID_DATA는 0이다.
+- 파일 집계는 success 320 → **326**, partial 368 → **363**, failed 15 → **14**다.
+- 남은 fallback 50개 고정 목록과 실제 페이지의 글 순서 검사도 통과했다. I-1~I-3은 이 데이터에 없는 추가 목록 속성/표시 입력이며, 해당 테스트의 통과만으로 새 일반 모드의 모든 의미 보존이 보장되지는 않는다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 36 files / 933 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 5 files / 194 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 703 / success 326 / partial 363 / failed 14 / fallback 50 |
+| 추가 직접 검사 | 목록 번호·표시 재현, 표 보존·진단, 구조 재분류 대조, 혼합 모드·상태 초기화, 이전 버전 703개 비교 |
+
+위 제품 검증 명령은 모두 종료 코드 0이다. 브라우저 원본에는 [Bootstrap 4.6.2 배포 CSS](https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css) + cms.css, 출력에는 host-style.css를 적용했다. 실사이트 전체 CSS를 확보한 비교가 아니다. 1100/360px의 DOM/CSS 측정과 캡처 확인을 구분해 위에 기록했다. 임시 스크립트·캡처는 /tmp에만 두고 커밋하지 않았다.
+
+아래는 이전 보고서의 원문 보관이며 현재 판정 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — bb06097 및 그 이전 기록</summary>
+
 # 실제 원본·703페이지 13차 재검수 — bb06097
 
 - 검수일: 2026-11-17 (KST).
@@ -1735,6 +1896,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
