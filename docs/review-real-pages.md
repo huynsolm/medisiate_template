@@ -1,3 +1,101 @@
+# 실제 원본·703페이지 12차 재검수 — 7407636
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `7407636`, 범위: `bd084d0..7407636`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장 및 `docs/review-request-real-pages.md` 19장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 복사본을 준비했다. cms/는 gitignore 대상으로 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았고 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전의 숨김 서식 글 입력은 이제 원본 보존된다. 원본과 출력의 표시 함수를 분리한 방향도 맞다. 다만 같은 요소에 두 호스트 표시 클래스가 함께 있으면 새 함수가 CSS 선언 우선순위와 다르게 계산해 정상 변환을 거부하는 오탐이 있다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 1 | I-1 동일 요소의 common-display-pc/mo 조합을 모든 화면에서 숨김으로 오판 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+I-1은 **추가 최소 입력**이며 실제 703페이지에서 발생했다고 집계하지 않는다. bd084d0에서는 정상 변환하던 입력의 새 오탐이다. 현재 렌더러가 두 클래스를 함께 생성한다는 주장은 아니다. 입력 서식에 남을 수 있는 클래스 조합과 새 출력 표시 함수의 실제 CSS 일치 여부를 검토했다.
+
+## 이전 입력 수정 확인 — 직접 실행
+
+- `BEFORE<span class="d-none">HIDDEN</span>AFTER`: LOSSY_PARSE·fallback 1. 원본에 없던 글이 출력 PC 화면에 나타난다는 사유로 보존한다.
+- `BEFORE<span class="d-none d-lg-block">HIDDEN</span>AFTER`: LOSSY_PARSE·fallback 1. 원본에서 숨는 태블릿 화면에 글이 나타난다는 사유로 보존한다.
+- 이전처럼 두 입력이 success·무경고로 넘어가지 않는다. 원본은 Bootstrap 표시 규칙, 출력은 hostVisibilityOf를 넘기는 분리가 코드에서 확인된다.
+- 렌더러가 붙이는 common-display-pc/mo 단독 클래스의 정상 동작과, 실제 글이 없는 br 대조 입력은 기존 추가 테스트에서 통과했다.
+
+## Important
+
+### I-1. 두 호스트 표시 클래스를 같은 요소에 붙이면 CSS는 PC 전용인데 검사는 모든 화면에서 숨김으로 판단
+
+**위치:** `packages/core/src/parse/common.ts:156`~`:161`의 hostVisibilityOf; 호출은 `packages/core/src/convert/convert-document.ts`의 textOrderDiffers 출력 쪽이다. 실제 기준 CSS는 `reference/host-style.css:357`~`:375`다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner">
+    <div class="cms-description-box"><p class="cms-description">BEFORE<span class="d-none d-lg-block common-display-pc common-display-mo">PC_TEXT</span>AFTER</p></div>
+  </div></section>
+</div>
+```
+
+**실제:** 현재 failed·LOSSY_PARSE·fallback 1. 사유는 PC 화면에서 원본 BEFOREPC_TEXTAFTER 자리에 출력 BEFOREAFTER가 온다는 것이다. bd084d0의 동일 입력은 success·무경고·fallback 0이다.
+
+**대조 입력 — 직접 실행:** span에서 common-display-mo 하나만 지우면 현재도 success·무경고·fallback 0이다. 원본 Bootstrap CSS 조건에서 두 입력의 글 표시는 같다. 입력의 common-display-*는 mig-* 예약 클래스가 아니므로 서식 정리에 남으며, 이 조합을 금지하는 입력 검증도 없다.
+
+**Chromium — 직접 실행:** 원본에는 Bootstrap 4.6.2 + cms.css를, 출력 후보에는 host-style.css를 적용했다.
+
+| 폭 | 원본의 PC_TEXT | 단독 common-display-pc 출력 | 같은 요소에 pc/mo 둘 다 있는 출력 CSS 대조 |
+|---|---|---|---|
+| 360px | 숨김 | 숨김 | 숨김 |
+| 800px | 숨김 | 숨김 | 숨김 |
+| 1100px | 표시(block) | 표시(block) | 표시(block) |
+
+출력 후보는 정상 대조 입력이 생성한 HTML이며, 마지막 열은 그 span에 common-display-mo도 붙여 CSS 동작을 직접 확인한 것이다. 현재 fallback 출력을 정상 출력이라고 측정한 것이 아니다. 두 클래스가 있어도 실제 호스트 CSS에서 해당 글은 PC에 보인다.
+
+**기대:** 같은 요소 안에서는 CSS 선언 순위로 그 요소의 표시를 먼저 정하고, 서로 다른 조상·자손 사이의 숨김은 그 다음에 합쳐야 한다. 위 입력의 source/output 표시가 동등한데 PC 글이 사라졌다고 거부하지 않아야 한다.
+
+**원인 — 정적 판독:** hostVisibilityOf는 common-display-pc가 있으면 모바일·태블릿을 false로, common-display-mo가 있으면 PC를 false로 만든다. 두 조건을 독립적인 숨김으로 AND하므로 동일 요소에 둘 다 있으면 모든 화면에서 false다.
+
+그러나 실제 CSS에서 PC 폭의 html:not(.design-edit-page) .common-display-pc 규칙은 .common-display-mo의 PC 숨김 규칙보다 뒤에 선언되어 있고 specificity·important 조건이 같다. 따라서 같은 요소에 둘 다 있으면 PC의 display:block이 이겨 결과는 PC 전용이다. 서로 다른 조상·자손에 각각 붙은 경우와 동일 요소에 동시에 붙은 경우를 구별해야 한다. 알려진 992~1023px 경계 차이로 인한 지적이 아니며 1100px에서 확인했다.
+
+## 호스트 표시 함수 추가 대조 — 직접 실행
+
+3단계(부모·중간 상자·내용 요소) 각각에 클래스 없음 / pc / mo / pc+mo 네 상태를 넣은 64개 조합을 만들었다. core hostVisibilityOf와 Chromium의 host-style.css 표시를 360/800/1100px에서 비교했다.
+
+- 총 192건 중 173건 일치, 19건 불일치.
+- 19건 모두 PC 폭에서 같은 요소에 두 클래스가 있는 경우다. 실제 CSS는 표시하지만 함수는 숨김으로 계산한다.
+- 두 클래스를 동일 요소에 함께 두지 않은 단독·조상 중첩 조합에서는 불일치가 없었다.
+- 이는 I-1의 같은 원인을 여러 조합으로 확인한 것이며 19개 별도 결함으로 세지 않는다.
+
+## 실제 페이지·회귀 대조 — 직접 실행
+
+- 실제 703개 파일을 bd084d0와 현재 코드로 각각 변환해 파일 상태와 섹션 type/fallback을 대조했다. 변화 0개. success 320 / partial 368 / failed 15 유지.
+- 순서 사유 fallback 9개 고정 목록 테스트도 통과했다. 이번 최소 입력의 오탐은 해당 실제 페이지 표본 밖의 사례다.
+- 기존 28타입 × 4변형(공백·이미지 없음·인라인 서식·문단 블록) 총 112개 입력은 전부 fallback 0이며 이전 HTML과 byte 단위로 같다.
+- 원본 Bootstrap 버전 미확인이라는 기존 한계는 남는다. 이번 I-1의 출력 판단은 버전을 알고 있는 로컬 host-style.css의 실제 선언을 근거로 한다.
+- Chromium 비교에는 보유한 [Bootstrap 4.6.2 배포 CSS](https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css), reference/cms-original/css/cms.css, reference/host-style.css를 사용했다. 실사이트 전체 CSS를 새로 확보한 비교가 아니다.
+
+## 실행 결과
+
+다음 명령을 7407636에서 직접 실행했고 모두 종료 코드 0이었다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 33 files / 907 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 4 files / 192 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 703 / success 320 / partial 368 / failed 15 |
+| 추가 직접 검사 | 이전 숨김 글 입력, 새 오탐·대조 입력, 호스트 표시 조합 192건 |
+
+임시 실행 스크립트·브라우저 기록은 /tmp에만 두고 커밋하지 않았다. 자동 테스트 통과와 위 검수 지적을 구분한다. 아래는 이전 원문 보관이며 현재 판정 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — 9f452dc 및 그 이전 기록</summary>
+
 # 실제 원본·703페이지 11차 재검수 — 9f452dc
 
 - 검수일: 2026-11-17 (KST).
@@ -1554,6 +1652,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
