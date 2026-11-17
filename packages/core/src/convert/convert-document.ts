@@ -1,13 +1,13 @@
 import { parse } from 'parse5';
 import type { Diagnostic, FileStatus, ImageKind, PageMeta, PageModel, SectionModel, Theme } from '../model/index.ts';
 import { renderPage } from '../page/render-page.ts';
-import { attr, descendants, hasClass, parseHtmlFragment, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
+import { ancestors as ancestorsOf, attr, descendants, hasClass, parseHtmlFragment, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
 import { sectionTypeId } from '../parse/sections.ts';
 import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
-import { ownVisibility, visibilityOf, VIEWS, type View } from '../parse/common.ts';
+import { visibilityOf, VIEWS, type View } from '../parse/common.ts';
 import type { TypeRegistry } from '../types/definition.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
 
@@ -231,7 +231,8 @@ function segments(node: DomNode, view: View, ignore: ((el: DomElement) => boolea
   if ('tagName' in node) {
     const el = node as DomElement;
     if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return out;
-    if (ownVisibility(el)?.[view] === false) return out;
+    // 조상까지 폭 구간마다 합친 실제 보임으로 뺀다(부모·자식이 서로 다른 구간에서 숨는 경우. 10차 재검수 I-1)
+    if (visibilityOf(el)[view] === false) return out;
     if (el.tagName === 'br') {
       mark();
       return out;
@@ -312,37 +313,35 @@ const VIEW_NAME: Record<View, string> = { pc: 'PC', tablet: '태블릿', mo: '�
 /**
  * 원본에서 한 화면 안에서도 폭에 따라 보였다 숨었다 하는 내용(예: d-block d-xl-none, d-sm-none d-md-block)을 찾는다.
  * 출력은 화면 단위(PC / 모바일·태블릿)로만 숨길 수 있어 이런 표시를 옮길 수 없으므로 원본을 보존해야 한다 (8차 재검수 I-1).
+ * 판정은 **내용 자체**(글 조각·이미지)의 실제 보임으로 한다: 조상까지 폭 구간마다 합친 뒤 화면별로 줄인다.
+ * 부모가 그 화면 전체를 숨기거나(9차 I-1), 부모·자식이 서로 다른 구간에서 숨어 합치면 화면 단위가 되는 경우(10차 I-1)는 문제가 아니다.
  */
-function partlyShown(node: DomNode, ignore: ((el: DomElement) => boolean) | undefined): string | undefined {
+function partlyShown(node: DomNode, ignore: ((el: DomElement) => boolean) | undefined, parent?: DomElement): string | undefined {
+  if (node.nodeName === '#text') {
+    if (!parent || !((node as { value?: string }).value ?? '').trim()) return undefined;
+    return mixedAt(parent);
+  }
   if (!('childNodes' in node)) return undefined;
+  let here = parent;
   if ('tagName' in node) {
     const el = node as DomElement;
     if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return undefined;
-    // 조상까지 합친 실제 표시로 본다: 부모가 그 화면 전체에서 숨기면 자식의 폭 구간 변화는 화면에 나타나지 않는다 (9차 재검수 I-1)
-    if (ownVisibility(el)) {
-      const shown = visibilityOf(el);
-      const view = VIEWS.find((v) => shown[v] === 'mixed' && hasContentIn(el, v, ignore));
-      if (view) return `원본 내용이 ${VIEW_NAME[view]} 화면 안에서도 폭에 따라 보였다 숨었다 함(출력으로 옮길 수 없는 표시: ${classesOf(el).filter((c) => c.startsWith('d-')).join(' ')})`;
-    }
+    if (el.tagName === 'img') return mixedAt(el);
+    here = el;
   }
   for (const child of node.childNodes as DomNode[]) {
-    const found = partlyShown(child, ignore);
+    const found = partlyShown(child, ignore, here);
     if (found) return found;
   }
   return undefined;
 }
 
-/** 그 화면에서 숨지 않은 글이나 이미지가 요소 안에 있는지(자손이 그 화면에서 숨으면 뺀다) */
-function hasContentIn(node: DomNode, view: View, ignore: ((el: DomElement) => boolean) | undefined, top = true): boolean {
-  if (node.nodeName === '#text') return ((node as { value?: string }).value ?? '').trim() !== '';
-  if (!('childNodes' in node)) return false;
-  if ('tagName' in node) {
-    const el = node as DomElement;
-    if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return false;
-    if (!top && ownVisibility(el)?.[view] === false) return false;
-    if (el.tagName === 'img') return true;
-  }
-  return (node.childNodes as DomNode[]).some((child) => hasContentIn(child, view, ignore, false));
+function mixedAt(el: DomElement): string | undefined {
+  const shown = visibilityOf(el);
+  const view = VIEWS.find((v) => shown[v] === 'mixed');
+  if (!view) return undefined;
+  const marks = [el, ...ancestorsOf(el)].flatMap((n) => classesOf(n).filter((c) => c.startsWith('d-')));
+  return `원본 내용이 ${VIEW_NAME[view]} 화면 안에서도 폭에 따라 보였다 숨었다 함(출력으로 옮길 수 없는 표시: ${marks.join(' ')})`;
 }
 
 export function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions, ignore?: (el: DomElement) => boolean): string | undefined {

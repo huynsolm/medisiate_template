@@ -358,3 +358,31 @@ describe('9th review: composed visibility, input mig-* classes, Bootstrap 4 util
     expect(r.html).not.toContain('common-display-pc');
   });
 });
+
+describe('10th review: parent and child hiding in different width ranges', () => {
+  const visual = (wrap: string, cls: string) => convert(`<section class="cms type23"><div class="cms-inner"><div class="cms-visual ${wrap}"><img src="https://example.com/image.png" alt="" class="${cls}"></div></div></section>`);
+  const only = (r: ReturnType<typeof convert>) => (r.page.sections[0]!.data as { image?: { only?: string } }).image?.only;
+
+  it('parent d-block d-sm-none d-lg-block + child d-none d-sm-block is exactly PC only', () => {
+    const r = visual('d-block d-sm-none d-lg-block', 'd-none d-sm-block');
+    expect(r.page.sections[0]!.type).toBe('type23');
+    expect(only(r)).toBe('pc');
+    expect(r.html).toContain('common-display-pc');
+  });
+
+  it('the mirror case is exactly mobile + tablet only', () => {
+    const r = visual('d-block d-xl-none', 'd-block d-lg-none d-xl-block');
+    expect(r.page.sections[0]!.type).toBe('type23');
+    expect(only(r)).toBe('mo');
+  });
+
+  it('a range that still changes inside one screen after combining is preserved', () => {
+    expect(visual('d-block d-sm-none d-lg-block', 'd-block').page.sections[0]!.type).toBe('fallback');
+    expect(visual('d-block', 'd-block d-xl-none').page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('text that changes inside one screen is preserved too', () => {
+    const box = (inner: string) => convert(`<section class="cms type23"><div class="cms-inner"><div class="cms-visual"><img src="https://example.com/image.png" alt=""></div><div class="cms-description-box"><p class="cms-description">${inner}</p></div></div></section>`);
+    expect(box('<span class="d-block d-xl-none">숨는 글</span>').page.sections[0]!.type).toBe('fallback');
+  });
+});

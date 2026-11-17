@@ -87,43 +87,65 @@ const VIEW_SPANS: Record<View, number[]> = { mo: [0, 576], tablet: [768], pc: [9
 const D_ORDER = ['none', 'inline', 'inline-block', 'block', 'table', 'table-row', 'table-cell', 'flex', 'inline-flex'];
 const D_CLASS = new RegExp(`^d-(?:(sm|md|lg|xl)-)?(${D_ORDER.join('|')})$`, 'u');
 
+/** Bootstrap 폭 구간의 시작점: 0~575, 576~767, 768~991, 992~1199, 1200~ */
+const SPANS = [0, 576, 768, 992, 1200];
+/** 폭 구간마다 보이는지(SPANS와 같은 순서) */
+export type SpanShown = boolean[];
+
 /**
- * 요소 자신의 클래스 기준으로 화면마다 보이는지. 표시 클래스가 없으면 undefined(= 모든 화면에서 보임).
+ * 요소 자신의 클래스 기준으로 폭 구간마다 보이는지. 표시 클래스가 없으면 undefined(= 모든 폭에서 보임).
  * - Bootstrap 표시 클래스(d-none, d-md-block, d-lg-none, d-xl-none …)는 Bootstrap CSS처럼 계산한다:
  *   폭이 넓어질수록 큰 breakpoint 규칙이 덮어쓰고, 같은 breakpoint 안에서는 CSS 선언 순서가 늦은 값이 이긴다.
  *   d-lg-block 하나만 있으면 큰 화면에서 block을 지정할 뿐이라 모든 화면에서 보인다 (7차 재검수 I-1).
- * - 화면 하나가 덮는 폭 구간(모바일 0~575·576~767, PC 992~1199·1200~)이 서로 다르면 'mixed'.
  * - 그 밖의 표시 이름(pc, mo, visible-lg, common-display-pc/mo …)은 PC 전용·모바일(태블릿 포함) 전용으로 본다.
  */
-export function ownVisibility(el: DomElement): Record<View, Shown> | undefined {
+export function ownSpans(el: DomElement): SpanShown | undefined {
   const classes = classesOf(el);
   const rules = classes.map((c) => D_CLASS.exec(c)).filter((m): m is RegExpExecArray => m !== null)
     .map((m) => ({ at: BREAKPOINT[m[1] ?? '']!, order: D_ORDER.indexOf(m[2]!), show: m[2] !== 'none' }));
   if (rules.length > 0) {
-    const at = (width: number) => {
+    return SPANS.map((width) => {
       const applicable = rules.filter((r) => r.at <= width).sort((a, b) => a.at - b.at || a.order - b.order);
       return applicable.length === 0 ? true : applicable[applicable.length - 1]!.show;
-    };
-    const view = (spans: number[]): Shown => {
-      const values = new Set(spans.map(at));
-      return values.size === 1 ? [...values][0]! : 'mixed';
-    };
-    return { mo: view(VIEW_SPANS.mo), tablet: view(VIEW_SPANS.tablet), pc: view(VIEW_SPANS.pc) };
+    });
   }
   const named = classes.filter((c) => !c.startsWith('d-'));
-  if (named.some((c) => PC_MARK.test(c))) return { mo: false, tablet: false, pc: true };
-  if (named.some((c) => MO_MARK.test(c))) return { mo: true, tablet: true, pc: false };
+  if (named.some((c) => PC_MARK.test(c))) return SPANS.map((w) => w >= BREAKPOINT.lg!);
+  if (named.some((c) => MO_MARK.test(c))) return SPANS.map((w) => w < BREAKPOINT.lg!);
   return undefined;
 }
 
-/** 요소와 조상들의 표시를 합친 화면별 보임(조상이 숨기면 숨음, 숨지 않았는데 어느 하나라도 폭에 따라 바뀌면 'mixed') */
-export function visibilityOf(el: DomElement): Record<View, Shown> {
-  const out: Record<View, Shown> = { mo: true, tablet: true, pc: true };
+/**
+ * 요소와 조상들의 표시를 **폭 구간마다** 먼저 합친 실제 보임(그 구간에서 하나라도 숨기면 숨음).
+ * 화면별 요약(mixed)으로 먼저 줄이면 부모·자식이 서로 다른 구간에서 숨는 경우를 계산할 수 없다 (10차 재검수 I-1).
+ */
+export function spansOf(el: DomElement): SpanShown {
+  const out = SPANS.map(() => true);
   for (const node of [el, ...ancestors(el)]) {
-    const v = ownVisibility(node);
-    if (v) for (const view of VIEWS) out[view] = out[view] === false || v[view] === false ? false : out[view] === 'mixed' || v[view] === 'mixed' ? 'mixed' : true;
+    const own = ownSpans(node);
+    if (own) own.forEach((shown, i) => { out[i] &&= shown; });
   }
   return out;
+}
+
+/** 폭 구간별 보임을 화면별로 줄인다. 한 화면이 덮는 구간끼리 다르면 'mixed' */
+function toViews(spans: SpanShown): Record<View, Shown> {
+  const view = (starts: number[]): Shown => {
+    const values = new Set(starts.map((w) => spans[SPANS.indexOf(w)]!));
+    return values.size === 1 ? [...values][0]! : 'mixed';
+  };
+  return { mo: view(VIEW_SPANS.mo), tablet: view(VIEW_SPANS.tablet), pc: view(VIEW_SPANS.pc) };
+}
+
+/** 요소 자신의 클래스 기준 화면별 보임. 표시 클래스가 없으면 undefined */
+export function ownVisibility(el: DomElement): Record<View, Shown> | undefined {
+  const own = ownSpans(el);
+  return own && toViews(own);
+}
+
+/** 요소와 조상들을 폭 구간마다 합친 뒤 화면별로 줄인 실제 보임 */
+export function visibilityOf(el: DomElement): Record<View, Shown> {
+  return toViews(spansOf(el));
 }
 
 export function deviceOf(el: DomElement): 'pc' | 'mo' | undefined {

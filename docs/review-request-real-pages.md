@@ -148,3 +148,9 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 입력의 `mig-*` 클래스는 서식 정리에서 지운다(호스트 역할 클래스 예약). 구분 자리 규칙은 그대로.
 - 표시 규칙은 Bootstrap 4 `_display.scss`의 9개 값만.
 - 기대 수치: `npm test` 898 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
+
+## 18. 11차 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(10차 재검수 반영). 범위: `4877115..` 이후.
+- 표시는 Bootstrap 폭 구간 5개마다 계산해 조상과 구간별로 먼저 합치고, 화면별 요약은 마지막에 한다. 폭 구간 숨김 판정과 화면별 순서 비교 모두 내용의 실제(합친) 보임을 쓴다.
+- 기대 수치: `npm test` 902 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.

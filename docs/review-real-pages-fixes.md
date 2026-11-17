@@ -205,3 +205,18 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트 10개(Codex 입력 그대로, 대조 입력, 같은 유형 변형). 수정 대상 7개는 수정을 되돌리면 실패.
 - `npm test` 898 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
 - 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음).
+
+## 10차 재검수(`4877115`) 지적 반영
+
+### I-1. 부모·자식이 서로 다른 폭 구간에서 숨는 경우를 합치지 못해 PC 전용 입력을 거부
+- 원인: 요소마다 먼저 화면별 요약(`'mixed'`)으로 줄인 뒤 조상과 합쳤다. 부모 `d-block d-sm-none d-lg-block`(576~991 숨김)과 이미지 `d-none d-sm-block`(0~575 숨김)은 합치면 정확히 PC 전용인데, 요약 단계에서 어느 구간에서 숨는지가 사라져 계산할 수 없었다.
+- 수정(`packages/core/src/parse/common.ts`): 표시를 **Bootstrap 폭 구간 5개(0·576·768·992·1200)마다의 보임**으로 계산한다(`ownSpans`). 조상과는 구간마다 먼저 합치고(`spansOf`), 화면별 요약(`toViews`)은 마지막에 한다. `ownVisibility`·`visibilityOf`는 이 위에서 동작한다.
+- 수정(`convert-document.ts`):
+  - `partlyShown`은 **내용 자체**(글 조각·이미지)의 실제 보임으로 판정한다. 합친 결과가 한 화면 안에서 폭에 따라 바뀔 때만 원본 보존.
+  - 화면별 순서 비교(`segments`)도 요소 자신이 아니라 조상까지 합친 실제 보임으로 뺀다(같은 입력에서 순서 검사가 반대로 거부하지 않게).
+- Codex 입력은 `only=pc`로 정상 변환, 반대 방향(합치면 모바일·태블릿 전용)도 `only=mo`. 합친 뒤에도 한 화면 안에서 바뀌는 입력(부모만 sm 구간 숨김, 이미지 `d-xl-none`, 글 `d-xl-none`)은 원본 보존.
+
+### 검증
+- 새 테스트 4개(Codex 입력, 반대 방향, 합친 뒤에도 남는 구간 변화, 글). 수정 대상 2개는 수정을 되돌리면 실패.
+- `npm test` 902 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
+- 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음).
