@@ -86,3 +86,15 @@ describe('section notes review fixes', () => {
     expect(r.status).toBe('partial');
   });
 });
+
+describe('section notes probe', () => {
+  it('M-1 body text that already holds the probe words does not fool the check', () => {
+    const data = structuredClone(defaultRegistry.get('type01')!.defaults) as Record<string, unknown>;
+    data.title = 'MIGNOTESPROBEINTRO';
+    data.desc = 'MIGNOTESPROBENOTE';
+    const s = { id: 's1', type: 'type01', variant: 'default', modifiers: {}, data };
+    expect(rendersNotes(defaultRegistry.get('type01')!, s as never)).toBe(false);
+    const preset = { id: 's1', type: 'type09', variant: 'default', modifiers: {}, data: { ...(structuredClone(defaultRegistry.get('type09')!.defaults) as object), heading: 'MIGNOTESPROBEINTRO MIGNOTESPROBENOTE' } };
+    expect(rendersNotes(defaultRegistry.get('type09')!, preset as never)).toBe(true);
+  });
+});

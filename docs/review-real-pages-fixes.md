@@ -323,3 +323,9 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트 7개(core 6: type01·type00 미출력 판정과 경고, type09 출력, 링크·style 경고 / 편집기 e2e 1: type01에는 칸 없음, type26에서 공통 설명 라벨이 자기 칸에 포커스, 입력이 HTML에 반영, `id="intro"` 1개). 수정을 되돌리면 core 4개·e2e 1개 실패.
 - `npm test` 968 passed, `npm run test:browser` 197 passed, lint·typecheck 오류 없음.
 - 703페이지: success 345 / partial 344 / failed 14, 블록 순서 306, 원본 보존 50개.
+
+## 본문 앞뒤 설명 재검수(`a662bb6`) 지적 반영
+
+### M-1. 본문에 검사용 표시 글이 이미 있으면 `rendersNotes`가 잘못 판정
+- 수정(`types/notes.ts`): 설명 없이 한 번, 표시 글을 설명에 넣어 한 번 렌더해, 표시 글 개수가 **늘어나는지**로 판정한다. 본문에 같은 글이 있어도 결과가 바뀌지 않는다.
+- 검증: 새 테스트 1개(type01 본문에 두 표시 글 → 출력 안 함, type09 머리글에 두 표시 글 → 출력함)는 수정을 되돌리면 실패. `npm test` 969 passed, `npm run test:browser` 197 passed, lint·typecheck 오류 없음, 703페이지 success 345 / partial 344 / failed 14(변화 없음).

@@ -19,11 +19,20 @@ export function rendersNotes(def: TypeDefinition<unknown>, section: SectionModel
     return false;
   }
   if (!parsed.success) return false;
-  const probe: SectionModel = { ...section, data: parsed.data, notes: { intro: PROBE_INTRO, note: PROBE_NOTE } };
-  const strategy = def.strategyFor ? def.strategyFor(probe) : def.strategy;
+  const strategyOf = (section: SectionModel) => {
+    const strategy = def.strategyFor ? def.strategyFor(section) : def.strategy;
+    return strategy === 'any' ? 'general' : strategy;
+  };
+  const render = (notes: SectionModel['notes']) => {
+    const s: SectionModel = { ...section, data: parsed.data, notes };
+    return serialize(def.render(s, createRenderContext({ mode: strategyOf(s) })));
+  };
+  const count = (html: string, token: string) => html.split(token).length - 1;
   try {
-    const html = serialize(def.render(probe, createRenderContext({ mode: strategy === 'any' ? 'general' : strategy })));
-    return html.includes(PROBE_INTRO) && html.includes(PROBE_NOTE);
+    // 본문에 같은 표시 글이 이미 있을 수 있으므로(검수 M-1), 설명 없이 렌더한 결과보다 표시 글이 늘어나는지로 판정한다
+    const base = render(undefined);
+    const probe = render({ intro: PROBE_INTRO, note: PROBE_NOTE });
+    return count(probe, PROBE_INTRO) > count(base, PROBE_INTRO) && count(probe, PROBE_NOTE) > count(base, PROBE_NOTE);
   } catch {
     return false;
   }
