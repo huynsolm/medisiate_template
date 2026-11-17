@@ -148,6 +148,21 @@ export function visibilityOf(el: DomElement): Record<View, Shown> {
   return toViews(spansOf(el));
 }
 
+/**
+ * 출력(호스트 화면)에서 실제로 보이는지. 호스트 CSS(reference/host-style.css)에 있는 표시 규칙은
+ * common-display-pc(1024 이상만)·common-display-mo(1024 미만만) 둘뿐이다. Bootstrap d-* 클래스는 호스트에 규칙이 없어
+ * 출력에 남아도 아무것도 숨기지 않는다 (11차 재검수 I-1). 태블릿은 호스트에서 모바일 쪽이다.
+ */
+export function hostVisibilityOf(el: DomElement): Record<View, Shown> {
+  const out: Record<View, Shown> = { mo: true, tablet: true, pc: true };
+  for (const node of [el, ...ancestors(el)]) {
+    const classes = classesOf(node);
+    if (classes.includes('common-display-pc')) { out.mo = false; out.tablet = false; }
+    if (classes.includes('common-display-mo')) out.pc = false;
+  }
+  return out;
+}
+
 export function deviceOf(el: DomElement): 'pc' | 'mo' | undefined {
   for (const node of [el, ...ancestors(el)]) {
     const classes = classesOf(node);

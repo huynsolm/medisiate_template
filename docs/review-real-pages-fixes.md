@@ -220,3 +220,16 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트 4개(Codex 입력, 반대 방향, 합친 뒤에도 남는 구간 변화, 글). 수정 대상 2개는 수정을 되돌리면 실패.
 - `npm test` 902 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
 - 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음).
+
+## 11차 재검수(`bd084d0`) 지적 반영
+
+### I-1. 출력에 남은 Bootstrap `d-none`을 호스트 CSS가 모르는데 순서 검사는 숨는다고 봄
+- 원인: 서식 글(rich text)은 원본 클래스(`d-none` 등)를 남긴다. 순서 검사는 원본과 출력을 같은 Bootstrap 규칙으로 읽어, 출력의 `<span class="d-none">`도 숨는다고 보고 통과시켰다. 호스트 CSS(`reference/host-style.css`)에는 `.d-none`·`.d-lg-block` 같은 표시 규칙이 없어 실제 출력에서는 숨긴 글이 나타난다.
+- 수정: 출력 쪽은 **호스트 CSS의 표시 규칙**으로만 읽는다(`common.ts` `hostVisibilityOf`). 호스트에 있는 것은 `common-display-pc`(1024 이상만)·`common-display-mo`(1024 미만만) 둘뿐이고, 다른 클래스는 아무것도 숨기지 않는다. 원본 쪽은 지금처럼 Bootstrap 규칙(`visibilityOf`)으로 읽는다.
+- 결과: 원본에서 숨던 서식 글이 출력에서 보이게 되면 순서 검사가 차이를 찾아 원본을 보존한다(`d-none`, `d-none d-lg-block`, `d-lg-none` span 모두). 글이 없는 줄바꿈(`<br class="d-none d-lg-block">`)은 그대로 통과. 렌더러가 붙이는 `common-display-pc/mo`(한쪽 화면 전용 이미지)는 그대로 인정된다.
+- 서식 글의 표시 클래스를 호스트 클래스로 옮기는 방법은 쓰지 않았다. `common-display-*`는 `display: block !important`라 줄 안 글에 붙이면 줄이 나뉜다.
+
+### 검증
+- 새 테스트 5개(Codex 입력 두 가지와 `d-lg-none` 변형, 글 없는 줄바꿈, 렌더러의 호스트 표시 클래스). 수정 대상 3개는 수정을 되돌리면 실패.
+- `npm test` 907 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
+- 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음).

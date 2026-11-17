@@ -154,3 +154,9 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(10차 재검수 반영). 범위: `4877115..` 이후.
 - 표시는 Bootstrap 폭 구간 5개마다 계산해 조상과 구간별로 먼저 합치고, 화면별 요약은 마지막에 한다. 폭 구간 숨김 판정과 화면별 순서 비교 모두 내용의 실제(합친) 보임을 쓴다.
 - 기대 수치: `npm test` 902 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
+
+## 19. 12차 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(11차 재검수 반영). 범위: `bd084d0..` 이후.
+- 순서 검사의 출력 쪽 표시는 호스트 CSS 규칙(`common-display-pc/mo`)으로만 판정한다. 원본 쪽은 Bootstrap 4 규칙 그대로.
+- 기대 수치: `npm test` 907 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.

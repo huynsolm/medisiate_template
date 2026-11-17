@@ -7,7 +7,7 @@ import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
-import { visibilityOf, VIEWS, type View } from '../parse/common.ts';
+import { hostVisibilityOf, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
 import type { TypeRegistry } from '../types/definition.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
 
@@ -203,7 +203,7 @@ const BLOCK_TAGS = new Set(['p', 'div', 'li', 'dt', 'dd', 'td', 'th', 'tr', 'cap
  * - 원본 쪽 위험한 링크는 출력에서 링크를 빼므로(UNSAFE_LINK_REMOVED) 링크 없는 글로 본다.
  * - ignore가 고른 원본 요소(호스트 CSS가 다시 그리는 표시)와 주석·script·style·template은 뺀다.
  */
-function segments(node: DomNode, view: View, ignore: ((el: DomElement) => boolean) | undefined, href = '', out: Segment[] = [], state = { open: false }): Segment[] {
+function segments(node: DomNode, view: View, ignore: ((el: DomElement) => boolean) | undefined, seen: (el: DomElement) => Record<View, Shown>, href = '', out: Segment[] = [], state = { open: false }): Segment[] {
   const close = () => { state.open = false; };
   // 열린 글 덩어리 안의 지금 위치를 "구분 자리"로 기록한다(<br>, 줄 안 요소의 시작·끝). 덩어리 합치기는 이 자리에서만 허용된다
   const mark = () => {
@@ -231,8 +231,9 @@ function segments(node: DomNode, view: View, ignore: ((el: DomElement) => boolea
   if ('tagName' in node) {
     const el = node as DomElement;
     if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return out;
-    // 조상까지 폭 구간마다 합친 실제 보임으로 뺀다(부모·자식이 서로 다른 구간에서 숨는 경우. 10차 재검수 I-1)
-    if (visibilityOf(el)[view] === false) return out;
+    // 조상까지 폭 구간마다 합친 실제 보임으로 뺀다(부모·자식이 서로 다른 구간에서 숨는 경우. 10차 재검수 I-1).
+    // 원본은 Bootstrap 규칙, 출력은 호스트 CSS 규칙(seen)으로 본다 (11차 재검수 I-1)
+    if (seen(el)[view] === false) return out;
     if (el.tagName === 'br') {
       mark();
       return out;
@@ -251,7 +252,7 @@ function segments(node: DomNode, view: View, ignore: ((el: DomElement) => boolea
   const inline = !block && 'tagName' in node && separates(node as DomElement);
   if (block) close();
   if (inline) mark();
-  for (const child of node.childNodes as DomNode[]) segments(child, view, ignore, link, out, state);
+  for (const child of node.childNodes as DomNode[]) segments(child, view, ignore, seen, link, out, state);
   if (inline) mark();
   if (block) close();
   return out;
@@ -356,7 +357,7 @@ export function textOrderDiffers(element: DomElement, section: SectionModel, opt
   const partly = partlyShown(element, ignore);
   if (partly) return partly;
   for (const view of VIEWS) {
-    const problem = matchSegments(segments(element, view, ignore), segments(outputRoot, view, undefined));
+    const problem = matchSegments(segments(element, view, ignore, visibilityOf), segments(outputRoot, view, undefined, hostVisibilityOf));
     if (problem) return `원본과 글 순서가 다름(${VIEW_NAME[view]} 화면): ${problem}`;
   }
   return undefined;

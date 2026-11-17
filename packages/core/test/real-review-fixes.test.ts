@@ -386,3 +386,23 @@ describe('10th review: parent and child hiding in different width ranges', () =>
     expect(box('<span class="d-block d-xl-none">숨는 글</span>').page.sections[0]!.type).toBe('fallback');
   });
 });
+
+describe('11th review: the output is judged by the host CSS, which has no Bootstrap d-* rules', () => {
+  const desc = (inner: string) => convert(`<section class="cms type23"><div class="cms-inner"><div class="cms-description-box"><p class="cms-description">${inner}</p></div></div></section>`);
+
+  it.each(['d-none', 'd-none d-lg-block', 'd-lg-none'])('text hidden by %s in the original would show in the output, so it is preserved', (cls) => {
+    const r = desc(`BEFORE<span class="${cls}">HIDDEN</span>AFTER`);
+    expect(r.page.sections[0]!.type).toBe('fallback');
+    expect(r.page.diagnostics.some((d) => d.code === 'LOSSY_PARSE')).toBe(true);
+  });
+
+  it('a line break that only some screens use carries no text and stays fine', () => {
+    expect(desc('첫 줄<br class="d-none d-lg-block">둘째 줄').page.sections[0]!.type).toBe('type23');
+  });
+
+  it('host display classes from the renderer still count (PC-only image)', () => {
+    const r = convert('<section class="cms type23"><div class="cms-inner"><div class="cms-visual"><img src="https://example.com/image.png" alt="" class="d-none d-lg-block"></div></div></section>');
+    expect(r.page.sections[0]!.type).toBe('type23');
+    expect(r.html).toContain('common-display-pc');
+  });
+});
