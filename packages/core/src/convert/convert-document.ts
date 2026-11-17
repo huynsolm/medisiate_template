@@ -8,7 +8,8 @@ import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
 import { hostVisibilityOf, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
-import type { TypeRegistry } from '../types/definition.ts';
+import type { TypeDefinition, TypeRegistry } from '../types/definition.ts';
+import { STRUCTURE_CLASSES } from '../types/structure-classes.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
 
 export interface ConvertOptions {
@@ -68,6 +69,52 @@ function treeRecoveries(doc: DomNode, html: string): Array<{ code: string; line:
   return out;
 }
 
+type Attempt = { section: SectionModel; diagnostics: Diagnostic[] } | { reason: string; diagnostics: Diagnostic[] };
+
+/** 한 타입으로 옮겨 본다. 글·이미지를 모두 담고(parse) 원본과 글 순서가 같아야(textOrderDiffers) 성공이다 */
+function attempt(def: TypeDefinition<unknown>, src: SourceSection, id: string, options: ConvertOptions): Attempt {
+  const local: Diagnostic[] = [];
+  const result = def.parse!(src, { diagnostics: local });
+  const diagnostics = [...local, ...result.diagnostics];
+  if (result.fallbackReason) return { reason: result.fallbackReason, diagnostics };
+  const section: SectionModel = {
+    id,
+    type: def.id,
+    variant: result.variant,
+    modifiers: result.modifiers,
+    data: result.data,
+    source: { file: src.file, index: src.index, classList: src.classList },
+  };
+  // 글을 모두 담았어도 순서가 바뀔 수 있다(예: 버튼 뒤 문단이 버튼 앞으로). 이 섹션만 출력해 원본과 글 순서를 비교하고,
+  // 다르면 원본을 보존한다 (실제 원본 대조 재검수 R-I-2, I-3). 비교 규칙은 real-pages 테스트와 같다.
+  const reordered = textOrderDiffers(src.element, section, options, def.orderCheckIgnores);
+  if (reordered) return { reason: reordered, diagnostics };
+  return { section, diagnostics };
+}
+
+/** 원본 도구의 타입마다 공통인 클래스(구조를 가르지 않음) */
+const COMMON_STRUCTURE = new Set(['cms-inner', 'cms-header', 'cms-title', 'cms-eyebrow', 'cms-description', 'cms-description-box', 'cms-visual', 'cms-list-item', 'cms-list-wrap']);
+
+/**
+ * 섹션 안의 cms-* 클래스가 모두 어떤 타입의 원본 컴포넌트에 있는 클래스이고, 그 타입을 가르는 구조 클래스(목록·상자 등)를
+ * 하나 이상 쓰면 "같은 구조"로 본다. 그런 타입을 레지스트리 순서로 옮겨 보고 처음 성공한 것을 쓴다.
+ * 손실·순서 검사는 적힌 타입과 똑같이 적용된다.
+ */
+function retype(src: SourceSection, id: string, options: ConvertOptions, declared: string | undefined): { section: SectionModel; diagnostics: Diagnostic[] } | undefined {
+  const used = new Set(descendants(src.element).flatMap((el) => classesOf(el).filter((c) => c.startsWith('cms-'))));
+  for (const def of options.registry.list()) {
+    if (!def.parse || def.id === declared) continue;
+    const own = STRUCTURE_CLASSES[def.id];
+    if (!own) continue;
+    const allowed = new Set(own);
+    if (![...used].every((c) => allowed.has(c))) continue;
+    if (![...used].some((c) => !COMMON_STRUCTURE.has(c))) continue;
+    const tried = attempt(def, src, id, options);
+    if ('section' in tried) return tried;
+  }
+  return undefined;
+}
+
 export function convertDocument(input: string, file: string, options: ConvertOptions): ConvertResult {
   const diagnostics: Diagnostic[] = [];
   const ssi = input.match(SSI) ?? [];
@@ -116,7 +163,25 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
   for (const src of sources) {
     const id = `s${src.index}`;
     const def = options.registry.match(src);
-    if (!def?.parse) {
+    const first = def?.parse ? attempt(def, src, id, options) : undefined;
+    if (first && 'section' in first) {
+      diagnostics.push(...first.diagnostics);
+      sections.push(first.section);
+      continue;
+    }
+    // 적힌 타입으로 옮기지 못하면, 구조가 원본 도구의 다른 타입과 같은지 본다 (예: type02로 적혔지만 type17의 행 목록).
+    // 원본 CSS는 타입 번호가 아니라 목록·상자 클래스로 모양을 정하므로, 같은 구조의 타입으로 옮기면 모양도 같다.
+    const other = retype(src, id, options, def?.id);
+    if (other) {
+      diagnostics.push(...other.diagnostics, {
+        level: 'info', code: 'STRUCTURE_RETYPED', sectionIndex: src.index,
+        message: `${src.typeId ?? '타입 없음'} 섹션이 원본 도구의 ${other.section.type} 구조와 같아 ${other.section.type}로 변환`,
+        detail: { declared: src.typeId, used: other.section.type, ...(first ? { reason: first.reason } : {}) },
+      });
+      sections.push(other.section);
+      continue;
+    }
+    if (!first) {
       diagnostics.push({
         level: 'warn',
         code: 'UNSUPPORTED_TYPE',
@@ -127,30 +192,8 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
       sections.push(fallbackFromSource(src, id, src.typeId ? '미구현 타입' : '타입 번호 없음'));
       continue;
     }
-    const result = def.parse(src, { diagnostics });
-    diagnostics.push(...result.diagnostics);
-    if (result.fallbackReason) {
-      diagnostics.push({ level: 'warn', code: 'LOSSY_PARSE', message: `${def.id}: ${result.fallbackReason} → 원본을 fallback으로 보존`, sectionIndex: src.index });
-      sections.push(fallbackFromSource(src, id, result.fallbackReason));
-      continue;
-    }
-    const section: SectionModel = {
-      id,
-      type: def.id,
-      variant: result.variant,
-      modifiers: result.modifiers,
-      data: result.data,
-      source: { file: src.file, index: src.index, classList: src.classList },
-    };
-    // 글을 모두 담았어도 순서가 바뀔 수 있다(예: 버튼 뒤 문단이 버튼 앞으로). 이 섹션만 출력해 원본과 글 순서를 비교하고,
-    // 다르면 원본을 보존한다 (실제 원본 대조 재검수 R-I-2, I-3). 비교 규칙은 real-pages 테스트와 같다.
-    const reordered = textOrderDiffers(src.element, section, options, def.orderCheckIgnores);
-    if (reordered) {
-      diagnostics.push({ level: 'warn', code: 'LOSSY_PARSE', message: `${def.id}: ${reordered} → 원본을 fallback으로 보존`, sectionIndex: src.index });
-      sections.push(fallbackFromSource(src, id, reordered));
-      continue;
-    }
-    sections.push(section);
+    diagnostics.push(...first.diagnostics, { level: 'warn', code: 'LOSSY_PARSE', message: `${def!.id}: ${first.reason} → 원본을 fallback으로 보존`, sectionIndex: src.index });
+    sections.push(fallbackFromSource(src, id, first.reason));
   }
 
   const titleSection = sections.find((s) => s.type === 'type00');

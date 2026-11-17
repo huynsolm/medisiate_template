@@ -84,6 +84,7 @@ export const DIAGNOSTIC_CODES = [
   'INVALID_DATA',
   'PRESET_LAYOUT_FIXED',
   'UNSAFE_LINK_REMOVED',
+  'STRUCTURE_RETYPED',
 ] as const;
 
 export type DiagnosticCode = (typeof DIAGNOSTIC_CODES)[number];
