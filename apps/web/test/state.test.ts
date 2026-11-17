@@ -16,6 +16,15 @@ describe('editor reducer', () => {
     expect(s.page.sections[0]!.data).not.toBe(defaultRegistry.get('text-steps')!.defaults);
   });
 
+  it('edits the section notes (text before/after the preset body) and drops them when emptied', () => {
+    let s = reducer(start(), { type: 'add', typeId: 'type09' });
+    s = reducer(s, { type: 'setNotes', id: 's1', path: ['note'], value: '예약 문의 <strong>02-000-0000</strong>' });
+    expect(s.page.sections[0]!.notes).toEqual({ note: '예약 문의 <strong>02-000-0000</strong>' });
+    expect(renderForWeb(s.page).html).toContain('예약 문의 <strong>02-000-0000</strong>');
+    s = reducer(s, { type: 'setNotes', id: 's1', path: ['note'], value: '' });
+    expect(s.page.sections[0]!.notes).toBeUndefined();
+  });
+
   it('ignores unknown types', () => {
     expect(reducer(start(), { type: 'add', typeId: 'nope' }).page.sections).toHaveLength(0);
   });

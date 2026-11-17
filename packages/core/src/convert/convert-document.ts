@@ -1,13 +1,13 @@
 import { parse } from 'parse5';
 import type { Diagnostic, FileStatus, ImageKind, PageMeta, PageModel, SectionModel, Theme } from '../model/index.ts';
 import { renderPage } from '../page/render-page.ts';
-import { ancestors as ancestorsOf, attr, descendants, hasClass, parseHtmlFragment, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
+import { ancestors as ancestorsOf, attr, children, descendants, hasClass, parseHtmlFragment, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
 import { sectionTypeId } from '../parse/sections.ts';
 import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
-import { hostVisibilityOf, resetReads, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
+import { hostVisibilityOf, resetReads, richFrom, TEXT_BLOCKS, TEXT_INLINE, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
 import type { TypeDefinition, TypeRegistry } from '../types/definition.ts';
 import { STRUCTURE_CLASSES } from '../types/structure-classes.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
@@ -93,6 +93,49 @@ function attempt(def: TypeDefinition<unknown>, src: SourceSection, id: string, o
   return { section, diagnostics };
 }
 
+/**
+ * 본문 앞뒤 설명 상자를 떼고 옮겨 본다. 원본 .cms-inner 바로 아래의 .cms-description-box 중
+ * 본문(머리글·설명 상자가 아닌 자식)보다 모두 앞에 있는 것은 intro, 모두 뒤에 있는 것은 note가 된다.
+ * 본문 사이에 끼인 상자, 글로 옮길 수 없는 구조(목록·표·이미지)가 든 상자가 있으면 시도하지 않는다.
+ * 상자를 뗀 나머지는 타입의 손실 검사(finish)를 받고, 설명을 붙인 결과 전체는 원본 전체와 글 순서 검사를 받는다.
+ */
+function attemptWithNotes(def: TypeDefinition<unknown>, src: SourceSection, id: string, options: ConvertOptions): { section: SectionModel; diagnostics: Diagnostic[] } | undefined {
+  const inner = children(src.element).find((el) => hasClass(el, 'cms-inner')) ?? src.element;
+  const kids = children(inner);
+  const isBox = (el: DomElement) => hasClass(el, 'cms-description-box');
+  const main = kids.filter((el) => !isBox(el) && !hasClass(el, 'cms-header'));
+  const boxes = kids.filter(isBox);
+  if (!boxes.length || !main.length) return undefined;
+  const firstMain = kids.indexOf(main[0]!);
+  const lastMain = kids.indexOf(main[main.length - 1]!);
+  if (boxes.some((b) => kids.indexOf(b) > firstMain && kids.indexOf(b) < lastMain)) return undefined;
+  if (boxes.some((b) => descendants(b).some((d) => !TEXT_BLOCKS.has(d.tagName) && !TEXT_INLINE.has(d.tagName)) || descendants(b).some((d) => d.tagName === 'img'))) return undefined;
+  const read = (list: DomElement[]) => list.map((b) => richFrom(b)).filter((t) => richTextToPlain(t).trim() !== '').join('<br>');
+  // 상자를 잠시 떼고 parse한다(원본 DOM은 끝나면 그대로 되돌린다)
+  const parent = inner as unknown as { childNodes: DomNode[] };
+  const saved = [...parent.childNodes];
+  let result: ReturnType<NonNullable<TypeDefinition<unknown>['parse']>>;
+  const local: Diagnostic[] = [];
+  try {
+    parent.childNodes = saved.filter((n) => !boxes.includes(n as DomElement));
+    resetReads(src.element);
+    result = def.parse!(src, { diagnostics: local });
+  } finally {
+    parent.childNodes = saved;
+  }
+  if (result.fallbackReason) return undefined;
+  const intro = read(boxes.filter((b) => kids.indexOf(b) < firstMain));
+  const note = read(boxes.filter((b) => kids.indexOf(b) > lastMain));
+  const section: SectionModel = {
+    id, type: def.id, variant: result.variant, modifiers: result.modifiers, data: result.data,
+    notes: { ...(intro ? { intro } : {}), ...(note ? { note } : {}) },
+    source: { file: src.file, index: src.index, classList: src.classList },
+  };
+  // 설명을 출력하지 않는 타입(프리셋 골격을 쓰지 않는 타입)은 여기서 글이 빠져 걸러진다
+  if (textOrderDiffers(src.element, section, options, def.orderCheckIgnores)) return undefined;
+  return { section, diagnostics: [...local, ...result.diagnostics] };
+}
+
 /** 원본 도구의 타입마다 공통인 클래스(구조를 가르지 않음) */
 const COMMON_STRUCTURE = new Set(['cms-inner', 'cms-header', 'cms-title', 'cms-eyebrow', 'cms-description', 'cms-description-box', 'cms-visual', 'cms-list-item', 'cms-list-wrap']);
 
@@ -168,6 +211,14 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
     if (first && 'section' in first) {
       diagnostics.push(...first.diagnostics);
       sections.push(first.section);
+      continue;
+    }
+    // 타입 구조 밖의 설명 상자(.cms-inner 바로 아래, 본문 앞뒤) 때문에 못 옮겼으면, 상자를 본문 앞뒤 설명(section.notes)으로
+    // 떼어 같은 타입으로 다시 옮겨 본다(실제 페이지에서 블록 순서로 가던 섹션 중 가장 흔한 원인)
+    const noted = def?.parse && first && 'reason' in first ? attemptWithNotes(def, src, id, options) : undefined;
+    if (noted) {
+      diagnostics.push(...noted.diagnostics);
+      sections.push(noted.section);
       continue;
     }
     // 적힌 타입으로 옮기지 못하면, 구조가 원본 도구의 다른 타입과 같은지 본다 (예: type02로 적혔지만 type17의 행 목록).

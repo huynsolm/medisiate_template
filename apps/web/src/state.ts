@@ -25,6 +25,7 @@ export type Action =
   | { type: 'setData'; id: string; path: Path; value: unknown }
   | { type: 'setVariant'; id: string; variant: string }
   | { type: 'setModifiers'; id: string; modifiers: SectionModifiers }
+  | { type: 'setNotes'; id: string; path: Path; value: unknown }
   | { type: 'setTheme'; theme: Theme }
   | { type: 'load'; page: PageModel };
 
@@ -110,6 +111,16 @@ export function createReducer(registry: TypeRegistry) {
         return update(sections.map((s, i) => (i === index ? { ...s, variant: action.variant } : s)));
       case 'setModifiers':
         return update(sections.map((s, i) => (i === index ? { ...s, modifiers: action.modifiers } : s)));
+      case 'setNotes':
+        // 프리셋 본문 앞뒤 설명(섹션 공통). 둘 다 비면 필드를 지운다
+        return update(sections.map((s, i) => {
+          if (i !== index) return s;
+          const notes = setIn(s.notes ?? {}, action.path, action.value) as NonNullable<SectionModel['notes']>;
+          const kept = Object.fromEntries(Object.entries(notes).filter(([, v]) => typeof v === 'string' && v !== ''));
+          const rest: SectionModel = { ...s };
+          delete rest.notes;
+          return Object.keys(kept).length ? { ...rest, notes: kept } : rest;
+        }));
       case 'setTheme':
         return { ...state, page: { ...state.page, theme: action.theme } };
       case 'load':

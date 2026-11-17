@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { defaultRegistry, safeParsePageModel, type PageModel } from '@cms-medisay/core';
+import { defaultRegistry, notesFields, safeParsePageModel, type PageModel } from '@cms-medisay/core';
 import samplePage from '../../../fixtures/sample-acne/page.json';
 import { FieldForm } from './FieldForm.tsx';
 import { ModifiersForm } from './ModifiersForm.tsx';
@@ -170,6 +170,12 @@ export function App() {
               </label>
             )}
             <FieldForm fields={def.fields} data={selected.data} onChange={(path, value) => dispatch({ type: 'setData', id: selected.id, path, value })} />
+            {def.strategy === 'preset' && (
+              <fieldset className="modifiers">
+                <legend>본문 앞뒤 설명 (섹션 공통)</legend>
+                <FieldForm fields={notesFields} data={selected.notes ?? {}} onChange={(path, value) => dispatch({ type: 'setNotes', id: selected.id, path, value })} />
+              </fieldset>
+            )}
             <ModifiersForm value={selected.modifiers} onChange={(modifiers) => dispatch({ type: 'setModifiers', id: selected.id, modifiers })} />
           </>
         ) : selected ? (

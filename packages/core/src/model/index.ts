@@ -61,6 +61,11 @@ export interface SectionModel<T = unknown> {
   type: string;
   variant: string;
   modifiers: SectionModifiers;
+  /**
+   * 프리셋 본문 앞뒤 설명(선택). 타입 구조 밖, 원본 .cms-inner 바로 아래의 설명 상자를 담는다.
+   * 프리셋 골격(presetSection)이 앞은 머리글 설명(.mig-header > .mig-desc)으로, 뒤는 본문 끝 글로 출력한다.
+   */
+  notes?: { intro?: RichText | undefined; note?: RichText | undefined } | undefined;
   data: T;
   source?: SectionSource | undefined;
 }

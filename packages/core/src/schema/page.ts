@@ -64,6 +64,8 @@ export const sectionSchema = z.object({
   type: z.string().min(1),
   variant: z.string().default('default'),
   modifiers: modifiersSchema.default({}),
+  /** 프리셋 본문 앞뒤 설명(원본 .cms-inner 바로 아래 설명 상자). 앞은 머리글 설명, 뒤는 본문 끝 글로 출력한다 */
+  notes: z.object({ intro: z.string().optional(), note: z.string().optional() }).optional(),
   data: z.unknown(),
   source: z
     .object({ file: z.string(), index: z.number().int(), classList: z.array(z.string()) })

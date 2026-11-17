@@ -202,3 +202,14 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `6de0666..` 이후.
 - 표 안의 행·칸·묶음에 화면별 표시가 있으면 type26·블록 순서 모두 원본 보존.
 - 기대 수치: `npm test` 954 passed, `npm run test:browser` 196 passed, 703페이지 success 326 / partial 363 / failed 14, 원본 보존 50개.
+
+## 26. 블록 순서 섹션 줄이기 1 검수 (본문 앞뒤 설명 상자)
+
+- 설계·결과: `docs/real-pages-baseline.md` 10장. 범위: `7ff8874..` 이후.
+- 새 경로: 적힌 타입 실패 → 타입 구조 밖 설명 상자를 `section.notes`(앞: 머리글 설명, 뒤: 본문 끝 글)로 떼고 같은 타입으로 다시 → 재분류 → 블록 순서.
+- 확인 요청:
+  1. 조용한 손실·순서 변경: 떼어 낸 상자의 글·링크·서식·한쪽 화면 전용 표시가 빠지거나 자리가 바뀌는 입력.
+  2. 호스트 배치: 머리글 설명·본문 끝 글이 프리셋 타입별 호스트 규칙(첫 자식·마지막 자식 선택자 등)을 깨는지.
+  3. DOM 되돌리기: 상자를 뗐다 되돌리는 동안 예외·재시도에서 원본 DOM이 바뀌는 경로.
+  4. 편집기: 설명 고치기·지우기·저장·다시 불러오기.
+- 기대 수치: `npm test` 962 passed, `npm run test:browser` 196 passed, 703페이지 success 346 / partial 343 / failed 14, 블록 순서 306, 원본 보존 50개.
