@@ -1,3 +1,123 @@
+# type10 문단·글머리 목록 검수 — ac9286d
+
+- 검수일: 2026-11-18 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `ac9286d`, 범위: `57c3b7b..ac9286d`.
+- 기준: `docs/real-pages-baseline.md` 11장, `docs/review-request-real-pages.md` 28장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 일반적인 문단·ul의 순서·링크·서식과 편집기 parts 저장은 검사한 입력에서 유지된다. 그러나 readTextParts는 번호 목록도 일반 글머리로 읽고, 빈 항목의 화면별 표시를 버린다. 두 경우 모두 success·진단 없음으로 실제 화면 차이를 알리지 않는다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 2 | I-1 번호 목록·시작값 등이 글머리로 바뀜, I-2 숨긴 빈 항목의 글머리 노출 |
+| Minor | 0 | 확정 항목 없음 |
+
+아래 지적은 추가 최소 입력이다. 실제 703페이지에서 해당 결함이 발생했다고 집계하지 않는다. 기준 버전과 같은 입력을 대조했으며 새 type10 parts 경로에서 생기는 회귀다.
+
+## Important
+
+### I-1. ol을 받아들이지만 항상 ul로 출력해 번호·시작값·역순·항목 지정 번호가 사라짐
+
+**위치:** `packages/core/src/parse/original.ts:184`~`:187` (ul/ol을 같은 bullets로 읽음); `packages/core/src/types/preset.ts:93`~`:96`, `:108`~`:112` (번호 속성 없는 모델과 ul 출력).
+
+**재현 입력 — 변환기·Chromium에서 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type10"><div class="cms-inner">
+    <div class="cms-list-wrap"><ol class="cms-figure-list">
+      <li class="cms-list-item"><div class="cms-description-box">
+        <p class="cms-description">BEFORE</p>
+        <ol start="4"><li>FIRST</li><li>SECOND</li></ol>
+        <p class="cms-description">AFTER</p>
+      </div></li>
+    </ol></div>
+  </div></section>
+</div>
+```
+
+**실제:** type10·success·fallback 0, diagnostics 빈 배열. parts에는 bullets의 글 두 개만 남고 ordered/start 정보는 없다. 출력은 `ul style="list-style: disc; ..."`다. Chromium 1100/360px에서 원본은 ol·start=4·list-style-type=decimal, 출력은 ul·start 없음·disc였다. 360px 캡처를 직접 열어 **4. FIRST / 5. SECOND가 글머리 FIRST / SECOND로 바뀐 것**을 확인했다.
+
+BEFORE 뒤에 아래 목록만 둔 변형도 success·진단 없음으로 같은 글머리가 된다.
+
+```html
+<ol reversed start="4"><li>FIRST</li><li value="8">SECOND</li></ol>
+```
+
+**기대:** 번호 목록의 종류와 시작/역순/개별 번호 의미를 보존해야 한다. parts를 글머리 목록에 한정한다면 ol을 지원 입력으로 받아들이지 않고 다음 안전 경로로 보내야 한다. 지원하지 않는 번호 속성은 원본 보존 등으로 처리해야 한다.
+
+**기준 대조 — 직접 실행:** 57c3b7b는 start=4 입력을 blocks·partial로 변환하며 ordered=true·start=4를 보존했다. reversed/value 변형은 fallback으로 원본을 보존했다. 현재는 새 경로가 먼저 성공하면서 이 방어를 우회한다.
+
+**원인 — 정적 판독:** ul과 ol을 같은 분기에서 같은 TextPart.bullets로 읽고 렌더러는 ul만 만든다. 번호·start·reversed·li value는 모델에 없고 별도 실패 조건도 없다. 내용 순서 검사에는 네이티브 목록 번호가 나타나지 않아 차이를 검출하지 못한다.
+
+### I-2. 모든 화면/한쪽 화면에서 숨긴 빈 li가 일반 글머리 항목으로 나타남
+
+**위치:** `packages/core/src/parse/original.ts:185`~`:187`; `packages/core/src/types/preset.ts:95`, `:112`.
+
+**재현 입력 — 직접 실행:** I-1의 안쪽 ol을 다음 ul로 바꾼다. 전체 section·BEFORE·AFTER는 그대로다.
+
+```html
+<ul><li class="d-none"></li><li>ALL ITEM</li></ul>
+```
+
+**실제:** type10·success·fallback 0, diagnostics 빈 배열. bullets는 `[{"text":""},{"text":"ALL ITEM"}]`로 읽히며 숨김은 없다. 출력은 두 li 모두 display=list-item이어서 **빈 글머리 한 줄 + ALL ITEM 글머리**가 보인다. 원본의 첫 li는 display=none이므로 보이는 항목은 ALL ITEM 하나뿐이다. Chromium 1100/360px DOM/CSS 측정과 360px 출력 캡처에서 확인했다.
+
+첫 li를 `class="d-none d-lg-block"`으로 바꾸어도 같은 모델이 된다. 원본은 360px에서 첫 항목을 숨기지만 출력은 빈 글머리를 표시한다.
+
+**기대:** 숨긴 빈 항목이 보이는 글머리·공간을 만들지 않아야 한다. 모든 화면에서 숨은 빈 항목은 안전하게 제외하고, 화면별 표시는 보존하거나 표현할 수 없으면 다음 안전 경로로 보내야 한다. 보이는 정상 빈 항목까지 무조건 삭제하라는 뜻은 아니다.
+
+**기준 대조 — 직접 실행:** 57c3b7b의 blocks 경로는 d-none 빈 항목을 제외했고, d-none d-lg-block 변형은 only=pc로 보존했다. 현재 새 parts 경로가 먼저 성공하면서 두 동작이 적용되지 않는다. 글이 있는 숨긴 항목은 기존 순서 검사가 fallback으로 막지만, 빈 항목은 글·이미지가 없어 검사를 통과한다.
+
+**원인 — 정적 판독:** 항목 모델은 richFrom(li)의 글만 담으며 li의 표시 상태를 읽지 않는다. 항목 수가 남으면 renderTextParts가 비어 있는 글에도 li를 출력한다.
+
+## 정상·방어 경로와 편집기 — 직접 실행
+
+| 입력·동작 | 결과 |
+|---|---|
+| BEFORE strong → ul의 안전한 링크·em → AFTER | type10·success. parts의 문단·항목 순서·서식·주소 보존 |
+| 중첩 목록, 항목 안 이미지, 목록 옆 떠 있는 글, 설명 뒤 표, 항목 안 p | type10 parts로 성공하지 않음. 검사한 입력은 내용·순서를 담는 blocks로 넘어감 |
+| ul의 li 밖 STRAY 글 | LOSSY_PARSE·fallback. 조용히 STRAY를 버리지 않음 |
+| 본문 끝 cms-eyebrow 소제목 | 소제목을 앞으로 올린 type10 결과를 채택하지 않고 blocks로 감 |
+| 숨긴 비어 있지 않은 항목 | 순서 검사에서 차이를 찾아 fallback |
+| parts 문단·글머리 수정, 한 part에 text+bullets 동시 입력 | 두 값 모두 출력. text → bullets 순서 유지 |
+| parts 순서 이동 → JSON 저장 → 새 페이지 → 재불러오기 | 배열 순서·링크·strong·em 보존, 재불러오기 전후 HTML 동일 |
+| parts 항목 삭제 | 삭제한 AFTER 문구가 HTML에서 제거됨 |
+
+편집기 검사는 Vite + Chromium으로 실제 입력·클릭·파일 다운로드/불러오기를 실행했다. 수정한 글 순서는 EDIT PARA → AFTER → LEAD TO BULLETS → EDIT ITEM이었다.
+
+## 호스트 배치 확인
+
+**직접 실행:** 일반 ul parts는 1100/360px에서 카드 안에 머물렀다. 출력의 안쪽 목록에는 mig-list가 없고 li에도 mig-item이 없어 type-10의 후손 카드 규칙을 받지 않았다. computed display는 안쪽 ul=block, li=list-item이며 측정한 항목의 가로 범위는 목록 안에 있었다. 번호/숨김 결함은 이 정상 배치와 별도로 기록했다.
+
+원본 비교에는 Bootstrap 4.6.2와 원본 cms.css, 출력에는 저장소 host-style.css를 적용했다. 원본 배포 사이트의 Bootstrap 버전까지 확정한 검사는 아니다. 실제 703페이지 전체에 대한 시각 비교로 확대 해석하지 않는다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 38개 파일, 975개 통과 |
+| `npm run test:browser` | 5개 파일, 197개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 356 / partial 333 / failed 14 |
+| 기준 57c3b7b와 703페이지 대조 | blocks 306 → 294, fallback 50 → 50. 페이지별 상태 또는 섹션 타입 배열이 바뀐 페이지 12개 |
+| 추가 최소 입력 | 13개 입력을 현재/기준 버전에서 실행, 5개 입력의 1100/360px DOM/CSS 측정 및 360px 캡처 |
+| 편집기 | 문단·글머리 편집, parts 이동·삭제·JSON 저장 및 재불러오기 |
+
+기존 테스트는 모두 통과하지만 위 두 추가 입력의 목록 의미·표시 손실을 검출하지 않는다.
+
+재현 스크립트·JSON·캡처는 `/tmp/text-parts-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 57c3b7b 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (57c3b7b)</summary>
+
 # 본문 앞뒤 설명 판정 재검수 — 56a1fbc
 
 - 검수일: 2026-11-18 (KST).
@@ -2569,6 +2689,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
