@@ -1,3 +1,66 @@
+# 블록 순서 5차 검수 — 94a0bac
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `94a0bac`, 범위: `6de0666..94a0bac`.
+- 기준: `docs/review-request-real-pages.md` 25장, `docs/review-real-pages-fixes.md` 마지막 장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**이번 범위에서 추가 수정이 필요한 결함을 확인하지 못했다.** 이전 I-1의 숨긴 빈 셀·빈 행은 원본 보존으로 해결됐다. 표 내부의 9종 구조 요소에 대한 방어가 type26·blocks의 공통 표 읽기에 적용되고, 표 전체만 한쪽 화면 전용인 입력은 계속 변환된다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 0 | 이전 I-1 해결, 추가 확정 항목 없음 |
+| Minor | 0 | 확정 항목 없음 |
+
+## 직접 실행한 재현·대조
+
+총 34개 최소 입력을 type01·type26 입력으로 변환했다. 별도로 blocks 또는 type26 파서를 직접 호출해, 앞선 타입의 실패나 기존 글 순서 검사 때문이 아니라 새 표 내부 검사 자체가 작동하는지도 확인했다.
+
+| 입력 | 실제 결과 / 기대 결과 |
+|---|---|
+| 이전 원문: `<table><tbody><tr><td class="d-none"></td><td>ALL ITEM</td></tr></tbody></table>` | 두 입력 타입 모두 fallback 1로 원본 보존. 숨긴 빈 셀을 일반 빈 열로 출력하지 않음 / 원본 보존 기대 충족 |
+| 이전 변형: `<tr class="d-none"><td></td></tr>` 뒤 일반 행 | 두 입력 타입 모두 fallback 1. 빈 첫 행을 화면에 추가하지 않음 / 원본 보존 기대 충족 |
+| caption·colgroup·col·thead·tbody·tfoot·tr·th·td 각각에 d-none | 9종 × 2경로 모두 직접 파서가 lossless=false, 해당 태그의 표 내부 숨김 사유를 반환. 전체 변환도 원본 보존 / 빈 구조도 검출 기대 충족 |
+| td에 `d-none d-lg-table-cell`, `d-block d-xl-none`, `d-none d-md-table-cell d-lg-none` | 3종 × 2경로 모두 원본 보존. PC 전용뿐 아니라 PC 폭 구간 내 변경·태블릿 전용도 검출 / 기대 충족 |
+| td에 표시 클래스 없음, `d-lg-table-cell`, `d-none d-table-cell` | 3종 × 2경로 모두 정상 변환. type01 입력은 blocks, type26 입력은 type26. 직접 파서도 lossless=true / 실제로 숨지 않는 규칙을 오탐하지 않음 |
+| 표 전체에 `d-none d-lg-table` 또는 `d-table d-lg-none`, 내부에는 표시 클래스 없음 | 2종 × 2입력 타입 모두 blocks로 정상 변환, fallback 0. PC 전용은 common-display-pc, 모바일·태블릿 전용은 common-display-mo / 전체 표 표시 유지 기대 충족 |
+
+원본 보존 사례는 모델·진단·보존 HTML을 확인했다. type01 입력의 최종 fallback 사유에는 최초 타입 파서의 사유가 남을 수 있으므로, 새 방어의 작동 여부는 직접 파서의 실패 사유도 함께 대조했다. 표 전체 한쪽 화면 전용 입력의 type26 프리셋은 blocks로 재시도되어 표시를 보존한다. 이것을 type26 프리셋 모델 자체가 표시 속성을 지원한다는 뜻으로 해석하지 않는다.
+
+표 전체 PC/모바일 전용은 Chromium 1100/360px에서도 원본·출력 표와 셀의 실제 표시 여부를 측정했다. 화면 비교용 원본에는 Bootstrap 4.6.2와 원본 cms.css, 출력에는 저장소 host-style.css를 적용했다. 원본 배포 사이트의 Bootstrap 버전까지 확정한 검사는 아니다.
+
+## 정적 판독
+
+- `packages/core/src/types/type26.ts:127`~`:138`: TABLE_PARTS가 요청한 9개 태그를 모두 포함한다. descendants(table)를 검사하므로 표 자체는 대상에서 제외된다. ownVisibility를 사용해 표 전체·표 바깥 조상의 한쪽 화면 전용 표시를 내부 요소의 숨김으로 잘못 간주하지 않는다.
+- ownVisibility 결과 중 false 또는 mixed가 있으면 실패 사유를 남긴다. 따라서 한 화면의 일부 폭에서만 숨는 표시도 검출한다. 클래스가 없거나 모든 구간이 true이면 실패시키지 않는다.
+- 공통 readTable의 problems는 type26.parse와 blocks.parse 양쪽에서 lossless=false로 전달된다. 글·이미지가 없는 빈 셀·행도 내용 순서 검사에 의존하지 않고 보호된다.
+- 이번 변경은 표 구조 모델·렌더러·표 전체 only 판정을 바꾸지 않는다. colgroup/col·tfoot도 검사 목록에서 누락되지 않았다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 36개 파일, 954개 통과 |
+| `npm run test:browser` | 5개 파일, 196개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 326 / partial 363 / failed 14 |
+| 기준 6de0666과 703페이지 대조 | 페이지별 상태·섹션 타입 배열 변화 0개 |
+| 원본 보존 섹션 고정 목록 | 50개, 전체 테스트에서 검사 통과 |
+| 추가 최소 입력 | 34개 전체 변환 및 직접 파서 호출, 표 전체 표시 1100/360px DOM/CSS 측정 |
+
+최소 입력은 실제 703페이지 통계와 구분했다. 이번 검수에서 확정한 결함이 없으므로 새 결함의 위치·재현 입력·실제/기대 결과 항목은 없고, 이전 입력의 실제/기대 결과를 위 표에 기록했다. 검수 스크립트·JSON·화면 캡처는 `/tmp/blocks-fix4-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 6de0666 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (6de0666)</summary>
+
 # 블록 순서 4차 검수 — 9f87d07
 
 - 검수일: 2026-11-17 (KST).
@@ -2197,6 +2260,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
