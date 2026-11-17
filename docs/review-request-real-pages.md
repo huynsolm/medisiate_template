@@ -196,3 +196,9 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `f687c61..` 이후.
 - 모든 화면에서 숨고 글·이미지가 없는 요소(빈 구조 포함)는 목록 항목이든 블록이든 옮기지 않는다.
 - 기대 수치: `npm test` 949 passed, `npm run test:browser` 196 passed, 703페이지 success 326 / partial 363 / failed 14, 원본 보존 50개.
+
+## 25. 블록 순서 5차 검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `6de0666..` 이후.
+- 표 안의 행·칸·묶음에 화면별 표시가 있으면 type26·블록 순서 모두 원본 보존.
+- 기대 수치: `npm test` 954 passed, `npm run test:browser` 196 passed, 703페이지 success 326 / partial 363 / failed 14, 원본 보존 50개.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { blocks, type Block } from '../src/types/blocks.ts';
-import { convertFull as convert } from './support/original.ts';
+import { convert as convertTyped, convertFull as convert } from './support/original.ts';
 
 const section = (cls: string, inner: string) => `<section class="cms ${cls}"><div class="cms-inner">${inner}</div></section>`;
 const data = (r: ReturnType<typeof convert>, i = 0) => r.page.sections[i]!.data as { blocks: Block[] };
@@ -167,5 +167,26 @@ describe('blocks 3rd review: hidden items holding only empty structure', () => {
 
   it('a hidden item with an image still keeps the original', () => {
     expect(convert(section('type01', '<ol><li class="d-none"><img src="https://example.com/a.png" alt=""></li><li>ALL ITEM</li></ol>')).page.sections[0]!.type).toBe('fallback');
+  });
+});
+
+describe('blocks 4th review: screen-dependent cells and rows inside a table', () => {
+  it.each([
+    ['a hidden empty cell', '<table><tbody><tr><td class="d-none"></td><td>ALL ITEM</td></tr></tbody></table>'],
+    ['a hidden empty row', '<table><tbody><tr class="d-none"><td></td></tr><tr><td>ALL ITEM</td></tr></tbody></table>'],
+    ['a PC-only cell', '<table><tbody><tr><td class="d-none d-lg-table-cell">PC</td><td>ALL ITEM</td></tr></tbody></table>'],
+  ])('%s would change the table grid, so the original is kept', (_, table) => {
+    expect(convert(section('type01', table)).page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('the same rule protects the type26 table preset', () => {
+    const r = convertTyped('<section class="cms type26"><div class="cms-inner"><div class="cms-table-wrap"><table class="cms-table"><tbody><tr><td class="d-none"></td><td>ALL ITEM</td></tr></tbody></table></div></div></section>');
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('a whole table shown on one screen is still fine', () => {
+    const r = convert(section('type99', '<p>글</p><table class="d-none d-lg-table"><tbody><tr><td>PC 표</td></tr></tbody></table>'));
+    expect(r.page.sections[0]!.type).toBe('blocks');
+    expect(r.html).toContain('common-display-pc');
   });
 });

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { h } from '../html/h.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
-import { richFrom, scanSection, TEXT_BLOCKS, TEXT_INLINE } from '../parse/common.ts';
+import { ownVisibility, richFrom, scanSection, TEXT_BLOCKS, TEXT_INLINE } from '../parse/common.ts';
 import { finish, firstByClass, optional, originalHeader, readNotes, textsOf } from '../parse/original.ts';
 import { attr, children, descendants, hasClass, type DomElement } from '../parse/dom.ts';
 import { CSS_LENGTH, toNumberInput } from '../schema/page.ts';
@@ -124,12 +124,18 @@ export interface TableData {
   body: Array<{ cells: Cell[] }>;
 }
 
+const TABLE_PARTS = new Set(['caption', 'colgroup', 'col', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td']);
+
 /** 표 하나를 읽는다(제목·머리글 행·본문 행). 옮길 수 없는 칸은 problems에 기록한다 */
 export function readTable(table: DomElement, problems: string[]): TableData {
   const captionEl = children(table).find((el) => el.tagName === 'caption');
   const caption = captionEl ? richFrom(captionEl) : '';
   // 원본 caption이 sr-only가 아니면 화면에 보이는 표 제목이다 (검수 I-1)
   const captionVisible = Boolean(captionEl && caption && !hasClass(captionEl, 'sr-only'));
+  // 표 안의 행·칸·묶음을 화면에 따라 숨기면 격자(열 위치·병합)가 바뀐다. 표 모델에는 칸별 표시가 없고,
+  // 빈 칸·행은 글 순서 검사에도 나타나지 않으므로 옮기지 않고 원본을 보존한다 (블록 순서 4차 검수 I-1)
+  const hidden = descendants(table, (el) => TABLE_PARTS.has(el.tagName) && Object.values(ownVisibility(el) ?? {}).some((v) => v !== true))[0];
+  if (hidden) problems.push(`표 안에서 화면에 따라 숨는 <${hidden.tagName}>`);
   const head = rowsOf(children(table).find((el) => el.tagName === 'thead'), problems);
   const body = rowsOf(children(table).find((el) => el.tagName === 'tbody'), problems);
   return { caption, captionVisible, head, body };
