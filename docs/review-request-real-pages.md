@@ -225,3 +225,9 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 설계·결과: `docs/real-pages-baseline.md` 11장. 범위: `57c3b7b..` 이후.
 - 확인 요청: `readTextParts`가 읽지 못하는 구조를 조용히 버리는 입력, 원본 순서·서식·링크 보존, type-10 호스트 배치(글머리 목록이 카드 안에 머무는지), 편집기 `parts` 칸 저장.
 - 기대 수치: `npm test` 975 passed, `npm run test:browser` 197 passed, 703페이지 success 356 / partial 333 / failed 14, 블록 순서 294, 원본 보존 50개.
+
+## 29. type10 설명 덩어리 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `fc76d0e..` 이후.
+- `readTextParts`는 번호 목록(ol)과 화면에 따라 숨는 요소가 있으면 읽지 않는다(다음 단계로).
+- 기대 수치: `npm test` 982 passed, `npm run test:browser` 197 passed, 703페이지 success 356 / partial 333 / failed 14, 블록 순서 294, 원본 보존 50개.

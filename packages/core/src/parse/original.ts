@@ -1,6 +1,6 @@
 import type { Diagnostic, ImagePair, SectionModifiers } from '../model/index.ts';
 import type { ParseResult } from '../types/definition.ts';
-import { duplicateReads, markReadInParts, pairImages, richFrom, TEXT_BLOCKS, TEXT_INLINE, textStructureProblems, uncoveredText } from './common.ts';
+import { duplicateReads, markReadInParts, ownVisibility, pairImages, richFrom, TEXT_BLOCKS, TEXT_INLINE, textStructureProblems, uncoveredText } from './common.ts';
 import { children, classesOf, descendants, hasClass, type DomElement, type SourceSection } from './dom.ts';
 
 /*
@@ -168,10 +168,14 @@ export interface TextPart { text?: string | undefined; bullets?: Array<{ text: s
 /**
  * 설명 상자 안에서 문단과 글머리 목록(ul/ol)이 섞인 경우를 원본 순서대로 읽는다.
  * 실제 페이지(type10 등)는 `p.cms-description` + `ul.list-box > li` 를 번갈아 둔다.
- * 직접 자식만 본다(skip은 다른 칸으로 읽은 요소, 예: 소제목): 문단(p·글 블록) → text, 목록 → bullets(항목은 줄 안 글만). 그 밖의 요소, 중첩 목록, 목록 밖 글이 있으면 undefined.
+ * 직접 자식만 본다(skip은 다른 칸으로 읽은 요소, 예: 소제목): 문단(p·글 블록) → text, 글머리 목록(ul) → bullets(항목은 줄 안 글만).
+ * 그 밖의 요소, 번호 목록(ol), 중첩 목록, 목록 밖 글, 화면에 따라 숨는 요소가 있으면 undefined.
  * 원본의 잘못된 중첩(<p><ul>)으로 생긴 빈 문단은 건너뛴다.
  */
 export function readTextParts(box: DomElement, skip: DomElement[] = []): TextPart[] | undefined {
+  // 화면에 따라 숨는 문단·목록·항목은 글머리 목록으로 옮기면 숨김이 사라진다(빈 항목이면 글머리만 남는다).
+  // 표시 조건을 담을 자리가 없으므로 읽지 않는다 (검수 I-2)
+  if (descendants(box).some((d) => Object.values(ownVisibility(d) ?? {}).some((v) => v !== true))) return undefined;
   const parts: TextPart[] = [];
   for (const node of box.childNodes as Array<{ nodeName: string; value?: string }>) {
     if (node.nodeName === '#text') {
@@ -181,7 +185,9 @@ export function readTextParts(box: DomElement, skip: DomElement[] = []): TextPar
     if (node.nodeName === '#comment') continue;
     const el = node as unknown as DomElement;
     if (skip.includes(el)) continue;
-    if (el.tagName === 'ul' || el.tagName === 'ol') {
+    // 번호 목록(ol)은 번호·시작값·역순·항목 번호를 글머리 목록으로 옮길 수 없으므로 읽지 않는다 (검수 I-1)
+    if (el.tagName === 'ol') return undefined;
+    if (el.tagName === 'ul') {
       const items = children(el);
       if (items.some((li) => li.tagName !== 'li' || descendants(li).some((d) => !TEXT_INLINE.has(d.tagName) || d.tagName === 'img'))) return undefined;
       parts.push({ bullets: items.map((li) => ({ text: richFrom(li) })) });

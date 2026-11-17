@@ -45,3 +45,29 @@ describe('type10: paragraphs and bullet lists mixed in the description box', () 
     expect(it0.parts).toEqual([]);
   });
 });
+
+describe('type10 description parts review fixes', () => {
+  it.each([
+    ['a numbered list with start', '<p class="cms-description">글</p><ol start="4"><li>FIRST</li><li>SECOND</li></ol>'],
+    ['a reversed list with item values', '<p class="cms-description">글</p><ol reversed start="4"><li>FIRST</li><li value="8">SECOND</li></ol>'],
+    ['a plain numbered list', '<p class="cms-description">글</p><ol><li>FIRST</li></ol>'],
+  ])('I-1 %s is not turned into bullets (type10 keeps the original)', (_, box) => {
+    const r = convert(type10(box));
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+
+  it.each([
+    ['hidden on every screen', '<p class="cms-description">글</p><ul><li class="d-none"></li><li>ALL ITEM</li></ul>'],
+    ['PC only', '<p class="cms-description">글</p><ul><li class="d-none d-lg-block"></li><li>ALL ITEM</li></ul>'],
+    ['a PC-only paragraph', '<p class="cms-description d-none d-lg-block">PC 글</p><ul><li>ALL ITEM</li></ul>'],
+  ])('I-2 an item or paragraph %s is not read as plain parts', (_, box) => {
+    const r = convert(type10(box));
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('with the full converter these go to block order, which keeps numbering and display', () => {
+    const r = convertFull(type10('<p class="cms-description">글</p><ol start="4"><li>FIRST</li></ol>'));
+    expect(r.page.sections[0]!.type).toBe('blocks');
+    expect(r.html).toContain('counter-reset: mig-counter-sub 3;');
+  });
+});
