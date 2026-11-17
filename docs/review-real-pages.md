@@ -1,3 +1,124 @@
+# 블록 순서 변환 재검수 — ce1baa9
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `ce1baa9`, 범위: `16f0048..ce1baa9`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장 및 `docs/review-request-real-pages.md` 22장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 복사본을 준비했다. cms/는 gitignore 대상으로 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았고 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 네 재현 입력은 수정됐다. 다만 중첩 번호 목록의 시작값과 모든 화면에서 숨긴 빈 목록 항목의 추가 변형에서 번호 의미가 여전히 바뀐다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 2 | I-1 중첩 목록의 다른 CSS 카운터에 start가 적용되지 않음, I-2 완전히 숨긴 빈 항목의 번호 잔존 |
+| Minor | 0 | 이전 열 너비 경고 해결, 추가 확정 항목 없음 |
+
+두 항목은 **추가 최소 입력**이며 실제 703페이지에서 발생했다고 집계하지 않는다. 둘 다 이전 구현에서도 남아 있던 변형으로, 이번 수정이 원래 입력에 적용되지 않았다는 주장은 아니다. 변환은 partial·LAYOUT_SIMPLIFIED 상태지만, 번호 의미 변경에 대한 별도 진단이나 fallback이 없다.
+
+## 이전 네 지적 수정 확인 — 직접 실행
+
+| 이전 입력 | 현재 결과 |
+|---|---|
+| 1단계 ol start=3 | blocks·partial·fallback 0. 모델/HTML start=3, computed counter-reset은 mig-counter 2. Chromium 1100/360px 실제 번호도 3·4 |
+| ol reversed start=3 | LOSSY_PARSE·fallback 1로 원본 보존 |
+| 첫 li value=7 | LOSSY_PARSE·fallback 1로 원본 보존 |
+| 첫 li d-none d-lg-block, 다음 ALL ITEM | 첫 항목 모델에 only=pc. 360px에서 li 전체가 숨고 1번 ALL ITEM만 표시. 1100px에서는 두 항목 모두 표시 |
+| 30% col 너비·rowspan=2 표와 앞뒤 글 | 너비·병합·글 순서 보존. INLINE_STYLE_DROPPED는 없어지고 LAYOUT_SIMPLIFIED만 남음 |
+
+위 번호·표시 결과는 DOM/CSS 측정과 캡처를 직접 열어 확인했다. reversed·value는 지원하지 않는 속성을 버리는 대신 fallback하므로 원래의 손실 문제가 해결됐다.
+
+## Important
+
+### I-1. 중첩 ol은 mig-counter-sub를 표시하는데 start는 mig-counter에만 설정됨
+
+**위치:** `packages/core/src/types/blocks.ts:210`~`:215`; 호스트의 2단계 번호 규칙은 `reference/host-style.css:5210`~`:5219`다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type01"><div class="cms-inner">
+    <ol><li>
+      <p>OUTER</p>
+      <ol start="4"><li>INNER FIRST</li><li>INNER SECOND</li></ol>
+    </li></ol>
+  </div></section>
+</div>
+```
+
+**실제:** blocks·partial·fallback 0, 진단은 LAYOUT_SIMPLIFIED뿐이다. 중첩 목록 모델의 start는 4이고 HTML에도 start=4가 남지만, 인라인 스타일은 `counter-reset: mig-counter 3`이다.
+
+Chromium 1100/360px에서 원본의 안쪽 번호는 **4·5**, 출력은 **a·b**였다. 원본·출력 캡처를 직접 열어 확인했다. 호스트의 lower-alpha 모양을 따를 때 시작 순번 4는 d에 해당하므로, 현재 a의 순번 1과 다르다.
+
+**DOM/CSS 측정 — 직접 실행:** 중첩 ol의 computed counterReset은 mig-counter 3, 자식 li의 counterIncrement는 mig-counter-sub 1, ::before content는 counter(mig-counter-sub, lower-alpha)다. 설정하는 카운터와 실제 표시하는 카운터가 다르다.
+
+**기대:** 시작 번호는 해당 목록에서 호스트가 실제 사용하는 카운터에 적용되어야 한다. 중첩 구조도 지원 범위이므로 1단계에서만 맞는 것으로 충분하지 않다. 표현하지 못하면 원본을 보존해야 한다.
+
+**원인 — 정적 판독:** renderBlocks는 모든 ordered 블록에 이름이 고정된 mig-counter를 설정한다. 반면 호스트 CSS는 연속으로 중첩된 ordered 목록의 2단계에서 mig-counter-sub, 3단계에서 mig-counter-sub-sub를 사용한다. 이번 변경은 루트 목록의 시작값은 고쳤지만 다른 카운터를 쓰는 중첩 목록까지 처리하지 않는다. 텍스트 순서 검사에는 CSS 생성 번호가 포함되지 않아 차이를 검출하지 못한다.
+
+### I-2. d-none인 빈 li는 only를 만들지 않아 번호가 나타나고 다음 항목이 2번이 됨
+
+**위치:** `packages/core/src/types/blocks.ts:135`~`:140` (항목 only 기록), `:214`~`:215` (li 출력). onlyOf는 PC 전용·모바일 전용 두 경우만 표현한다.
+
+**재현 입력 — 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type01"><div class="cms-inner">
+    <ol><li class="d-none"></li><li>ALL ITEM</li></ol>
+  </div></section>
+</div>
+```
+
+**실제:** blocks·partial·fallback 0, 진단은 LAYOUT_SIMPLIFIED뿐이다. 첫 항목 모델은 `{blocks: []}`이고 표시 정보가 없다. 출력에서는 항상 li.mig-item으로 생성된다.
+
+Chromium 1100/360px에서 원본은 첫 li가 숨으므로 **1. ALL ITEM만** 표시된다. 출력에서는 빈 첫 항목의 번호가 나타나고 **ALL ITEM은 2번**이 된다. 360px 캡처를 직접 확인했으며, 표시되는 li 수도 원본 1개 / 출력 2개다.
+
+**대조 입력 — 직접 실행:** 숨긴 첫 li에 HIDDEN ITEM이라는 글을 넣으면 현재 순서 검사가 차이를 찾아 fallback한다. 빈 항목에서는 비교할 글·이미지가 없어 이 방어가 작동하지 않는다. 앞서 보고한 PC 전용 항목은 이번 수정대로 항목째 숨으며, 이 지적은 모든 화면에서 숨기는 추가 경우다.
+
+**기대:** 항상 숨겨진 빈 항목이 새 번호·빈 공간을 만들거나 뒤의 항목 번호를 밀지 않아야 한다. 표시 의미를 보존하도록 처리하거나, 표현할 수 없다면 원본을 보존해야 한다.
+
+**원인 — 정적 판독:** d-none은 모든 화면 false라 onlyOf가 pc/mo 어느 값도 반환하지 않는다. 빈 li에는 하위 블록도 없으므로 그대로 항상 보이는 항목이 된다. source/output의 글 스트림은 모두 ALL ITEM이라 통과하고, 호스트의 li 카운터가 빈 항목에서도 증가한다. 화면 한쪽 전용뿐 아니라 완전히 숨는 항목의 처리도 필요하다.
+
+## 기타 회귀·실제 페이지 대조 — 직접 실행과 정적 판독 구분
+
+**직접 실행:**
+
+- 원래 start=3 및 PC 전용 항목 입력은 Chromium 1100/360px에서 수정된 실제 번호·표시를 확인했다. 새 변형과 원래 입력을 구분했다.
+- 이전 표 입력은 30% 열 너비, rowspan=2, BEFORE → 표 → AFTER 순서를 그대로 보존하고 잘못된 열 너비 경고도 없다.
+- 실제 703개 파일을 16f0048과 현재 코드로 각각 변환해 파일 상태와 섹션 type/fallback을 대조했다. 변화 0개다.
+- 파일 집계 success 326 / partial 363 / failed 14, 원본 보존 50개를 유지한다. STRUCTURE_RETYPED 26개와 LAYOUT_SIMPLIFIED 352개도 같다. 고정 fallback 목록 검사도 통과했다.
+
+**정적 판독·자동 테스트:**
+
+- reversed·li value가 있으면 w.problems에 기록해 블록 변환을 거부한다. 번호 값이 조용히 사라지던 원래 경로는 막혔다.
+- 항목 only가 스키마와 li 출력에 함께 추가돼, 기존의 ‘p만 숨음’ 문제는 원래 PC 전용 입력에서 해결됐다.
+- 열 너비 경고 필터를 type26과 blocks가 함께 쓰며, 이전 type26 검사도 전체 테스트에 포함되어 통과했다.
+- 재분류·모드 분리·resetReads 구현은 이번 범위에서 바뀌지 않았고 관련 기존 검사가 통과했다. 이번 범위에서 추가로 확정한 상태 누수·모드 분리 결함은 없다.
+
+## 실행 결과
+
+다음 명령을 ce1baa9에서 직접 실행했고 모두 종료 코드 0이었다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 36 files / 940 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 5 files / 196 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 703 / success 326 / partial 363 / failed 14 / fallback 50 |
+| 추가 직접 검사 | 이전 네 지적, 중첩 start·숨긴 빈 항목·숨긴 글 대조, 1100/360px DOM/CSS 및 캡처 확인, 이전 버전 703개 비교 |
+
+브라우저 원본에는 보유한 [Bootstrap 4.6.2 배포 CSS](https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css) + cms.css, 출력에는 host-style.css를 적용했다. 실사이트 전체 CSS를 새로 확보한 비교가 아니다. 임시 스크립트·캡처는 /tmp에만 두고 커밋하지 않았다.
+
+아래는 이전 보고서의 원문 보관이며 현재 판정 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — 52cbe1b 및 그 이전 기록</summary>
+
 # 구조 재분류·블록 순서 변환 검수 — 52cbe1b
 
 - 검수일: 2026-11-17 (KST).
@@ -1896,6 +2017,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
