@@ -1,3 +1,103 @@
+# 실제 원본·703페이지 10차 재검수 — 83e2737
+
+- 검수일: 2026-11-17 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `83e2737`, 범위: `684c505..83e2737`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장 및 `docs/review-request-real-pages.md` 17장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 복사본을 준비했다. cms/는 gitignore 대상으로 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았고 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 세 재현 입력은 해결됐다. 다만 부모와 자식이 서로 반대 구간에서 숨는 경우, 실제로는 일정한 PC 전용 표시인데도 mixed로 판단해 원본 보존하는 잔여 오탐을 확인했다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 이번 범위에서 확정한 항목 없음 |
+| Important | 1 | I-1 구간별 표시를 조합하기 전에 mixed로 요약해 실제로 상쇄되는 숨김을 놓침 |
+| Minor | 0 | 별도 확정 항목 없음 |
+
+I-1은 **추가 최소 입력**이며 실제 703페이지에서 새로 발생한 결함으로 집계하지 않는다. 같은 입력은 이전 기준에서도 fallback이어서 새 회귀라고 주장하지 않는다. 이번 요청의 ‘조상까지 합친 실제 표시’가 놓치는 잔여 사례다.
+
+## 이전 세 입력 수정 확인 — 직접 실행
+
+| 이전 입력 | 83e2737 결과 |
+|---|---|
+| 부모 d-none d-lg-block / 자식 d-block d-sm-none d-md-block | success·무경고·fallback 0, only=pc. 부모가 모바일 전체를 숨기는 원래 오탐 해결 |
+| 위 부모를 제거한 동일 자식 | 실제 모바일 구간 변화가 남으므로 LOSSY_PARSE·fallback 1 |
+| 두 본문 검사·검사 → 제목 검사<em class="mig-inline-demo">검사</em> | LOSSY_PARSE·fallback 1. 입력의 mig-*가 역할 경계로 쓰이던 원래 우회 해결 |
+| d-none d-lg-grid | 원본은 모든 화면에서 숨김으로 판정, only 없음, LOSSY_PARSE·fallback 1. 출력에서 원본에 없는 이미지를 표시하지 않도록 보존 |
+
+서식 정리를 별도로 직접 호출해 span/em/strong의 mig-title, mig-inline-demo, mig-label, mig-num이 제거되는 것을 확인했다. 같은 요소의 text-point와 실제 글 `2026`은 유지된다. 예약 클래스 제거 정책을 의도된 변경으로 취급했으며, 제거 자체를 결함으로 세지 않았다.
+
+Bootstrap 표시 값은 코드상 none·inline·inline-block·block·table·table-row·table-cell·flex·inline-flex의 아홉 값으로 제한됐다. grid·inline-grid·contents가 더 이상 Bootstrap 4 표시 규칙으로 취급되지 않는다. 원본 Bootstrap 버전 미확인은 이전 보고서의 한계로 남으며, 이번 범위에서 버전이 새로 확인된 것은 아니다.
+
+## Important
+
+### I-1. 부모·자식의 반대 구간 숨김을 결합하지 못해 실제 PC 전용 입력을 mixed로 거부
+
+**위치:** `packages/core/src/parse/common.ts:120`~`:124` (요소별 mixed 요약값 합성), `packages/core/src/convert/convert-document.ts:322`~`:325`, `:336`~`:345` (mixed 판정과 내용 존재 검사).
+
+**재현 입력 — 직접 실행:** 아래 전체 문자열을 convertDocument에 전달했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type23"><div class="cms-inner">
+    <div class="cms-visual d-block d-sm-none d-lg-block">
+      <img src="https://example.com/image.png" alt="" class="d-none d-sm-block">
+    </div>
+  </div></section>
+</div>
+```
+
+**실제:** failed, LOSSY_PARSE, fallback 1. 사유는 부모 d-block d-sm-none d-lg-block 안의 내용이 모바일 화면에서도 폭에 따라 보였다 숨었다 한다는 것이다. 이미지에 visibilityOf를 직접 호출하면 `{mo: 'mixed', tablet: false, pc: true}`다. 그러나 원본의 실제 구간별 표시는 다음과 같다.
+
+| 폭 구간 | 부모 | 이미지 자신 | 실제 이미지 |
+|---|---|---|---|
+| 0~575px | 표시 | 숨김 | 숨김 |
+| 576~991px | 숨김 | 표시 | 숨김 |
+| 992px 이상 | 표시 | 표시 | 표시 |
+
+즉 이미지가 보이는 범위는 정확히 PC 전용이며, 모바일 안에서 실제 내용이 보였다 숨었다 하는 경우가 아니다.
+
+**Chromium — 직접 실행:** 원본에 Bootstrap 4.6.2 + cms.css를 적용해 360/600/800px에서 이미지가 숨고 1100/1300px에서 표시되는 것을 확인했다.
+
+대조 입력은 부모 class를 d-none d-lg-block, 자식 class를 d-block으로 바꾼 동일 이미지다. 이 입력은 현재 success·무경고·fallback 0, only=pc이고 출력은 common-display-pc를 쓴다. 이 **별도 정상 입력의 출력 후보**에 host-style.css를 적용했을 때 다섯 폭 모두 원본과 표시 여부·이미지 주소가 같았다. 현재 fallback 출력을 정상 출력처럼 측정한 것이 아니며, 기존 모델로 표현할 수 있는 PC 전용 내용이라는 점을 확인한 것이다.
+
+**기대:** 부모와 자식의 조건을 각 Bootstrap 폭 구간에서 먼저 합성한 후, 최종 내용의 표시 범위를 판단해야 한다. 위 입력은 기존 only=pc로 보존할 수 있으므로 mixed 사유로 섹션 전체를 거부하지 않아야 한다. 실제 구간 변화가 남는 입력은 계속 원본 보존해야 한다.
+
+**원인 — 정적 판독:** ownVisibility가 각 요소의 모바일 0·576 상태를 먼저 mixed 하나로 요약한다. visibilityOf는 mixed와 mixed의 관계를 모른 채 결과를 mixed로 유지한다. 부모와 자식이 각각 어느 구간에서 숨는지 정보가 이미 사라져, 실제로는 어느 모바일 구간에서도 동시에 보이지 않는다는 사실을 계산할 수 없다.
+
+partlyShown이 부모에서 검사할 때도 hasContentIn은 자식의 모바일 ownVisibility가 false인지 여부만 보므로 mixed 자식을 ‘그 화면에 내용 있음’으로 취급한다. 이에 따라 부모·자식 조건이 동시에 참인 구간이 없다는 사실을 놓친다. 이전의 ‘부모가 그 화면 전체에서 false’인 사례는 해결됐으나 **구간끼리 상쇄되는 숨김**은 남는다. 이름상 visibilityOf를 공유하는 것만으로 구간 단위의 실제 가시성이 보장되지는 않는다.
+
+## 실행 조건·범위 대조
+
+**직접 실행:**
+
+- Chromium 비교는 [Bootstrap 4.6.2 배포 CSS](https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css)와 `reference/cms-original/css/cms.css`, 출력에는 `reference/host-style.css`를 사용했다. 보유한 로컬 배포 CSS를 사용했으며 실사이트의 원본 Bootstrap 버전을 확보한 비교가 아니다.
+- 외부 이미지 응답을 같은 로컬 100×80 SVG로 대체하고 360/600/800/1100/1300px에서 실제 이미지 표시 여부와 src를 측정했다. 알려진 992~1023px 호스트 경계 차이를 이 지적으로 세지 않았다.
+- 실제 703개 파일을 684c505와 현재 코드로 각각 변환해 파일 상태와 섹션 type/fallback을 대조했다. 변화 0개. success 320 / partial 368 / failed 15 유지.
+- 순서 사유 fallback 9개 고정 목록 테스트도 통과했다. 이번 추가 오탐은 해당 실제 페이지 표본 밖의 입력이다.
+- 기존 28타입 × 4변형(공백·이미지 없음·인라인 서식·문단 블록) 총 112개 입력은 모두 fallback 0이며 이전 HTML과 byte 단위로 같다.
+- 입력 클래스 정리에서 텍스트 손실이나 예약 클래스가 다시 역할 경계로 유입되는 추가 우회는 이번 검사에서 확정하지 않았다. Bootstrap 4 표시 값 아홉 개 제한에서도 이전 grid 관련 문제 외에 추가 결함을 확정하지 않았다.
+
+## 실행 결과
+
+다음 명령을 83e2737에서 직접 실행했고 모두 종료 코드 0이었다.
+
+| 명령 | 결과 |
+|---|---|
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm test` | 33 files / 898 tests passed, 실패·건너뜀 0 |
+| `npm run lint` | 오류 없음 |
+| `npm run typecheck` | 오류 없음 |
+| `PLAYWRIGHT_BROWSERS_PATH=/tmp/stage3-pw-browsers npm run test:browser` | 4 files / 192 tests passed, 실패·건너뜀 0 (전체 테스트와 중복되는 별도 실행) |
+| `npm run convert -- --all` | 703 / success 320 / partial 368 / failed 15 |
+| 추가 최소 입력·Chromium 검사 | 위 재현·표시 대조 및 예약 클래스/텍스트 보존 확인 |
+
+임시 실행 스크립트·브라우저 기록은 /tmp에만 두고 커밋하지 않았다. 자동 테스트 통과와 위 검수 지적을 구분한다. 아래는 이전 원문 보관이며 현재 판정 건수는 위 표만 적용한다.
+
+<details>
+<summary>이전 검수 원문 — bd8d1c2 및 그 이전 기록</summary>
+
 # 실제 원본·703페이지 9차 재검수 — bd8d1c2
 
 - 검수일: 2026-11-17 (KST).
@@ -1355,6 +1455,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
