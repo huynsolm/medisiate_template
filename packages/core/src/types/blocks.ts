@@ -5,7 +5,7 @@ import { generalHeader } from '../helpers/header.ts';
 import { visualPcMo } from '../helpers/image.ts';
 import { isBlank, rich } from '../helpers/misc.ts';
 import type { ImagePair } from '../model/index.ts';
-import { imageFromElement, isHeading, markReadInParts, richFrom, richFromNodes, scanSection, structureProblemsInNodes, TEXT_INLINE, visibilityOf } from '../parse/common.ts';
+import { imageFromElement, isHeading, markReadInParts, richFrom, richFromNodes, scanSection, structureProblemsInNodes, TEXT_INLINE, visibilityOf, VIEWS } from '../parse/common.ts';
 import { childNodes, children, descendants, hasClass, isElement, plainText, attr, type DomElement, type DomNode } from '../parse/dom.ts';
 import { finish } from '../parse/original.ts';
 import { imagePairSchema } from '../schema/page.ts';
@@ -132,12 +132,17 @@ function walk(node: DomElement, w: Walk, depth: number, inHeader: boolean): Bloc
         w.problems.push(`${MAX_LIST_DEPTH}단계보다 깊은 목록`);
         continue;
       }
-      const items = children(child).filter((li) => li.tagName === 'li').map((li) => {
+      const items = children(child).filter((li) => li.tagName === 'li').flatMap((li) => {
         markReadInParts(li);
         // 항목 전체가 한쪽 화면 전용이면 항목(li)에 표시를 둔다. 글에만 두면 번호·글머리가 남고 다음 번호가 밀린다 (검수 I-3)
         const only = onlyOf(li);
         if (attr(li, 'value') !== undefined) w.problems.push('항목 번호 지정(li value)');
-        return { blocks: walk(li, w, depth + 1, false), ...(only && only !== onlyOf(child) ? { only } : {}) };
+        const inner = walk(li, w, depth + 1, false);
+        // 모든 화면에서 숨은 빈 항목은 원본에서 번호·자리를 차지하지 않으므로 옮기지 않는다 (재검수 I-2).
+        // 글·이미지가 든 숨은 항목은 남겨 두어 글 순서 검사가 차이를 찾아 원본을 보존하게 한다.
+        const shown = visibilityOf(li);
+        if (inner.length === 0 && VIEWS.every((v) => shown[v] === false)) return [];
+        return [{ blocks: inner, ...(only && only !== onlyOf(child) ? { only } : {}) }];
       });
       if (children(child).some((c) => c.tagName !== 'li')) w.problems.push('목록 안의 항목 밖 요소');
       // 호스트 번호는 CSS 카운터(mig-counter)라 역순은 옮기지 않는다(원본 보존). 시작 번호는 카운터 시작값으로 옮긴다 (검수 I-1·I-2)
@@ -191,7 +196,11 @@ function pairAlternatives(blocks: Block[]): Block[] {
   return out;
 }
 
-function renderBlocks(blocks: Block[], white: boolean, ctx: Parameters<TypeDefinition['render']>[1]): Child[] {
+/** 호스트 번호 카운터: ol > li > ol로 바로 이어진 번호 목록의 단계마다 다르다(1단계 mig-counter, 2단계 -sub, 3단계 -sub-sub) */
+const COUNTERS = ['mig-counter', 'mig-counter-sub', 'mig-counter-sub-sub'];
+
+/** chain: 바로 바깥 항목이 몇 단계 이어진 번호 목록 안에 있는지(0 = 번호 목록 밖) */
+function renderBlocks(blocks: Block[], white: boolean, ctx: Parameters<TypeDefinition['render']>[1], chain = 0): Child[] {
   const out: Child[] = [];
   const display = (b: Block) => (b.only ? ` common-display-${b.only}` : '');
   for (let i = 0; i < blocks.length; i++) {
@@ -210,9 +219,11 @@ function renderBlocks(blocks: Block[], white: boolean, ctx: Parameters<TypeDefin
     else if (b.kind === 'list') {
       // 호스트는 ol의 기본 번호 대신 ::before의 counter(mig-counter)를 그린다. start 속성은 그 카운터를 바꾸지 않으므로
       // 카운터 시작값(start - 1)을 함께 준다 (검수 I-1)
-      const counter = b.ordered && b.start !== undefined ? { counterReset: `mig-counter ${b.start - 1}` } : undefined;
+      // 중첩 번호 목록은 단계마다 다른 카운터를 그리므로 그 단계의 카운터에 준다 (재검수 I-1)
+      const level = b.ordered ? chain + 1 : 0;
+      const counter = b.ordered && b.start !== undefined ? { counterReset: `${COUNTERS[Math.min(level, COUNTERS.length) - 1]} ${b.start - 1}` } : undefined;
       out.push(h(b.ordered ? 'ol' : 'ul', { class: `mig-list ${b.ordered ? 'type-ordered' : 'type-bullet'}${display(b)}`, start: b.start, style: counter },
-        (b.items ?? []).map((item) => h('li', { class: `mig-item${item.only ? ` common-display-${item.only}` : ''}` }, renderBlocks(item.blocks, white, ctx)))));
+        (b.items ?? []).map((item) => h('li', { class: `mig-item${item.only ? ` common-display-${item.only}` : ''}` }, renderBlocks(item.blocks, white, ctx, level)))));
     } else if (b.kind === 'table') {
       const table = renderTable({ caption: b.caption ?? '', captionVisible: b.captionVisible ?? false, colWidths: b.colWidths ?? [], head: b.head ?? [], body: b.body ?? [] });
       out.push(b.only ? h('div', { class: display(b).trim() }, [table]) : table);

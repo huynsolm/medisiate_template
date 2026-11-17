@@ -122,3 +122,28 @@ describe('blocks review fixes: numbering and list item display', () => {
     expect(r.page.diagnostics.some((d) => d.code === 'INLINE_STYLE_DROPPED')).toBe(false);
   });
 });
+
+describe('blocks re-review: nested counters and items hidden on every screen', () => {
+  it('I-1 a nested ordered list starts its own host counter level (mig-counter-sub, then -sub-sub)', () => {
+    const r = convert(section('type01', '<ol><li><p>OUTER</p><ol start="4"><li>INNER FIRST</li><li>INNER SECOND</li></ol></li></ol>'));
+    expect(r.html).toContain('<ol class="mig-list type-ordered" start="4" style="counter-reset: mig-counter-sub 3;">');
+    const third = convert(section('type01', '<ol><li>A<ol><li>B<ol start="2"><li>C</li></ol></li></ol></li></ol>'));
+    expect(third.html).toContain('style="counter-reset: mig-counter-sub-sub 1;"');
+  });
+
+  it('I-1 an ordered list inside a bullet item is a first-level counter again (the host chain is ol > li > ol only)', () => {
+    const r = convert(section('type01', '<ol><li>A<ul><li>B<ol start="5"><li>C</li></ol></li></ul></li></ol>'));
+    expect(r.html).toContain('style="counter-reset: mig-counter 4;"');
+  });
+
+  it('I-2 an empty item hidden on every screen is not moved (no number, the next item stays 1)', () => {
+    const r = convert(section('type01', '<ol><li class="d-none"></li><li>ALL ITEM</li></ol>'));
+    expect(r.page.sections[0]!.type).toBe('blocks');
+    expect(data(r).blocks[0]!.items).toHaveLength(1);
+    expect(r.html.match(/<li class="mig-item/gu)).toHaveLength(1);
+  });
+
+  it('I-2 a hidden item that holds text still keeps the original (the text would appear)', () => {
+    expect(convert(section('type01', '<ol><li class="d-none">HIDDEN ITEM</li><li>ALL ITEM</li></ol>')).page.sections[0]!.type).toBe('fallback');
+  });
+});

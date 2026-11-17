@@ -265,3 +265,17 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트 5개(Codex 입력 그대로)는 수정을 되돌리면 모두 실패. 브라우저 검사 2개 추가(1100/360px: ol의 계산된 `counter-reset`이 `mig-counter 2`, PC 전용 항목은 360px에서 항목째 숨음).
 - `npm test` 940 passed, `npm run test:browser` 196 passed, lint·typecheck 오류 없음.
 - 703페이지: success 326 / partial 363 / failed 14, 원본 보존 50개(변화 없음).
+
+## 블록 순서 재검수(`38ff8cf`) 지적 반영
+
+### I-1. 중첩 번호 목록의 start가 그리는 카운터와 다른 카운터에 들어감
+- 호스트는 `ol > li > ol`로 바로 이어진 번호 목록의 단계마다 다른 카운터를 그린다(1단계 `mig-counter`, 2단계 `mig-counter-sub`, 3단계 `mig-counter-sub-sub`; `reference/host-style.css` 5210~5260줄).
+- 수정(`types/blocks.ts`): 출력할 때 바깥 번호 목록 단계를 세어 그 단계의 카운터에 시작값을 준다. 글머리 목록 안의 번호 목록은 호스트 규칙대로 다시 1단계(`mig-counter`)다.
+
+### I-2. 모든 화면에서 숨은 빈 항목이 번호를 차지함
+- 수정: 모든 화면에서 숨은 **빈** 항목은 옮기지 않는다(원본에서도 번호·자리를 차지하지 않는다). 글·이미지가 든 숨은 항목은 남겨 두어 글 순서 검사가 차이를 찾아 원본을 보존한다.
+
+### 검증
+- 새 테스트 4개 중 수정 대상 2개는 수정을 되돌리면 실패. 브라우저 검사에 중첩 목록(계산된 `counter-reset`이 `mig-counter-sub 3`이고 항목이 `counter(mig-counter-sub…)`를 그림)과 숨은 빈 항목(보이는 항목 1개)을 추가.
+- `npm test` 944 passed, `npm run test:browser` 196 passed, lint·typecheck 오류 없음.
+- 703페이지: success 326 / partial 363 / failed 14, 원본 보존 50개(변화 없음).

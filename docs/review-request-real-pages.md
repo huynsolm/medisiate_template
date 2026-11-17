@@ -184,3 +184,9 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `16f0048..` 이후.
 - 번호 목록 시작값은 호스트 카운터로 옮기고, 역순·항목별 번호는 원본 보존. 한쪽 화면 전용 항목은 항목째 숨김. 보존한 열 너비 경고 제거.
 - 기대 수치: `npm test` 940 passed, `npm run test:browser` 196 passed, 703페이지 success 326 / partial 363 / failed 14, 원본 보존 50개.
+
+## 23. 블록 순서 3차 검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장. 범위: `38ff8cf..` 이후.
+- 중첩 번호 목록의 시작값을 그 단계의 호스트 카운터(-sub, -sub-sub)에 준다. 모든 화면에서 숨은 빈 항목은 옮기지 않는다.
+- 기대 수치: `npm test` 944 passed, `npm run test:browser` 196 passed, 703페이지 success 326 / partial 363 / failed 14, 원본 보존 50개.

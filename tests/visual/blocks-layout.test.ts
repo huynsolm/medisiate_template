@@ -21,7 +21,9 @@ const body = `<section class="cms type01"><div class="cms-inner">
 
 // 번호 목록(검수 I-1·I-3): 시작 번호는 호스트 카운터로, 한쪽 화면 전용 항목은 번호까지 함께 숨는다
 const numbered = `<section class="cms type01"><div class="cms-inner"><ol start="3"><li>FIRST</li><li>SECOND</li></ol>
-<ol><li class="d-none d-lg-block">PC ITEM</li><li>ALL ITEM</li></ol></div></section>`;
+<ol><li class="d-none d-lg-block">PC ITEM</li><li>ALL ITEM</li></ol>
+<ol><li><p>OUTER</p><ol start="4"><li>INNER FIRST</li><li>INNER SECOND</li></ol></li></ol>
+<ol><li class="d-none"></li><li>ALL ITEM</li></ol></div></section>`;
 
 describe.skipIf(!pw)('blocks (general mode) on the host css', () => {
   let browser: Browser;
@@ -45,14 +47,23 @@ describe.skipIf(!pw)('blocks (general mode) on the host css', () => {
     await page.setContent(`<!doctype html><html><head><style>${css}</style></head><body>${numberedHtml}</body></html>`);
     const m = await page.evaluate(() => {
       const lists = Array.from(document.querySelectorAll('ol.mig-list.type-ordered'));
+      const visible = (ol: Element) => Array.from(ol.children).filter((li) => getComputedStyle(li).display !== 'none').length;
+      const nested = lists[3]!;
       return {
         reset: getComputedStyle(lists[0]!).counterReset,
-        shown: Array.from(lists[1]!.children).filter((li) => getComputedStyle(li).display !== 'none').length,
+        shown: visible(lists[1]!),
+        // 중첩 목록: 시작값을 준 카운터와 항목이 그리는 카운터가 같아야 한다
+        nestedReset: getComputedStyle(nested).counterReset,
+        nestedDraws: getComputedStyle(nested.children[0]!, '::before').content,
+        hiddenEmpty: visible(lists[4]!),
       };
     });
     await page.close();
     expect(m.reset).toBe('mig-counter 2');
     expect(m.shown).toBe(items);
+    expect(m.nestedReset).toBe('mig-counter-sub 3');
+    expect(m.nestedDraws).toContain('counter(mig-counter-sub');
+    expect(m.hiddenEmpty).toBe(1);
   });
 
   afterAll(async () => {
