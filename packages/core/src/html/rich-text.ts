@@ -120,7 +120,9 @@ function walk(nodes: P5Node[] | undefined): string {
     }
     const classes = (node.attrs?.find((a) => a.name === 'class')?.value ?? '')
       .split(/\s+/u)
-      .filter((token) => CLASS_TOKEN.test(token));
+      // mig-*는 호스트 역할 클래스(렌더러만 붙임)라 입력에서 오면 지운다. 원본 서식이 호스트 역할 스타일을 받거나
+      // 순서 검사의 구분 자리로 오인되지 않게 한다 (9차 재검수 I-2)
+      .filter((token) => CLASS_TOKEN.test(token) && !token.startsWith('mig-'));
     const style = filterInlineStyle(tag, node.attrs?.find((a) => a.name === 'style')?.value ?? '').kept.join(' ');
     const attr = `${classes.length ? ` class="${escapeAttr(classes.join(' '))}"` : ''}${style ? ` style="${escapeAttr(style)}"` : ''}`;
     out += tag === 'br' ? `<br${attr}>` : `<${tag}${attr}>${inner}</${tag}>`;

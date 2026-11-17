@@ -140,3 +140,11 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 덩어리 합치기의 구분 자리: `<br>`, 호스트 역할 클래스(`mig-*`) 요소 경계, 인라인 스타일로 블록이 되는 요소 경계만.
 - 확인 요청: 위 규칙의 우회·오탐. Bootstrap 4 순서 가정(원본 `bootstrap.css` 버전 미확인)이 타당한지.
 - 기대 수치: `npm test` 890 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
+
+## 17. 10차 재검수
+
+- 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(9차 재검수 반영). 범위: `684c505..` 이후.
+- 폭 구간 숨김 판정은 조상까지 합친 표시로, 그 화면에서 실제로 보이는 내용이 있을 때만 원본 보존.
+- 입력의 `mig-*` 클래스는 서식 정리에서 지운다(호스트 역할 클래스 예약). 구분 자리 규칙은 그대로.
+- 표시 규칙은 Bootstrap 4 `_display.scss`의 9개 값만.
+- 기대 수치: `npm test` 898 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.

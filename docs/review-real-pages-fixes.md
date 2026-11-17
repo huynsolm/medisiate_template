@@ -184,3 +184,24 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 기존 테스트 하나(`review-fixes.test.ts` 블록 정렬 span)가 첫 수정안의 오탐을 잡아 `display: block` 스타일 규칙을 추가했다.
 - `npm test` 890 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
 - 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음). 실제 페이지의 sm 클래스는 1개 파일(`13267/0210_분만전검사.html`, `d-sm-block`)뿐이고 결과 변화가 없다.
+
+## 9차 재검수(`684c505`) 지적 반영
+
+### I-1. 부모가 그 화면 전체를 숨기는데 자식 자신의 폭 구간 변화만 보고 원본 보존
+- 원인: `partlyShown`이 요소 자신의 클래스만 봤다. 부모 `d-none d-lg-block` 안의 이미지 `d-block d-sm-none d-md-block`은 모바일에서 부모가 늘 숨기므로 sm 변화가 화면에 나타나지 않는데도 거부했다(이미지 `only`는 조상까지 합쳐 PC 전용으로 맞게 판정하고 있었다).
+- 수정(`convert-document.ts`): 표시 클래스가 있는 요소마다 **조상까지 합친 표시**(`visibilityOf`)로 판정하고, 그 화면에서 `'mixed'`이면서 **그 화면에서 숨지 않은 글·이미지가 안에 있을 때만** 원본을 보존한다(`hasContentIn`: 그 화면에서 숨는 자손은 뺀다).
+- 부모를 뺀 같은 자식은 여전히 원본 보존. 폭 구간이 바뀌는 부모 안에 그 화면에서 숨는 내용만 있으면 통과.
+
+### I-2. 입력에서 온 `mig-*` 클래스가 호스트 역할 경계로 쓰임
+- 원인: 구분 자리 판정이 클래스 이름의 `mig-` 접두사만 봤고, 서식 정리(rich-text)는 입력의 클래스를 그대로 남겼다.
+- 수정(`packages/core/src/html/rich-text.ts`): `mig-*`는 렌더러만 붙이는 호스트 역할 클래스로 보고 **입력에서 오면 지운다**. 그래서 출력의 `mig-*`는 모두 렌더러가 붙인 역할이다. 원본 서식이 호스트 역할 스타일(예: `mig-title` 글자 크기)을 받는 것도 함께 막는다. 다른 클래스(`text-point` 등)는 그대로.
+- 실제 원본(703페이지, fixture)에는 `mig-` 클래스가 없어 출력 변화가 없다.
+
+### I-3. Bootstrap 4에 없는 `d-*-grid`·`inline-grid`·`contents`를 표시 규칙으로 적용
+- 수정(`common.ts` `D_ORDER`): Bootstrap 4 `_display.scss`에 있는 9개 값(none, inline, inline-block, block, table, table-row, table-cell, flex, inline-flex)만 둔다. 그 밖의 이름은 Bootstrap 4 CSS에 규칙이 없어 아무것도 바꾸지 않는다(`d-none d-lg-grid` → 모든 화면에서 숨김).
+- Bootstrap 버전은 여전히 잠정 가정이다(원본 `bootstrap.css` 확보 실패, 정황상 4).
+
+### 검증
+- 새 테스트 10개(Codex 입력 그대로, 대조 입력, 같은 유형 변형). 수정 대상 7개는 수정을 되돌리면 실패.
+- `npm test` 898 passed, `npm run test:browser` 192 passed, lint·typecheck 오류 없음, 기존 스냅샷 변화 없음.
+- 703페이지: success 320 / partial 368 / failed 15, 순서 사유 보존 9개(변화 없음).

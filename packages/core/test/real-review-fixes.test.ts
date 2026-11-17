@@ -320,3 +320,41 @@ describe('plain formatting is not a separation for merging blocks (8th review I-
     expect(convert('<section class="cms type04"><div class="cms-inner"><ol class="cms-tile-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">첫 <em>문단</em></p><p class="cms-description"><strong>둘째</strong> 문단</p></div></li></ol></div></section>').page.sections[0]!.type).toBe('type04');
   });
 });
+
+describe('9th review: composed visibility, input mig-* classes, Bootstrap 4 utilities only', () => {
+  const visual = (cls: string, wrap = '') => convert(`<section class="cms type23"><div class="cms-inner"><div class="cms-visual${wrap ? ` ${wrap}` : ''}"><img src="https://example.com/image.png" alt="" class="${cls}"></div></div></section>`);
+  const only = (r: ReturnType<typeof convert>) => (r.page.sections[0]!.data as { image?: { only?: string } }).image?.only;
+
+  it('I-1 a child range change hidden by its parent on that whole screen is not a problem', () => {
+    const r = visual('d-block d-sm-none d-md-block', 'd-none d-lg-block');
+    expect(r.page.sections[0]!.type).toBe('type23');
+    expect(only(r)).toBe('pc');
+  });
+
+  it('I-1 without the hiding parent the same child is still preserved', () => {
+    expect(visual('d-block d-sm-none d-md-block').page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('I-1 a mixed parent whose content is hidden on that screen is not a problem', () => {
+    const r = convert('<section class="cms type23"><div class="cms-inner"><div class="cms-visual d-block d-xl-none"><img src="https://example.com/image.png" alt="" class="d-lg-none"></div></div></section>');
+    expect(r.page.sections[0]!.type).toBe('type23');
+    expect(only(r)).toBe('mo');
+  });
+
+  it('I-2 a mig-* class from the input is not a host role boundary', () => {
+    const r = convert('<section class="cms type10"><div class="cms-inner"><ol class="cms-figure-list"><li class="cms-list-item"><div class="cms-description-box"><p class="cms-description">검사</p><p class="cms-description">검사</p></div><div class="cms-figure-text"><p class="cms-title">검사<em class="mig-inline-demo">검사</em></p></div></li></ol></div></section>');
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+
+  it('I-2 input mig-* classes are removed from rich text, other classes stay', () => {
+    const r = convert('<section class="cms type23"><div class="cms-inner"><div class="cms-description-box"><p class="cms-description"><span class="mig-title text-point">강조</span> 설명</p></div></div></section>');
+    expect(r.html).toContain('<span class="text-point">강조</span>');
+    expect(r.html).not.toContain('mig-title text-point');
+  });
+
+  it.each(['d-none d-lg-grid', 'd-none d-lg-inline-grid', 'd-none d-lg-contents'])('I-3 %s: the non-Bootstrap-4 name does not override d-none', (cls) => {
+    const r = visual(cls);
+    expect(only(r)).not.toBe('pc');
+    expect(r.html).not.toContain('common-display-pc');
+  });
+});

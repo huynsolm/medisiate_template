@@ -80,8 +80,11 @@ export type Shown = boolean | 'mixed';
 const BREAKPOINT: Record<string, number> = { '': 0, sm: 576, md: 768, lg: 992, xl: 1200 };
 /** 각 화면이 덮는 Bootstrap 폭 구간의 시작점(8차 재검수 I-1: 대표 폭 하나만 보면 sm·xl 구간의 변화를 놓친다) */
 const VIEW_SPANS: Record<View, number[]> = { mo: [0, 576], tablet: [768], pc: [992, 1200] };
-/** Bootstrap 4 utilities/_display.scss 선언 순서. 같은 폭의 규칙끼리는 CSS에서 나중에 선언된 쪽이 이긴다(HTML 클래스 순서와 무관. 8차 재검수 I-2) */
-const D_ORDER = ['none', 'inline', 'inline-block', 'block', 'table', 'table-row', 'table-cell', 'flex', 'inline-flex', 'grid', 'inline-grid', 'contents'];
+/**
+ * Bootstrap 4 utilities/_display.scss 선언 순서. 같은 폭의 규칙끼리는 CSS에서 나중에 선언된 쪽이 이긴다(HTML 클래스 순서와 무관. 8차 재검수 I-2).
+ * Bootstrap 4에 있는 값만 둔다. d-lg-grid 같은 이름은 Bootstrap 4 CSS에 규칙이 없어 아무것도 바꾸지 않는다 (9차 재검수 I-3)
+ */
+const D_ORDER = ['none', 'inline', 'inline-block', 'block', 'table', 'table-row', 'table-cell', 'flex', 'inline-flex'];
 const D_CLASS = new RegExp(`^d-(?:(sm|md|lg|xl)-)?(${D_ORDER.join('|')})$`, 'u');
 
 /**

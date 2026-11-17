@@ -1,13 +1,13 @@
 import { parse } from 'parse5';
 import type { Diagnostic, FileStatus, ImageKind, PageMeta, PageModel, SectionModel, Theme } from '../model/index.ts';
 import { renderPage } from '../page/render-page.ts';
-import { attr, descendants, hasClass, parseHtmlFragment, plainText, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
+import { attr, descendants, hasClass, parseHtmlFragment, type DomElement, type DomNode, type SourceSection } from '../parse/dom.ts';
 import { sectionTypeId } from '../parse/sections.ts';
 import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
-import { ownVisibility, VIEWS, type View } from '../parse/common.ts';
+import { ownVisibility, visibilityOf, VIEWS, type View } from '../parse/common.ts';
 import type { TypeRegistry } from '../types/definition.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
 
@@ -256,7 +256,9 @@ function segments(node: DomNode, view: View, ignore: ((el: DomElement) => boolea
   return out;
 }
 
-const separates = (el: DomElement) => classesOf(el).some((c) => c.startsWith('mig-')) || /(?:^|;)\s*display\s*:\s*(?!inline\s*(?:;|$)|contents)/iu.test(attr(el, 'style') ?? '');
+// 입력에서 온 mig-* 클래스는 서식 정리(rich-text)에서 지우므로 출력의 mig-*는 렌더러가 붙인 역할뿐이다 (9차 재검수 I-2)
+const separates = (el: DomElement) => classesOf(el).some((c) => c.startsWith('mig-'))
+  || /(?:^|;)\s*display\s*:\s*(?!inline\s*(?:;|$)|contents)/iu.test(attr(el, 'style') ?? '');
 
 const joinRuns = (list: Run[][]): Run[] => {
   const out: Run[] = [];
@@ -316,10 +318,11 @@ function partlyShown(node: DomNode, ignore: ((el: DomElement) => boolean) | unde
   if ('tagName' in node) {
     const el = node as DomElement;
     if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return undefined;
-    const own = ownVisibility(el);
-    const view = own && VIEWS.find((v) => own[v] === 'mixed');
-    if (view && (el.tagName === 'img' || plainText(el).trim() || descendants(el).some((d) => d.tagName === 'img'))) {
-      return `원본 내용이 ${VIEW_NAME[view]} 화면 안에서도 폭에 따라 보였다 숨었다 함(출력으로 옮길 수 없는 표시: ${classesOf(el).filter((c) => c.startsWith('d-')).join(' ')})`;
+    // 조상까지 합친 실제 표시로 본다: 부모가 그 화면 전체에서 숨기면 자식의 폭 구간 변화는 화면에 나타나지 않는다 (9차 재검수 I-1)
+    if (ownVisibility(el)) {
+      const shown = visibilityOf(el);
+      const view = VIEWS.find((v) => shown[v] === 'mixed' && hasContentIn(el, v, ignore));
+      if (view) return `원본 내용이 ${VIEW_NAME[view]} 화면 안에서도 폭에 따라 보였다 숨었다 함(출력으로 옮길 수 없는 표시: ${classesOf(el).filter((c) => c.startsWith('d-')).join(' ')})`;
     }
   }
   for (const child of node.childNodes as DomNode[]) {
@@ -327,6 +330,19 @@ function partlyShown(node: DomNode, ignore: ((el: DomElement) => boolean) | unde
     if (found) return found;
   }
   return undefined;
+}
+
+/** 그 화면에서 숨지 않은 글이나 이미지가 요소 안에 있는지(자손이 그 화면에서 숨으면 뺀다) */
+function hasContentIn(node: DomNode, view: View, ignore: ((el: DomElement) => boolean) | undefined, top = true): boolean {
+  if (node.nodeName === '#text') return ((node as { value?: string }).value ?? '').trim() !== '';
+  if (!('childNodes' in node)) return false;
+  if ('tagName' in node) {
+    const el = node as DomElement;
+    if (['script', 'style', 'template'].includes(el.tagName) || ignore?.(el)) return false;
+    if (!top && ownVisibility(el)?.[view] === false) return false;
+    if (el.tagName === 'img') return true;
+  }
+  return (node.childNodes as DomNode[]).some((child) => hasContentIn(child, view, ignore, false));
 }
 
 export function textOrderDiffers(element: DomElement, section: SectionModel, options: ConvertOptions, ignore?: (el: DomElement) => boolean): string | undefined {
