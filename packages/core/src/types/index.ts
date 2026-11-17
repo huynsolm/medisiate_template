@@ -1,4 +1,5 @@
 import { TypeRegistry, type AnyTypeDefinition } from './definition.ts';
+import { blocks } from './blocks.ts';
 import { textVisual } from './text-sample/text-visual.ts';
 import { textZigzag } from './text-sample/text-zigzag.ts';
 import { textSteps } from './text-sample/text-steps.ts';
@@ -40,6 +41,6 @@ import { type32 } from './type32.ts';
 import { type33 } from './type33.ts';
 
 /** 웹 번들과 CLI가 함께 쓰는 정적 타입 목록 */
-export const ALL_TYPES: AnyTypeDefinition[] = [type00, type01, type02, type03, type04, type05, type06, type07, type08, type09, type10, type11, type12, type13, type14, type15, type16, type17, type18, type19, type20, type21, type22, type23, type24, type25, type26, type27, type28, type29, type30, type31, type32, type33, textVisual, textZigzag, textSteps, textHex, textIconGrid];
+export const ALL_TYPES: AnyTypeDefinition[] = [type00, type01, type02, type03, type04, type05, type06, type07, type08, type09, type10, type11, type12, type13, type14, type15, type16, type17, type18, type19, type20, type21, type22, type23, type24, type25, type26, type27, type28, type29, type30, type31, type32, type33, textVisual, textZigzag, textSteps, textHex, textIconGrid, blocks];
 
 export const defaultRegistry = new TypeRegistry(ALL_TYPES);

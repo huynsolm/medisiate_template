@@ -3,13 +3,22 @@ import path from 'node:path';
 import { parseFragment } from 'parse5';
 import { expect } from 'vitest';
 import { convertDocument } from '../../src/convert/convert-document.ts';
-import { defaultRegistry } from '../../src/types/index.ts';
+import { ALL_TYPES, defaultRegistry } from '../../src/types/index.ts';
+import { TypeRegistry } from '../../src/types/definition.ts';
 
 // 3단계 P2 타입: fixtures/original/typeNN.html(원본 CMS 도구와 같은 마크업)을 기준으로 parse → 호스트 프리셋 render.
 const root = path.resolve(import.meta.dirname, '../../../..');
 export const original = (id: string) => readFileSync(path.join(root, 'fixtures/original', `${id}.html`), 'utf8');
-const opts = { registry: defaultRegistry, theme: { primary: '#164aa0', source: 'default' as const }, coreVersion: '0', hostCss: { sha256: 'x', savedAt: 'y' } };
+/**
+ * 타입 parser의 안전 검사용 레지스트리: 마지막 수단인 블록 순서 변환(blocks)을 뺀다.
+ * "담지 못하면 섹션을 원본 보존(fallback)한다"는 각 타입의 약속을 그대로 검사한다. blocks 자체는 blocks.test.ts가 검사한다.
+ */
+export const typedRegistry = new TypeRegistry(ALL_TYPES.filter((t) => t.id !== 'blocks'));
+const base = { theme: { primary: '#164aa0', source: 'default' as const }, coreVersion: '0', hostCss: { sha256: 'x', savedAt: 'y' } };
+const opts = { registry: typedRegistry, ...base };
 export const convert = (body: string) => convertDocument(`<div class="cms-container">${body}</div>`, 'p2.html', opts);
+/** 실제 변환기와 같은 전체 레지스트리(블록 순서 변환 포함) */
+export const convertFull = (body: string) => convertDocument(`<div class="cms-container">${body}</div>`, 'p2.html', { registry: defaultRegistry, ...base });
 export const snapshot = (rel: string) => path.join(root, 'fixtures/types', rel);
 
 type P5 = { tagName?: string; attrs?: Array<{ name: string; value: string }>; childNodes?: P5[] };

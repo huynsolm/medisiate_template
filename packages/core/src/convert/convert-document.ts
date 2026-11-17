@@ -7,7 +7,7 @@ import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
-import { hostVisibilityOf, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
+import { hostVisibilityOf, resetReads, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
 import type { TypeDefinition, TypeRegistry } from '../types/definition.ts';
 import { STRUCTURE_CLASSES } from '../types/structure-classes.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
@@ -74,6 +74,7 @@ type Attempt = { section: SectionModel; diagnostics: Diagnostic[] } | { reason: 
 /** 한 타입으로 옮겨 본다. 글·이미지를 모두 담고(parse) 원본과 글 순서가 같아야(textOrderDiffers) 성공이다 */
 function attempt(def: TypeDefinition<unknown>, src: SourceSection, id: string, options: ConvertOptions): Attempt {
   const local: Diagnostic[] = [];
+  resetReads(src.element);
   const result = def.parse!(src, { diagnostics: local });
   const diagnostics = [...local, ...result.diagnostics];
   if (result.fallbackReason) return { reason: result.fallbackReason, diagnostics };
@@ -179,6 +180,27 @@ export function convertDocument(input: string, file: string, options: ConvertOpt
         detail: { declared: src.typeId, used: other.section.type, ...(first ? { reason: first.reason } : {}) },
       });
       sections.push(other.section);
+      continue;
+    }
+    // 그래도 못 옮기면 머리글·제목·글·이미지·목록·표를 원본 순서대로 일반 모드로 옮긴다(배치는 호스트 기본 모양).
+    // 손실·순서 검사는 같다. 배치가 원본과 달라지므로 warn으로 남겨 파일을 확인 대상(partial)으로 둔다.
+    const general = options.registry.get('blocks');
+    const simple = general?.parse ? attempt(general, src, id, options) : undefined;
+    if (simple && 'section' in simple) {
+      // 지원하지 않는 타입은 블록 순서로 옮겨도 목록(unsupported.csv)에 남겨 어떤 타입을 더 만들지 알 수 있게 한다
+      if (!first) {
+        diagnostics.push({
+          level: 'warn', code: 'UNSUPPORTED_TYPE', sectionIndex: src.index,
+          message: `아직 지원하지 않는 섹션: ${src.typeId ?? src.classList.join(' ')} (블록 순서로 변환)`,
+          ...(src.line ? { location: { line: src.line, col: 1 } } : {}),
+        });
+      }
+      diagnostics.push(...simple.diagnostics, {
+        level: 'warn', code: 'LAYOUT_SIMPLIFIED', sectionIndex: src.index,
+        message: `${src.typeId ?? '타입 없음'}: ${first ? first.reason : '아직 지원하지 않는 타입'} → 글·이미지·순서는 그대로, 배치는 일반 모드 기본 모양(블록 순서)으로 변환`,
+        detail: { declared: src.typeId, ...(first ? { reason: first.reason } : {}) },
+      });
+      sections.push(simple.section);
       continue;
     }
     if (!first) {

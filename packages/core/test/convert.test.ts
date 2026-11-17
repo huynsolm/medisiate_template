@@ -28,8 +28,17 @@ describe('convertDocument', () => {
     expect(result.html).toContain('src="https://a/x.jpg"');
   });
 
-  it('falls back for unsupported types and reports partial', () => {
+  it('converts an unsupported type in block order, still reports it, and marks the file partial', () => {
     const result = convertDocument(doc('<section class="cms type01"><p>a</p></section><section class="cms type99"><p>표</p></section>'), 'a.html', opts);
+    expect(result.page.sections[1]?.type).toBe('blocks');
+    expect(result.page.diagnostics.some((d) => d.code === 'UNSUPPORTED_TYPE' && d.sectionIndex === 2)).toBe(true);
+    expect(result.page.diagnostics.some((d) => d.code === 'LAYOUT_SIMPLIFIED' && d.sectionIndex === 2)).toBe(true);
+    expect(result.status).toBe('partial');
+    expect(result.html).toContain('<p class="mig-desc">표</p>');
+  });
+
+  it('falls back for an unsupported type whose content cannot be moved at all', () => {
+    const result = convertDocument(doc('<section class="cms type01"><p>a</p></section><section class="cms type99"><iframe src="https://example.com/v"></iframe><p>영상</p></section>'), 'a.html', opts);
     expect(result.page.sections[1]?.type).toBe('fallback');
     expect(result.page.diagnostics.some((d) => d.code === 'UNSUPPORTED_TYPE' && d.sectionIndex === 2)).toBe(true);
     expect(result.status).toBe('partial');

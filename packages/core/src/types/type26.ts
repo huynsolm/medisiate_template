@@ -42,7 +42,8 @@ const schema = z.object({
   body: z.array(rowSchema).default([]),
 });
 export type Type26Data = z.infer<typeof schema>;
-type Cell = z.infer<typeof cellSchema>;
+export type Cell = z.infer<typeof cellSchema>;
+export { cellSchema, rowSchema, widthSchema };
 
 const WIDTH = /^\s*width\s*:\s*([^;]+?)\s*;?\s*$/iu;
 
@@ -92,6 +93,58 @@ function rowsOf(group: DomElement | undefined, problems: string[]): Array<{ cell
 }
 
 /**
+ * 열 너비. style(width: 20%) 또는 width 속성(width="20%")에서 읽는다. 실제 페이지에는 width:* · width:% 같은 오타가 있는데,
+ * 브라우저는 잘못된 값을 무시하므로(= 너비 지정 없음) auto로 옮긴다. 그대로 담으면 스키마가 섹션 전체를 거부했다.
+ * 브라우저 순서: 유효한 style 너비 → (없거나 무효면) 유효한 width 속성 → 너비 없음(auto). (검수 I-2: 무효한 style이 유효한 속성을 가리던 문제)
+ * CSS 값은 단위가 있어야 길이다(표준 모드: width:20은 무효, 0만 예외). HTML width 속성만 숫자를 px로 본다 (재검수 R-I-1).
+ */
+export function colWidthsOf(cols: DomElement[]): Array<{ width: string }> {
+  const cssWidth = (raw: string | undefined) => {
+    const v = (raw ?? '').trim();
+    return CSS_LENGTH.test(v) ? v : undefined;
+  };
+  const attrWidth = (raw: string | undefined) => {
+    const v = (raw ?? '').trim();
+    return CSS_LENGTH.test(v) ? v : /^\d+(\.\d+)?$/u.test(v) ? `${v}px` : undefined;
+  };
+  return cols.map((col) => ({ width: cssWidth(WIDTH.exec(attr(col, 'style') ?? '')?.[1]) ?? attrWidth(attr(col, 'width')) ?? 'auto' }));
+}
+
+export interface TableData {
+  caption: string;
+  captionVisible: boolean;
+  head: Array<{ cells: Cell[] }>;
+  body: Array<{ cells: Cell[] }>;
+}
+
+/** 표 하나를 읽는다(제목·머리글 행·본문 행). 옮길 수 없는 칸은 problems에 기록한다 */
+export function readTable(table: DomElement, problems: string[]): TableData {
+  const captionEl = children(table).find((el) => el.tagName === 'caption');
+  const caption = captionEl ? richFrom(captionEl) : '';
+  // 원본 caption이 sr-only가 아니면 화면에 보이는 표 제목이다 (검수 I-1)
+  const captionVisible = Boolean(captionEl && caption && !hasClass(captionEl, 'sr-only'));
+  const head = rowsOf(children(table).find((el) => el.tagName === 'thead'), problems);
+  const body = rowsOf(children(table).find((el) => el.tagName === 'tbody'), problems);
+  return { caption, captionVisible, head, body };
+}
+
+/** 표 출력: .table-responsive(가로 스크롤) > table.mig-table. 프리셋·일반 모드 공통 */
+export function renderTable(d: TableData & { colWidths: Array<{ width: string }> }) {
+  const cell = (c: Cell) => h(c.th ? 'th' : 'td', { colspan: c.colspan, rowspan: c.rowspan }, [rich(c.text)]);
+  const rows = (list: Array<{ cells: Cell[] }>) => list.map((r) => h('tr', {}, r.cells.map(cell)));
+  return h('div', { class: 'table-responsive' }, [
+    h('table', { class: 'mig-table' }, [
+      // 호스트는 caption을 화면에서 숨긴다(position: absolute; 1px; clip). 보이는 표 제목은 그 규칙을 인라인으로 되돌린다
+      !isBlank(d.caption) && h('caption', d.captionVisible
+        ? { style: { position: 'static', width: 'auto', height: 'auto', margin: '0 0 8px', overflow: 'visible', clip: 'auto' } } : {}, [rich(d.caption)]),
+      d.colWidths.length > 0 && h('colgroup', {}, d.colWidths.map((c) => h('col', { style: { width: c.width } }))),
+      d.head.length > 0 && h('thead', {}, rows(d.head)),
+      h('tbody', {}, rows(d.body)),
+    ]),
+  ]);
+}
+
+/**
  * 원본: .cms-table-wrap > [.cms-description-box > p.cms-description] + table.cms-table(colgroup > col[style=width], thead, tbody)
  * 호스트: section.type-26 > .mig-body > .mig-table-wrap > [p.mig-desc] + .table-responsive(가로 스크롤) > table.mig-table
  * 칸 병합(colspan/rowspan)과 th/td 구분, 열 너비를 그대로 옮긴다.
@@ -128,19 +181,7 @@ export const type26: TypeDefinition<Type26Data> = {
     const scan = scanSection(src);
     const table = descendants(src.element, (el) => el.tagName === 'table')[0];
     const cols = table ? descendants(table, (el) => el.tagName === 'col') : [];
-    // 너비는 style(width: 20%) 또는 width 속성(width="20%")에서 읽는다. 실제 페이지에는 width:* · width:% 같은 오타가 있는데,
-    // 브라우저는 잘못된 값을 무시하므로(= 너비 지정 없음) auto로 옮긴다. 그대로 담으면 스키마가 섹션 전체를 거부했다.
-    // 브라우저 순서: 유효한 style 너비 → (없거나 무효면) 유효한 width 속성 → 너비 없음(auto). (검수 I-2: 무효한 style이 유효한 속성을 가리던 문제)
-    // CSS 값은 단위가 있어야 길이다(표준 모드: width:20은 무효, 0만 예외). HTML width 속성만 숫자를 px로 본다 (재검수 R-I-1).
-    const cssWidth = (raw: string | undefined) => {
-      const v = (raw ?? '').trim();
-      return CSS_LENGTH.test(v) ? v : undefined;
-    };
-    const attrWidth = (raw: string | undefined) => {
-      const v = (raw ?? '').trim();
-      return CSS_LENGTH.test(v) ? v : /^\d+(\.\d+)?$/u.test(v) ? `${v}px` : undefined;
-    };
-    const colWidths = cols.map((col) => ({ width: cssWidth(WIDTH.exec(attr(col, 'style') ?? '')?.[1]) ?? attrWidth(attr(col, 'width')) ?? 'auto' }));
+    const colWidths = colWidthsOf(cols);
     // 열 너비는 데이터로 옮기므로, width만 있는 col style은 "버린 style" 경고에서 뺀다.
     const diagnostics = scan.diagnostics.filter((d) => !(d.code === 'INLINE_STYLE_DROPPED' && d.detail?.tag === 'col'
       && (d.detail.declarations as string[]).every((decl) => WIDTH.test(decl))));
@@ -155,12 +196,7 @@ export const type26: TypeDefinition<Type26Data> = {
     const desc = boxText(true);
     const afterTable = boxText(false);
     const problems: string[] = [];
-    const captionEl = table ? children(table).find((el) => el.tagName === 'caption') : undefined;
-    const caption = captionEl ? richFrom(captionEl) : '';
-    // 원본 caption이 sr-only가 아니면 화면에 보이는 표 제목이다 (검수 I-1)
-    const captionVisible = Boolean(captionEl && caption && !hasClass(captionEl, 'sr-only'));
-    const head = rowsOf(table ? children(table).find((el) => el.tagName === 'thead') : undefined, problems);
-    const body = rowsOf(table ? children(table).find((el) => el.tagName === 'tbody') : undefined, problems);
+    const { caption, captionVisible, head, body } = table ? readTable(table, problems) : { caption: '', captionVisible: false, head: [], body: [] };
     const notes = readNotes(src.element, wrap);
     const data: Type26Data = {
       ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}),
@@ -176,21 +212,10 @@ export const type26: TypeDefinition<Type26Data> = {
   },
   render(section) {
     const d = section.data;
-    const cell = (c: Cell) => h(c.th ? 'th' : 'td', { colspan: c.colspan, rowspan: c.rowspan }, [rich(c.text)]);
-    const rows = (list: Type26Data['head']) => list.map((r) => h('tr', {}, r.cells.map(cell)));
     return presetSection('type-26', section, withNotes(d, [
       h('div', { class: 'mig-table-wrap' }, [
         !isBlank(d.desc) && h('p', { class: 'mig-desc' }, [rich(d.desc)]),
-        h('div', { class: 'table-responsive' }, [
-          h('table', { class: 'mig-table' }, [
-            // 호스트는 caption을 화면에서 숨긴다(position: absolute; 1px; clip). 보이는 표 제목은 그 규칙을 인라인으로 되돌린다
-            !isBlank(d.caption) && h('caption', d.captionVisible
-              ? { style: { position: 'static', width: 'auto', height: 'auto', margin: '0 0 8px', overflow: 'visible', clip: 'auto' } } : {}, [rich(d.caption)]),
-            d.colWidths.length > 0 && h('colgroup', {}, d.colWidths.map((c) => h('col', { style: { width: c.width } }))),
-            d.head.length > 0 && h('thead', {}, rows(d.head)),
-            h('tbody', {}, rows(d.body)),
-          ]),
-        ]),
+        renderTable({ caption: d.caption ?? '', captionVisible: d.captionVisible ?? false, colWidths: d.colWidths, head: d.head, body: d.body }),
       ]),
     ]));
   },

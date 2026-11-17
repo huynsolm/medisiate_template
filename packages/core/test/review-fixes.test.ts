@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { parseFragment } from 'parse5';
 import { convertDocument } from '../src/convert/convert-document.ts';
-import { defaultRegistry } from '../src/types/index.ts';
+import { typedRegistry } from './support/original.ts';
 import { sanitizeRichText } from '../src/html/rich-text.ts';
 
-const opts = { registry: defaultRegistry, theme: { primary: '#b1926a', source: 'default' as const }, coreVersion: '0', hostCss: { sha256: 'x', savedAt: 'y' } };
+// 타입 parser 안전 검사: 마지막 수단(블록 순서 변환)을 뺀 레지스트리
+const opts = { registry: typedRegistry, theme: { primary: '#b1926a', source: 'default' as const }, coreVersion: '0', hostCss: { sha256: 'x', savedAt: 'y' } };
 const doc = (body: string) => `<div class="cms-container">${body}</div>`;
 const convert = (body: string) => convertDocument(doc(body), 'a.html', opts);
 

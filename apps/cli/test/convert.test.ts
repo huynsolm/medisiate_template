@@ -32,7 +32,8 @@ beforeEach(async () => {
   await put('config/themes/default.json', '{ "primary": "#c7b195" }');
   await put('config/themes/01.json', '{ "primary": "#164aa0" }');
   await put('cms/contents/01/botox.html', page('<section class="cms type00"><h2>보톡스</h2></section><section class="cms type01"><img src="http://x/a.jpg"><p>설명</p></section>'));
-  await put('cms/contents/01/filler.html', page('<section class="cms type01"><p>필러</p></section><section class="cms type99"><table><tr><td>가격</td></tr></table></section>'));
+  // type99 안의 iframe은 어떤 방식으로도 옮길 수 없어 섹션이 원본 보존(fallback)된다(지원 안 되는 섹션 보고 검사용)
+  await put('cms/contents/01/filler.html', page('<section class="cms type01"><p>필러</p></section><section class="cms type99"><iframe src="https://x/v"></iframe><table><tr><td>가격</td></tr></table></section>'));
   await put('cms/contents/02/laser.html', page('<section class="cms type01"><img src="../img/l.jpg"><p>레이저</p></section>'));
   await put('cms/contents/include/menu.html', '<ul><li>메뉴</li></ul>');
   await put('cms/contents/01/old.html.bak', 'old');
@@ -80,7 +81,7 @@ describe('convert', () => {
 
   it('converts one directory and rebuilds reports from all existing data', async () => {
     await runConvert(root, ['--all']);
-    await put('cms/contents/02/laser.html', page('<section class="cms type99"><p>바뀜</p></section>'));
+    await put('cms/contents/02/laser.html', page('<section class="cms type99"><iframe src="https://x/v"></iframe><p>바뀜</p></section>'));
     const code = await runConvert(root, ['--dir', 'cms/contents/02']);
     expect(code).toBe(0);
     const report = JSON.parse(await readFile(path.join(root, 'output/reports/report.json'), 'utf8'));

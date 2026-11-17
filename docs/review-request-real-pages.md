@@ -166,3 +166,15 @@ npm run convert -- --all   # 기대: success 270, partial 418, failed 15 (output
 - 반영 기록: `docs/review-real-pages-fixes.md` 마지막 장(12차 재검수 반영). 범위: `3eb7113..` 이후.
 - 출력 쪽 호스트 표시 판정이 같은 요소 안에서는 호스트 CSS 선언 순서(pc가 mo보다 뒤)를 따르고, 조상·자손 사이는 그다음 합친다.
 - 기대 수치: `npm test` 911 passed, `npm run test:browser` 192 passed, 703페이지 success 320 / partial 368 / failed 15, 순서 사유 보존 9개.
+
+## 21. 원본 보존 섹션 줄이기 검수 (구조 일치 재분류 + 블록 순서 변환)
+
+- 설계·결과: `docs/real-pages-baseline.md` 9장. 범위: `78133b4..` 이후.
+- 새 경로: 적힌 타입 실패 → 같은 구조의 원본 도구 타입(`STRUCTURE_RETYPED`) → 블록 순서 일반 모드(`LAYOUT_SIMPLIFIED`, `types/blocks.ts`) → 원본 보존.
+- 확인 요청:
+  1. 조용한 손실: 블록 순서 변환이 글·이미지·링크·표 병합·목록 단계·한쪽 화면 전용 표시를 잃거나 순서를 바꾸는 입력이 있는지.
+  2. 재분류 오판: 구조 클래스 일치 규칙이 원본과 다른 모양의 타입을 고르는 경우.
+  3. 모드 분리: 프리셋 섹션과 블록 섹션이 한 페이지에 섞일 때 `migration-content` 블록이 나뉘는지(`MIXED_MODE_SPLIT`), 호스트 일반 모드 규칙이 적용되는지.
+  4. 시도 사이 상태(`resetReads`): 앞선 시도의 읽기 기록이 다음 시도 검사에 남는 경로가 있는지.
+  5. 진단 수준: 블록 순서 변환을 warn(partial)으로 두는 것이 맞는지.
+- 기대 수치: `npm test` 933 passed, `npm run test:browser` 194 passed, 703페이지 success 326 / partial 363 / failed 14, 원본 보존 섹션 50개(고정 목록).

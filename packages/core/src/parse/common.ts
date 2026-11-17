@@ -293,6 +293,18 @@ export function duplicateReads(root: DomElement): string[] {
   return [...new Set(problems)];
 }
 
+/**
+ * 섹션의 읽기 기록(글로 읽음·나눠 읽음·읽은 횟수)을 지운다. 한 섹션을 여러 타입으로 차례로 옮겨 볼 때,
+ * 앞선 시도의 기록이 다음 시도의 구조·중복 검사에 섞이지 않게 시도마다 먼저 부른다.
+ */
+export function resetReads(root: DomElement): void {
+  for (const el of [root, ...descendants(root)]) {
+    readAsText.delete(el);
+    readInParts.delete(el);
+    readCount.delete(el);
+  }
+}
+
 /** 노드 목록을 서식 글로. 문단 블록은 줄바꿈으로 잇는다. 요소의 일부(자식 몇 개)만 글로 읽을 때도 쓴다(예: Q&A 답의 목록 앞 글) */
 export function richFromNodes(nodes: DomNode[]): string {
   if (!nodes.some((n) => isElement(n) && TEXT_BLOCKS.has(n.tagName))) return cleanRich(nodesHtml(nodes));
