@@ -1,3 +1,110 @@
+# type10 설명 덩어리 재검수 — 6e04ccf
+
+- 검수일: 2026-11-18 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `6e04ccf`, 범위: `fc76d0e..6e04ccf`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장, `docs/review-request-real-pages.md` 29장.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 I-1·I-2의 정확한 재현 입력은 해결됐다. 다만 설명 상자 자체 또는 조상의 숨김은 새 검사 대상에서 빠져, 빈 항목만 있는 상자의 글머리가 노출된다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 1 | I-1 설명 상자·조상의 숨김을 놓쳐 빈 글머리 노출 |
+| Minor | 0 | 확정 항목 없음 |
+
+추가 지적은 최소 입력이다. 실제 703페이지에서 발생했다고 집계하지 않는다. 기준 fc76d0e에도 있던 잔여 변형이며 이번 수정이 새로 만든 회귀라는 주장은 아니다.
+
+## 이전 지적 확인 — 직접 실행
+
+| 이전 입력 | 현재 결과 / 기대 결과 |
+|---|---|
+| 문단 → ol start=4(FIRST·SECOND) → 문단 | blocks·partial·fallback 0, ordered=true·start=4 유지. 실제 DOM에서 중첩 ol의 counter-reset=mig-counter-sub 3 / 번호 보존 기대 충족 |
+| ol reversed start=4, 두 번째 li value=8 | LOSSY_PARSE·fallback 1로 원본 보존 / 지원하지 않는 번호 의미 보존 기대 충족 |
+| ul의 첫 li가 d-none·빈 항목, 다음 ALL ITEM | blocks에서 숨긴 빈 항목 제외, 안쪽 ul에는 ALL ITEM 한 개만 남음 / 기대 충족 |
+| 첫 빈 li가 d-none d-lg-block | blocks의 항목 only=pc. 360px에서 항목 전체가 숨고 1100px에서 표시 / 기대 충족 |
+| PC 전용 문단과 일반 ul | parts로 읽지 않고 only=pc를 가진 blocks로 변환 / 기대 충족 |
+| 항목 안 span d-none의 비어 있지 않은 글 | LOSSY_PARSE·fallback으로 원본 보존 / 숨긴 글을 노출하지 않음 |
+
+번호·표시 결과는 Chromium 1100/360px의 DOM/CSS를 직접 측정했다. 원본 전체와 현재 변환 모델·HTML·진단을 함께 확인했다.
+
+## Important
+
+### I-1. 설명 상자 자체나 조상에 숨김이 있으면 readTextParts가 이를 놓쳐 빈 글머리가 나타남
+
+**위치:** `packages/core/src/parse/original.ts:175`~`:178` (자손의 ownVisibility만 검사), `:190`~`:193` (빈 글 항목 유지); 출력은 `packages/core/src/types/preset.ts:112`.
+
+**재현 입력 — 변환기·Chromium에서 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type10"><div class="cms-inner">
+    <div class="cms-header"><p class="cms-title">TITLE</p></div>
+    <div class="cms-list-wrap"><ol class="cms-figure-list">
+      <li class="cms-list-item">
+        <div class="cms-description-box d-none"><ul><li></li></ul></div>
+      </li>
+    </ol></div>
+  </div></section>
+</div>
+```
+
+**실제:** type10·success·fallback 0, diagnostics 빈 배열. parts는 `[{"bullets":[{"text":""}]}]`가 된다. 출력에는 숨김이 없는 ul/li가 만들어져 **빈 글머리 한 개**가 표시된다. 원본은 상자 전체가 display:none이라 해당 글머리가 보이지 않는다. Chromium 1100/360px에서 원본 li는 표시되지 않고 출력 li는 display=list-item·표시됨을 측정했다. 360px 원본·출력 캡처도 직접 열어 확인했다.
+
+다음 변형도 직접 실행해 같은 경로를 확인했다.
+
+```html
+<!-- 360px에서 상자 전체가 숨는 경우 -->
+<div class="cms-description-box d-none d-lg-block"><ul><li></li></ul></div>
+
+<!-- 상자 자체에는 표시 클래스가 없고 조상이 숨는 경우 -->
+<div class="d-none">
+  <div class="cms-description-box"><ul><li></li></ul></div>
+</div>
+```
+
+두 변형도 type10·success·진단 없음이며, 360px에서 숨겨야 하는 빈 글머리를 출력한다.
+
+**기대:** 목록의 실제 보임에는 설명 상자와 조상의 숨김도 반영되어야 한다. 숨긴 빈 구조가 출력에 새 글머리·공간을 만들면 안 된다. parts로 표시 조건을 보존할 수 없다면 안전하게 생략하거나 다음 변환/원본 보존 경로로 보내야 한다.
+
+**원인 — 정적 판독:** descendants(box)는 box 자신을 포함하지 않는다. 또한 ownVisibility(d)는 조상의 표시를 합치지 않는다. 따라서 내부 ul·li에 개별 숨김 클래스가 없으면 검사를 통과한다. 모델에는 컨테이너·항목의 표시가 없고 빈 글도 li로 출력된다. 글·이미지 순서 검사는 빈 항목의 글머리 차이를 검출하지 못한다.
+
+**기준 버전 대조 — 직접 실행:** fc76d0e에서도 세 변형이 type10·success로 같은 빈 bullets 모델을 만들었다. 이전 정확한 li 자체의 숨김 입력은 이번에 고쳐졌지만, 컨테이너에 숨김을 둔 변형은 남아 있다.
+
+## 정상·회귀 검사
+
+- **직접 실행:** 일반 문단 → ul → 문단의 parts 순서·안전한 링크·strong·em은 유지됐다. 정상 글 블록의 d-lg-block, ul의 d-none d-block처럼 계산 결과 항상 보이는 규칙도 parts를 불필요하게 거부하지 않았다.
+- **직접 실행:** 중첩 목록·이미지·표·항목 안 문단·떠 있는 글·늦은 소제목·ul의 li 밖 글을 이전과 같은 입력으로 재검사했다. 지원 밖 구조를 parts 성공으로 조용히 버리는 추가 사례는 이 입력들에서 없었다.
+- **직접 실행:** 숨긴 목록만 비어 있는 입력은 parts로 읽지 않고 기존 desc 경로에서 빈 구조를 생략해 type10을 유지했다. 글머리 노출은 없었다. 모든 거부 입력이 반드시 blocks/fallback 타입이 되는 것은 아니므로, 위 확인은 경로와 실제 내용 보존을 구분했다.
+- **편집기 직접 실행:** 정상 parts의 문단·글머리 편집, 한 part에 text+bullets 입력, 이동·삭제·JSON 저장·재불러오기를 확인했다. 저장 배열의 순서·링크·서식과 재불러오기 전후 HTML이 유지됐다.
+
+원본 화면 비교에는 Bootstrap 4.6.2와 원본 cms.css, 출력에는 저장소 host-style.css를 적용했다. 원본 배포 사이트의 Bootstrap 버전까지 확정한 검사는 아니다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 38개 파일, 982개 통과 |
+| `npm run test:browser` | 5개 파일, 197개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 356 / partial 333 / failed 14 |
+| 기준 fc76d0e와 703페이지 대조 | 페이지별 상태·섹션 타입 배열 변화 0개, blocks 294 → 294, fallback 50 → 50 |
+| 추가 직접 검증 | 이전 13개 입력과 추가 7개 변형, 7개 입력의 1100/360px DOM/CSS·캡처, parts 편집·저장·재불러오기 |
+
+기존 테스트 통과는 위 컨테이너 숨김 변형까지 안전하다는 뜻이 아니다.
+
+추가 스크립트·JSON·캡처는 `/tmp/text-parts-fix-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 fc76d0e 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (fc76d0e)</summary>
+
 # type10 문단·글머리 목록 검수 — ac9286d
 
 - 검수일: 2026-11-18 (KST).
@@ -2689,6 +2796,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
