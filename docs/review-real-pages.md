@@ -1,3 +1,100 @@
+# type10 설명 상자 표시 재검수 — 94a04bb
+
+- 검수일: 2026-11-18 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `94a04bb`, 범위: `f327a06..94a04bb`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장의 상자·조상 visibilityOf 검사.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 상자·조상 숨김을 판정하는 새 검사 자체는 작동한다. 모든 화면에서 숨은 상자의 글머리 노출은 해결됐다. 그러나 한쪽 화면 전용 상자는 parts 거부 뒤 기존 desc 경로에서 목록 전체가 누락되어, 원래 보이는 화면에서도 글머리가 사라진다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 1 | I-1 parts 거부 뒤 빈 목록을 누락해 PC/모바일 전용 표시를 전부 삭제 |
+| Minor | 0 | 확정 항목 없음 |
+
+아래는 추가 대조로 확인한 최소 입력이다. 실제 703페이지에서 발생했다고 집계하지 않는다. 이전 PC 전용 상자 재현 입력의 모바일 노출은 막혔지만, PC에서의 정상 표시까지 사라지는 회귀가 남는다.
+
+## 이전 입력 및 정상 대조 — 직접 실행
+
+| 입력 | 현재 실제 결과 |
+|---|---|
+| 상자 d-none + 빈 ul/li | type10·success, parts=[]. 모든 화면에서 글머리가 없어 이전 불필요 노출 해결 |
+| 조상 d-none + 상자 안 빈 ul/li | 같은 결과. 조상 숨김도 검사됨 |
+| 상자 d-none d-lg-block + 빈 ul/li | parts=[]로 모든 화면에서 목록 삭제. 360px 노출은 해결됐지만 1100px의 원래 글머리도 삭제됨(I-1) |
+| 같은 상자에 표시 클래스 없음 | parts=[{bullets:[{text:""}]}] 유지. 원본·출력 모두 빈 글머리 표시 |
+| 일반 문단·안전한 링크·strong·em·ul | 기존 순서·서식·주소 유지, type10·success |
+| 실제로 항상 보이는 규칙(d-lg-block 문단, d-none d-block 목록) | parts 정상 변환. 숨김 검사로 불필요하게 거부되지 않음 |
+| ol start=4 / reversed·li value | 시작값은 blocks로 보존, 역순·개별 번호는 원본 보존. 이전 번호 방어 유지 |
+| li 자체의 d-none / PC 전용 | blocks에서 완전 숨김 빈 항목 제외 / only=pc 유지. 이전 항목 표시 방어 유지 |
+
+## Important
+
+### I-1. PC 전용 상자의 parts 읽기를 거부한 뒤 type10이 성공해, PC에 보이던 빈 글머리까지 사라짐
+
+**위치:** `packages/core/src/parse/original.ts:178` (거부 조건); `packages/core/src/types/type10.ts:68`~`:83` (parts 미정의 시 desc 경로로 진행해 finish 성공).
+
+**재현 입력 — 변환기·Chromium에서 직접 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type10"><div class="cms-inner">
+    <div class="cms-header"><p class="cms-title">TITLE</p></div>
+    <div class="cms-list-wrap"><ol class="cms-figure-list">
+      <li class="cms-list-item">
+        <div class="cms-description-box d-none d-lg-block">
+          <ul><li></li></ul>
+        </div>
+      </li>
+    </ol></div>
+  </div></section>
+</div>
+```
+
+**실제:** type10·success·fallback 0, diagnostics 빈 배열. `items[0].parts=[]`가 되어 안쪽 ul/li가 출력되지 않는다. Chromium 1100px의 원본에는 상자·ul·li가 보이고 빈 글머리(circle)가 하나 표시되지만, 출력에는 해당 목록 자체가 없다. 360px에서는 원본·출력 모두 글머리가 없다. 1100px 원본·출력 캡처를 직접 열어 차이를 확인했다.
+
+**대조 입력 — 직접 실행:** 상자의 표시 클래스를 빼면 같은 빈 ul/li가 parts에 남고 출력된다. 즉 보이는 빈 목록이 일반적으로 지원되지 않는 것이 아니라, 화면별 표시 때문에 readTextParts가 undefined를 반환한 후에만 사라진다.
+
+반대 방향도 재현했다.
+
+```html
+<div class="cms-description-box d-block d-lg-none"><ul><li></li></ul></div>
+```
+
+이 변형은 360px에서 원본 글머리가 보이지만 출력에는 없고, 여전히 type10·success·진단 없음이다.
+
+**기대:** 한쪽 화면에서 숨는 상자는 보이는 화면의 목록을 보존해야 한다. parts로 표시 조건을 표현할 수 없어 거부했다면 기존 desc 경로가 빈 목록을 조용히 버리며 성공해서는 안 된다. 안전하게 표시를 유지하거나 원본을 보존해야 한다. 모든 화면에서 숨은 빈 구조를 제외하는 것과, 한쪽 화면에 보이는 구조를 전부 삭제하는 것은 구별해야 한다.
+
+**원인 — 정적 판독:** 새 visibilityOf 검사로 parts가 undefined가 되는 것은 올바르다. 하지만 type10은 loose 목록의 읽기 실패를 명시적 실패로 전달하지 않고, 직접 자식 p.cms-description만 desc로 읽은 뒤 parts를 []로 만든다. 빈 li에는 글·이미지가 없어 finish와 순서 검사가 누락을 찾지 못한다. 결과적으로 다음 안전 경로로 넘어가지 않는다. visibility 계산보다 **거부 결과를 처리하는 type10 호출부**에 남은 문제다.
+
+**기준 버전 대조 — 직접 실행:** f327a06은 같은 PC 전용 입력을 parts=[{bullets:[{text:""}]}]로 출력했다. 이는 모바일에서 과도하게 보이는 이전 결함이 있었지만 PC에서는 글머리가 남았다. 현재는 두 화면 모두 삭제되어 PC 표시가 손실된다. 이전 구현이 옳았다는 뜻이 아니라 두 화면의 기대 결과를 각각 보존해야 한다는 지적이다.
+
+## 회귀·실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 38개 파일, 985개 통과 |
+| `npm run test:browser` | 5개 파일, 197개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 356 / partial 333 / failed 14 |
+| 기준 f327a06과 703페이지 대조 | 페이지별 상태·섹션 타입 배열 변화 0개, blocks 294 → 294, fallback 50 → 50 |
+| 원본/출력 DOM·화면 대조 | 1100/360px에서 이전 입력 및 표시 없는 빈 목록·모바일 전용 목록을 대조, 1100px PC 전용 상자의 캡처 직접 확인 |
+| 편집기 실제 조작 | 정상 parts 수정·이동·삭제·JSON 저장·재불러오기. 배열 순서·링크·서식 및 재불러오기 전후 HTML 유지 |
+
+중첩 목록·이미지·표·떠 있는 글·늦은 소제목·li 밖 글도 이전 입력으로 재실행했고, parts가 이를 조용히 받아 버리는 추가 사례는 확인하지 못했다. 위 I-1은 기존 테스트들이 부재만 검사하는 화면과 원래 보이는 화면을 함께 대조하면서 확인한 사례다.
+
+브라우저 비교는 원본에 Bootstrap 4.6.2와 원본 cms.css, 출력에 저장소 host-style.css를 적용했다. 원본 배포 사이트의 Bootstrap 버전까지 확정한 검사는 아니다. 추가 스크립트·JSON·캡처는 `/tmp/text-parts-fix2-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 f327a06 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (f327a06)</summary>
+
 # type10 설명 덩어리 재검수 — 6e04ccf
 
 - 검수일: 2026-11-18 (KST).
@@ -2796,6 +2893,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
