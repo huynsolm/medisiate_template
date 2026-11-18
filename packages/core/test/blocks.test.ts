@@ -202,3 +202,13 @@ describe('unread plain list items', () => {
     expect(r.page.sections[0]!.type).toBe('fallback');
   });
 });
+
+describe('unread plain list items are checked for every type, not only finish() users', () => {
+  it.each([
+    ['type01', '<section class="cms type01"><div class="cms-inner"><p class="cms-thin-title">제목</p><p>설명</p><ul><li></li></ul></div></section>'],
+    ['type00', '<section class="cms type00"><div class="cms-inner"><div class="cms-header"><p class="cms-page-title">페이지</p></div><ul><li></li></ul></div></section>'],
+  ])('%s with a visible empty bullet keeps it (typed parser falls back)', (_, html) => {
+    const r = convertTyped(html);
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+});

@@ -7,7 +7,7 @@ import { classesOf } from '../parse/dom.ts';
 import { classifyImageSrc } from '../helpers/image-ref.ts';
 import { richTextToPlain, safeHref } from '../html/rich-text.ts';
 import { fallbackFromSource } from '../types/fallback.ts';
-import { hostVisibilityOf, resetReads, richFrom, scanSection, TEXT_BLOCKS, TEXT_INLINE, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
+import { hostVisibilityOf, resetReads, richFrom, scanSection, unreadListItems, TEXT_BLOCKS, TEXT_INLINE, visibilityOf, VIEWS, type Shown, type View } from '../parse/common.ts';
 import type { TypeDefinition, TypeRegistry } from '../types/definition.ts';
 import { STRUCTURE_CLASSES } from '../types/structure-classes.ts';
 import type { FluidRange } from '../helpers/fluid.ts';
@@ -78,6 +78,9 @@ function attempt(def: TypeDefinition<unknown>, src: SourceSection, id: string, o
   const result = def.parse!(src, { diagnostics: local });
   const diagnostics = [...local, ...result.diagnostics];
   if (result.fallbackReason) return { reason: result.fallbackReason, diagnostics };
+  // 읽지 않은 원본 도구 밖 목록 항목은 타입이 finish()를 쓰지 않아도(type00·type01 등) 여기서 한 번 더 본다 (재검수 I-1)
+  const unread = unreadListItems(src.element);
+  if (unread.length) return { reason: `옮기지 않은 목록 항목 ${unread.length}개(빈 항목도 글머리·번호가 보임)`, diagnostics };
   const section: SectionModel = {
     id,
     type: def.id,
@@ -124,6 +127,7 @@ function attemptWithNotes(def: TypeDefinition<unknown>, src: SourceSection, id: 
     parent.childNodes = saved;
   }
   if (result.fallbackReason) return undefined;
+  if (unreadListItems(src.element).length) return undefined;
   const intro = read(boxes.filter((b) => kids.indexOf(b) < firstMain));
   const note = read(boxes.filter((b) => kids.indexOf(b) > lastMain));
   const section: SectionModel = {

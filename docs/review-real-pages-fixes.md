@@ -358,3 +358,9 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
   - type10: 설명 상자 안 원본 도구 밖 목록을 덩어리로 읽지 못하면 사유를 남기고 원본 보존(다음 단계로).
 - 실제 703페이지 결과 변화 없음.
 - 검증: 새 테스트 5개(PC·모바일 전용 상자의 빈 목록, 빈 번호 목록, 다른 타입(type23)의 읽지 않은 빈 글머리, 모든 화면에서 숨은 빈 목록은 그대로 생략) 중 4개는 수정을 되돌리면 실패. `npm test` 990 passed, `npm run test:browser` 197 passed, lint·typecheck 오류 없음, 703페이지 success 356 / partial 333 / failed 14, 블록 순서 294, 원본 보존 50개.
+
+## 목록 항목 손실 검사 재검수(`4e1c0bf`) 지적 반영
+
+### I-1. finish()를 쓰지 않는 type01(·type00)이 새 공통 검사를 우회
+- 수정(`convert-document.ts` `attempt`, `attemptWithNotes`): 읽지 않은 원본 도구 밖 목록 항목 검사(`unreadListItems`)를 **변환기가 모든 시도마다** parse 직후 한 번 더 한다. 타입이 `finish()`를 쓰는지와 무관하게 적용된다(적힌 타입·설명 분리·재분류·블록 순서 모두).
+- 검증: 새 테스트 2개(type01·type00의 보이는 빈 글머리)는 수정을 되돌리면 실패. `npm test` 992 passed, `npm run test:browser` 197 passed, lint·typecheck 오류 없음, 703페이지 success 356 / partial 333 / failed 14, 블록 순서 294, 원본 보존 50개(변화 없음).
