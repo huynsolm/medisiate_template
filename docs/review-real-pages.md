@@ -1,3 +1,97 @@
+# 미읽기 목록 공통 손실 검사 재검수 — 533f825
+
+- 검수일: 2026-11-18 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `533f825`, 범위: `c631f21..533f825`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장의 unreadListItems 및 type10 읽기 실패 처리.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**수정 후 재확인 필요.** 이전 type10의 PC·모바일 전용 빈 목록 입력은 이제 blocks로 넘어가 표시 조건을 유지한다. 다만 모든 타입에 적용한다는 공통 검사가 finish를 호출하지 않는 type01에는 적용되지 않아 같은 종류의 누락이 남는다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 1 | I-1 type01의 별도 파서가 공통 미읽기 목록 검사를 우회 |
+| Minor | 0 | 확정 항목 없음 |
+
+아래는 추가 최소 입력이다. 실제 703페이지에서 발생했다고 집계하지 않는다. 이번 변경 이전에도 있던 경로이며, 새 검사의 적용 범위 누락으로 기록한다.
+
+## 이전 type10 입력 확인 — 직접 실행
+
+| 입력 | 현재 결과 / 기대 결과 |
+|---|---|
+| PC 전용 상자 + 빈 ul/li | blocks·partial, 안쪽 list.only=pc·빈 항목 유지. 1100px에서 항목 표시, 360px에서 숨김 / 기대 충족 |
+| 모바일 전용 상자 + 빈 ul/li | blocks·partial, list.only=mo 유지. 화면별 표시 보존 / 기대 충족 |
+| 표시 클래스 없는 빈 ul/li | type10·success, parts의 빈 bullet 유지 / 정상 표시를 무조건 삭제하지 않음 |
+| 모든 화면에서 숨긴 상자/조상 + 빈 ul/li | type10 실패 후 type02로 재분류되며 숨긴 빈 구조 제외. 불필요한 글머리 없음 / 기대 충족 |
+| 번호 목록 start=4 / reversed·li value | blocks에서 시작값 보존 / 역순·개별 번호는 원본 보존. 기존 번호 방어 유지 |
+| type23의 같은 원본 도구 밖 빈 ul/li | 직접 파서가 미읽기 1개 사유로 실패. 전체 변환은 blocks로 보존 / 공통 검사가 작동하는 대조군 |
+
+모델·HTML·진단과 Chromium 1100/360px DOM/CSS를 대조했다. type10이 parts를 거부한 뒤 기존 desc만으로 성공하던 이전 경로는 검사한 재현 입력에서 막혔다.
+
+## Important
+
+### I-1. type01은 finish를 호출하지 않아 보이는 빈 목록을 여전히 조용히 버림
+
+**위치:** `packages/core/src/types/type01.ts:72`~`:78` (별도 손실 판정과 직접 반환). 새 검사는 `packages/core/src/parse/original.ts:130` 부근 finish에서 호출되며, 이 type01 경로를 거치지 않는다.
+
+**재현 입력 — 변환기·직접 파서·Chromium에서 실행:**
+
+```html
+<div class="cms-container">
+  <section class="cms type01"><div class="cms-inner">
+    <div class="cms-description-box">
+      <p class="cms-description">BODY</p>
+      <ul class=""><li></li></ul>
+    </div>
+  </div></section>
+</div>
+```
+
+빈 class는 원본 도구 밖 목록 대조를 위한 것으로, 목록·항목에 cms-* 클래스가 없다.
+
+**실제:** type01·success·fallback 0, diagnostics 빈 배열. 데이터는 image={}·desc=BODY뿐이고 안쪽 ul/li가 출력되지 않는다. Chromium 1100/360px의 원본에는 빈 글머리가 하나 보이고 출력에는 없다. 360px 원본·출력 캡처도 직접 열어 확인했다.
+
+같은 ul을 `class="d-none d-lg-block"`으로 바꾸어도 type01·success·진단 없음이다. 원본은 1100px에서 항목이 보이는데 출력에는 없으며, 360px에서는 원본과 출력 모두 숨김 상태다. 즉 이전 type10에서 문제였던 “보이는 화면의 항목까지 삭제”가 다른 파서에 남는다.
+
+**직접 파서 대조:** 같은 DOM에서 type01.parse 실행 후 unreadListItems를 호출하면 1개를 반환한다. 그러나 type01.parse의 반환값은 lossless=true·fallbackReason 없음이다. 같은 구조의 type23.parse는 lossless=false이고 “옮기지 않은 목록 항목 1개(빈 항목도 글머리·번호가 보임)” 사유를 반환한다. 검사 함수 자체가 이 li를 못 찾는 문제가 아니라 호출 경로 누락이다.
+
+**기대:** 모든 타입에 적용하는 미읽기 항목 검사에 type01 같은 별도 손실 판정 경로도 포함되어야 한다. 보이는 미읽기 항목이 있으면 다음 안전 변환 또는 원본 보존으로 보내야 한다. type10에만 있는 로컬 실패 기록이나 finish 사용자만 보호하는 것으로는 범위가 충족되지 않는다.
+
+**원인 — 정적 판독:** type01은 이미지 수·uncoveredText만으로 fallbackReason을 계산하고 직접 ParseResult를 반환한다. finish를 사용하지 않는다. 빈 li는 글·이미지가 없어 이 별도 검사와 글 순서 비교를 통과한다. 새 unreadListItems 호출은 finish 안에만 추가되어 해당 경로에 도달하지 않는다.
+
+**기준 버전 대조 — 직접 실행:** c631f21에서도 같은 입력은 type01·success·desc=BODY·진단 없음이었다. 새 회귀라는 주장이 아니라 이번 “모든 타입” 방어에 포함되지 않은 잔여 경로다.
+
+## 공통 검사와 회귀 확인
+
+- **정적 판독:** unreadListItems는 richFrom의 readAsText와 markReadInParts 기록을 사용한다. 빈 richFrom 읽기도 readAsText에는 기록되므로, readCount가 빈 글 읽기를 세지 않는 기존 정책 때문에 정상 읽기를 미읽기로 오판하지는 않는다. duplicateReads가 지우는 readCount와도 별개다.
+- **정적 판독:** 목록/항목 자체의 cms-* 클래스가 있는 원본 도구 구조는 명시적으로 제외한다. 모든 화면에서 숨은 항목은 조상까지 합친 visibilityOf로 제외한다. 시도별 resetReads가 기존 기록을 정리하는 흐름은 유지된다.
+- **직접 실행:** type23의 일반·PC 전용 빈 목록은 전체 변환에서 blocks로 넘어가고, 모든 화면에서 숨은 빈 목록은 제외된다. type10의 정상 문단·ul, 안전한 링크·strong·em, 항상 보이는 표시 규칙은 기존대로 처리됐다.
+- **직접 실행:** 중첩 목록·이미지·표·떠 있는 글·늦은 소제목·li 밖 글 및 이전 번호·숨김 입력을 재실행했다. 검사한 입력에서 새 검사로 정상 구조가 조용히 손상되는 추가 회귀는 확인하지 못했다.
+- **편집기 직접 실행:** 정상 parts 수정·이동·삭제·JSON 저장·재불러오기를 실행했다. 배열 순서·링크·서식과 재불러오기 전후 HTML이 유지됐다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 38개 파일, 990개 통과 |
+| `npm run test:browser` | 5개 파일, 197개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 356 / partial 333 / failed 14 |
+| 기준 c631f21과 703페이지 대조 | 페이지별 상태·섹션 타입 배열 변화 0개, blocks 294 → 294, fallback 50 → 50 |
+| 추가 검증 | 이전 type10 입력·표시 변형, type01/type23 비교 6개, 직접 파서/미읽기 개수, 1100/360px DOM/CSS·캡처, 편집기 저장·재불러오기 |
+
+기존 테스트 통과는 위 type01 잔여 경로까지 안전하다는 뜻이 아니다. 원본 화면 비교에는 Bootstrap 4.6.2와 원본 cms.css, 출력에는 저장소 host-style.css를 적용했다. 원본 배포 사이트의 Bootstrap 버전까지 확정한 검사는 아니다. 추가 스크립트·JSON·캡처는 `/tmp/unread-list-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 c631f21 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (c631f21)</summary>
+
 # type10 설명 상자 표시 재검수 — 94a04bb
 
 - 검수일: 2026-11-18 (KST).
@@ -2893,6 +2987,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
