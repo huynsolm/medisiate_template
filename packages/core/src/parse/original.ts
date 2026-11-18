@@ -1,6 +1,6 @@
 import type { Diagnostic, ImagePair, SectionModifiers } from '../model/index.ts';
 import type { ParseResult } from '../types/definition.ts';
-import { duplicateReads, markReadInParts, ownVisibility, pairImages, visibilityOf, richFrom, TEXT_BLOCKS, TEXT_INLINE, textStructureProblems, uncoveredText } from './common.ts';
+import { duplicateReads, markReadInParts, unreadListItems, ownVisibility, pairImages, visibilityOf, richFrom, TEXT_BLOCKS, TEXT_INLINE, textStructureProblems, uncoveredText } from './common.ts';
 import { children, classesOf, descendants, hasClass, type DomElement, type SourceSection } from './dom.ts';
 
 /*
@@ -127,6 +127,7 @@ export function finish<T>(
   const structure = textStructureProblems(src.element);
   // 한 원본 글을 두 필드로 읽으면 출력에 두 번 나온다 (4단계 P5 검수 I-1)
   const duplicates = duplicateReads(src.element);
+  const unreadItems = unreadListItems(src.element);
   const fallbackReason = extraImages.length || missing > 0
     ? `이미지 ${Math.max(extraImages.length, missing)}장을 담을 자리가 없음`
     : lost
@@ -135,7 +136,9 @@ export function finish<T>(
         ? `글 안의 구조를 그대로 옮길 수 없음: ${structure.slice(0, 3).join(', ')}`
         : duplicates.length
           ? `같은 글을 두 칸으로 읽음: ${duplicates.slice(0, 3).join(', ')}`
-          : undefined;
+          : unreadItems.length
+            ? `옮기지 않은 목록 항목 ${unreadItems.length}개(빈 항목도 글머리·번호가 보임)`
+            : undefined;
   return {
     data,
     variant: base.variant ?? 'default',

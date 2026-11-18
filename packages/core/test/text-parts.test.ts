@@ -86,3 +86,15 @@ describe('type10 description parts re-review: hidden box or ancestor', () => {
     expect(r.html).not.toContain('list-style: disc');
   });
 });
+
+describe('type10 description parts 3rd review: an unread list is never dropped', () => {
+  const t10 = (li: string) => `<section class="cms type10"><div class="cms-inner"><div class="cms-header"><p class="cms-title">TITLE</p></div><div class="cms-list-wrap"><ol class="cms-figure-list"><li class="cms-list-item">${li}</li></ol></div></div></section>`;
+  it.each([
+    ['a PC-only box with an empty list', '<div class="cms-description-box d-none d-lg-block"><ul><li></li></ul></div>'],
+    ['a mobile-only box with an empty list', '<div class="cms-description-box d-block d-lg-none"><ul><li></li></ul></div>'],
+    ['an empty numbered list', '<div class="cms-description-box"><p class="cms-description">글</p><ol><li></li></ol></div>'],
+  ])('%s keeps the original in type10 (not a silent success)', (_, li) => {
+    const r = convert(t10(li));
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+});

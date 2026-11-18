@@ -58,6 +58,9 @@ export const type10: TypeDefinition<Type10Data> = {
     const { pair: image, extra } = imagesIn(children(firstByClass(src.element, 'cms-inner') ?? src.element).find(byClass('cms-visual')), src, diagnostics);
     const list = descendants(src.element, byClass('cms-figure-list'))[0];
     const used: string[] = [...header.used];
+    // 설명 상자 안의 원본 도구 밖 목록을 덩어리로 읽지 못했으면(번호 목록·화면별 숨김 등) 목록이 빠진다.
+    // 빈 목록(글머리만 보임)은 글 비교에도 안 잡히므로 직접 기록해 원본 보존·다음 단계로 보낸다 (재검수 I-1)
+    const unread: string[] = [];
     const items = listItems(list).map((li) => {
       const figure = descendants(li, byClass('cms-figure-text'))[0];
       const box = descendants(li, byClass('cms-description-box'))[0];
@@ -66,6 +69,7 @@ export const type10: TypeDefinition<Type10Data> = {
       const loose = box && !sub && descendants(box).some((d) => (d.tagName === 'ul' || d.tagName === 'ol'));
       const subtitleEl = loose ? children(box).find(byClass('cms-eyebrow')) : undefined;
       const parts = loose ? readTextParts(box, subtitleEl ? [subtitleEl] : []) : undefined;
+      if (loose && !parts) unread.push('설명 상자 안 목록');
       const item = {
         ...optional('num', textOf(figure, 'cms-eyebrow')),
         // 진짜 원본은 육각형 안 핵심 단어가 p.cms-description이다(biny 재현본은 cms-title). 둘 다 받는다.
@@ -80,7 +84,10 @@ export const type10: TypeDefinition<Type10Data> = {
       return item;
     });
     const data: Type10Data = { ...(header.eyebrow ? { eyebrow: header.eyebrow } : {}), ...(header.heading ? { heading: header.heading } : {}), image, items };
-    return finish(src, data, used, extra, { modifiers, diagnostics });
+    const result = finish(src, data, used, extra, { modifiers, diagnostics });
+    return unread.length && !result.fallbackReason
+      ? { ...result, lossless: false, fallbackReason: `옮길 수 없는 ${unread[0]}(번호 목록·화면별 표시 등)` }
+      : result;
   },
   render(section) {
     const d = section.data;

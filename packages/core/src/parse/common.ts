@@ -294,6 +294,20 @@ export function duplicateReads(root: DomElement): string[] {
 }
 
 /**
+ * 파서가 읽지 않은 원본 도구 밖 목록 항목(li)을 찾는다. 항목이 비어 있으면 글 비교(uncoveredText)에는 잡히지 않지만
+ * 원본 화면에는 글머리·번호가 보이므로, 옮기지 않으면 조용히 사라진다(type10 3차 재검수 I-1).
+ * 원본 도구 목록(cms-* 클래스가 있는 목록·항목)은 타입 구조라 각 타입이 자리를 정하므로 대상이 아니다.
+ * 읽음 = 항목 자신이나 조상을 richFrom으로 읽었거나 나눠 읽었음(markReadInParts).
+ */
+export function unreadListItems(root: DomElement): DomElement[] {
+  const toolClass = (el: DomElement) => classesOf(el).some((c) => c.startsWith('cms-'));
+  const read = (el: DomElement) => [el, ...ancestors(el)].some((a) => readAsText.has(a) || readInParts.has(a));
+  // 모든 화면에서 숨은 항목은 원본에도 보이지 않으므로 옮기지 않아도 된다
+  const hidden = (el: DomElement) => { const v = visibilityOf(el); return VIEWS.every((view) => v[view] === false); };
+  return descendants(root, (el) => el.tagName === 'li' && !toolClass(el) && !(el.parentNode && isElement(el.parentNode as DomNode) && toolClass(el.parentNode as DomElement)) && !read(el) && !hidden(el));
+}
+
+/**
  * 섹션의 읽기 기록(글로 읽음·나눠 읽음·읽은 횟수)을 지운다. 한 섹션을 여러 타입으로 차례로 옮겨 볼 때,
  * 앞선 시도의 기록이 다음 시도의 구조·중복 검사에 섞이지 않게 시도마다 먼저 부른다.
  */

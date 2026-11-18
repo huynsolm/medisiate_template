@@ -190,3 +190,15 @@ describe('blocks 4th review: screen-dependent cells and rows inside a table', ()
     expect(r.html).toContain('common-display-pc');
   });
 });
+
+describe('unread plain list items', () => {
+  it('an empty plain list hidden on every screen may still be left out', () => {
+    const r = convert(section('type99', '<p>BEFORE</p><ul class="d-none"><li></li></ul><p>AFTER</p>'));
+    expect(r.page.sections[0]!.type).toBe('blocks');
+  });
+
+  it('an empty visible bullet that a type does not read keeps the original (typed parser)', () => {
+    const r = convertTyped('<section class="cms type23"><div class="cms-inner"><div class="cms-description-box text-center"><p class="cms-description">설명</p><ul><li></li></ul></div></div></section>');
+    expect(r.page.sections[0]!.type).toBe('fallback');
+  });
+});
