@@ -30,7 +30,8 @@ async function readJson<T>(file: string): Promise<T | undefined> {
   return JSON.parse(await readFile(file, 'utf8')) as T;
 }
 
-async function themeFor(root: string, rel: string) {
+/** 파일 경로(병원 폴더)로 테마를 정한다. 비교 페이지도 같은 테마를 쓴다 */
+export async function themeFor(root: string, rel: string) {
   const dir = path.join(root, 'config/themes');
   const base = (await readJson<ThemeInput & { primary: string }>(path.join(dir, 'default.json'))) ?? { primary: '#c7b195' };
   const hospitalId = rel.includes('/') ? rel.split('/')[0] : undefined;

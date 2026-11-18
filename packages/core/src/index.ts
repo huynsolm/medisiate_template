@@ -15,5 +15,6 @@ export { notesFields } from './types/preset.ts';
 export { rendersNotes } from './types/notes.ts';
 export { convertDocument, fileStatus, type ConvertOptions, type ConvertResult, type ImageRecord } from './convert/convert-document.ts';
 export { sourceSections } from './parse/sections.ts';
+export { outerHtml } from './parse/dom.ts';
 
 export const CORE_VERSION = '0.1.0';
