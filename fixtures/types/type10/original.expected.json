@@ -1,0 +1,63 @@
+{
+  "id": "s1",
+  "type": "type10",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "image": {
+      "pc": {
+        "src": "/images/cms-sample.svg",
+        "alt": "",
+        "kind": "relative"
+      },
+      "mo": {
+        "src": "/images/cms-sample-m.svg",
+        "alt": "",
+        "kind": "relative"
+      }
+    },
+    "items": [
+      {
+        "num": "01",
+        "title": "핵심 단어",
+        "subtitle": "소제목",
+        "desc": "설명을 입력해 보세요.",
+        "parts": [],
+        "subitems": [
+          {
+            "text": "목록 1"
+          },
+          {
+            "text": "목록 2"
+          }
+        ]
+      },
+      {
+        "num": "02",
+        "title": "핵심 단어",
+        "subtitle": "소제목",
+        "desc": "설명을 입력해 보세요.",
+        "parts": [],
+        "subitems": []
+      },
+      {
+        "num": "03",
+        "title": "핵심 단어",
+        "subtitle": "소제목",
+        "desc": "설명을 입력해 보세요.",
+        "parts": [],
+        "subitems": []
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type10"
+    ]
+  }
+}

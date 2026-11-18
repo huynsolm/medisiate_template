@@ -1,0 +1,36 @@
+{
+  "id": "s1",
+  "type": "type14",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "items": [
+      {
+        "num": "01",
+        "text": "1번째 내용을 입력해 보세요."
+      },
+      {
+        "num": "02",
+        "text": "2번째 내용을 입력해 보세요."
+      },
+      {
+        "num": "03",
+        "text": "3번째 내용을 입력해 보세요."
+      },
+      {
+        "num": "04",
+        "text": "4번째 내용을 입력해 보세요."
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type14"
+    ]
+  }
+}

@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdir, mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { isResolvedWithinOutput, safeWrite } from '../src/fs/safe-write.js';
+import { isResolvedWithinOutput, safeRemove, safeWrite } from '../src/fs/safe-write.js';
+import { requireFileSymlinks } from './support/file-symlink.js';
 
 let tempRoot: string | undefined;
 
@@ -24,6 +25,19 @@ describe('safeWrite', () => {
     const target = path.join(tempRoot, 'output', 'reports', 'ok.txt');
     await safeWrite(tempRoot, target, 'ok');
     expect(await readFile(target, 'utf8')).toBe('ok');
+  });
+
+  it('refuses to write through a target file that is a symlink (I-6)', async ({ skip }) => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-write-'));
+    await requireFileSymlinks(tempRoot, skip);
+    const victim = path.join(tempRoot, 'cms', 'contents', 'a.html');
+    await mkdir(path.dirname(victim), { recursive: true });
+    await writeFile(victim, 'original');
+    const link = path.join(tempRoot, 'output', 'reports', 'x.json');
+    await mkdir(path.dirname(link), { recursive: true });
+    await symlink(victim, link);
+    await expect(safeWrite(tempRoot, link, 'overwritten')).rejects.toThrow(/symlink/iu);
+    expect(await readFile(victim, 'utf8')).toBe('original');
   });
 
   it('recognizes a resolved link target outside output', () => {
@@ -48,5 +62,80 @@ describe('safeWrite', () => {
     }
 
     await expect(safeWrite(tempRoot, path.join(output, 'linked-cms', 'bad.html'), 'no')).rejects.toThrow(/link|escape|read-only/i);
+  });
+});
+
+describe('safeRemove', () => {
+  it('only removes files below output and never follows links', async ({ skip }) => {
+    const { safeRemove } = await import('../src/fs/safe-write.js');
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-rm-'));
+    await requireFileSymlinks(tempRoot, skip);
+    const victim = path.join(tempRoot, 'cms', 'a.html');
+    await mkdir(path.dirname(victim), { recursive: true });
+    await writeFile(victim, 'keep');
+    await expect(safeRemove(tempRoot, victim)).rejects.toThrow(/output/u);
+    const link = path.join(tempRoot, 'output', 'link.html');
+    await mkdir(path.dirname(link), { recursive: true });
+    await symlink(victim, link);
+    await safeRemove(tempRoot, link);
+    expect(await readFile(victim, 'utf8')).toBe('keep');
+  });
+});
+
+describe('safeRemove through linked directories (C-1)', () => {
+  it('refuses a target whose parent directory is a link out of output', async () => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-remove-'));
+    const victim = path.join(tempRoot, 'victim');
+    await mkdir(victim, { recursive: true });
+    await writeFile(path.join(victim, 'important.html'), 'keep');
+    await mkdir(path.join(tempRoot, 'output'), { recursive: true });
+    await symlink(victim, path.join(tempRoot, 'output', 'contents'), 'junction');
+    await expect(safeRemove(tempRoot, path.join(tempRoot, 'output', 'contents', 'important.html'))).rejects.toThrow(/link/iu);
+    expect(await readFile(path.join(victim, 'important.html'), 'utf8')).toBe('keep');
+  });
+});
+
+describe('output root that is a link (C-1)', () => {
+  it('refuses to write or remove when output itself links into cms', async () => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-output-'));
+    const cmsContents = path.join(tempRoot, 'cms', 'contents');
+    await mkdir(cmsContents, { recursive: true });
+    await writeFile(path.join(cmsContents, 'a.html'), 'original');
+    await symlink(cmsContents, path.join(tempRoot, 'output'), 'junction');
+    await expect(safeWrite(tempRoot, path.join(tempRoot, 'output', 'a.html'), 'overwritten')).rejects.toThrow(/link/iu);
+    await expect(safeRemove(tempRoot, path.join(tempRoot, 'output', 'a.html'))).rejects.toThrow(/link/iu);
+    expect(await readFile(path.join(cmsContents, 'a.html'), 'utf8')).toBe('original');
+  });
+});
+
+describe('safeWrite atomic replace (I-7)', () => {
+  it('writes through a temporary file and leaves no temporary files behind', async () => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-atomic-'));
+    const target = path.join(tempRoot, 'output', 'data', 'a.json');
+    await safeWrite(tempRoot, target, 'one');
+    await safeWrite(tempRoot, target, 'two');
+    expect(await readFile(target, 'utf8')).toBe('two');
+    expect(await readdir(path.dirname(target))).toEqual(['a.json']);
+  });
+
+  it('replaces a target that became a link instead of writing through it', async ({ skip }) => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), 'cms-safe-atomic-'));
+    await requireFileSymlinks(tempRoot, skip);
+    const victim = path.join(tempRoot, 'victim.txt');
+    await writeFile(victim, 'keep');
+    const target = path.join(tempRoot, 'output', 'a.txt');
+    await safeWrite(tempRoot, target, 'old');
+    // 검사 직후 대상이 링크로 바뀌는 상황을 흉내 낸다: 검사 훅에서 링크로 교체
+    let swapped = false;
+    await safeWrite(tempRoot, target, 'first', {
+      afterCheck: async () => {
+        await rm(target, { force: true });
+        await symlink(victim, target);
+        swapped = true;
+      },
+    });
+    expect(swapped).toBe(true);
+    expect(await readFile(victim, 'utf8')).toBe('keep');
+    expect(await readFile(target, 'utf8')).toBe('first');
   });
 });

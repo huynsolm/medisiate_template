@@ -1,0 +1,98 @@
+{
+  "id": "s1",
+  "type": "type22",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "items": [
+      {
+        "title": "칸 1",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": [
+          {
+            "text": "짧은 설명 1"
+          },
+          {
+            "text": "짧은 설명 2"
+          }
+        ]
+      },
+      {
+        "title": "칸 2",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": [
+          {
+            "text": "짧은 설명 1"
+          },
+          {
+            "text": "짧은 설명 2"
+          }
+        ]
+      },
+      {
+        "title": "칸 3",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": []
+      },
+      {
+        "title": "칸 4",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": []
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type22"
+    ]
+  }
+}

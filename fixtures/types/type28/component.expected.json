@@ -1,0 +1,48 @@
+{
+  "id": "s1",
+  "type": "type28",
+  "variant": "default",
+  "modifiers": {
+    "background": {
+      "kind": "color",
+      "value": "#f9f3ec",
+      "token": "type-bg"
+    }
+  },
+  "data": {
+    "eyebrow": "우리아이는",
+    "heading": "잘 크고 있나요?",
+    "badge": "CHECK POINT",
+    "image": {
+      "pc": {
+        "src": "./images/temp/type28_img.jpg",
+        "alt": "",
+        "kind": "relative"
+      },
+      "mo": {
+        "src": "./images/temp/type28_img_m.jpg",
+        "alt": "",
+        "kind": "relative"
+      }
+    },
+    "paragraphs": [
+      {
+        "text": "<strong class=\"medium\">아이의 키는 유전적인 영향도 있지만 아이의 건강과 환경이 최종적인 키를 완성합니다.</strong>"
+      },
+      {
+        "text": "아이의 키, 현재 상태와 방해 요소를 예측하여<br>꾸준하고 건강하게 자랄 수 있는 환경을 만들어 주는 것이 중요합니다."
+      }
+    ],
+    "textFirst": false,
+    "items": []
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type28",
+      "type-bg"
+    ]
+  }
+}

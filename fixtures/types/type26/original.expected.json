@@ -1,0 +1,82 @@
+{
+  "id": "s1",
+  "type": "type26",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "desc": "표 위에 놓을 설명을 입력해 보세요.",
+    "colWidths": [
+      {
+        "width": "30%"
+      },
+      {
+        "width": "auto"
+      },
+      {
+        "width": "auto"
+      }
+    ],
+    "head": [
+      {
+        "cells": [
+          {
+            "text": "구분",
+            "th": true
+          },
+          {
+            "text": "항목 A",
+            "th": true
+          },
+          {
+            "text": "항목 B",
+            "th": true
+          }
+        ]
+      }
+    ],
+    "body": [
+      {
+        "cells": [
+          {
+            "text": "행 1",
+            "th": true
+          },
+          {
+            "text": "내용 1",
+            "th": false
+          },
+          {
+            "text": "내용 2",
+            "th": false
+          }
+        ]
+      },
+      {
+        "cells": [
+          {
+            "text": "행 2",
+            "th": true
+          },
+          {
+            "text": "내용 3",
+            "th": false
+          },
+          {
+            "text": "내용 4",
+            "th": false
+          }
+        ]
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type26"
+    ]
+  }
+}

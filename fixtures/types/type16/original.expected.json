@@ -1,0 +1,72 @@
+{
+  "id": "s1",
+  "type": "type16",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "image": {
+      "pc": {
+        "src": "/images/cms-sample.svg",
+        "alt": "",
+        "kind": "relative"
+      }
+    },
+    "mobileText": "핵심 문구",
+    "items": [
+      {
+        "title": "칸 1",
+        "desc": "설명을 입력해 보세요.",
+        "icon": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      },
+      {
+        "title": "칸 2",
+        "desc": "설명을 입력해 보세요.",
+        "icon": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      },
+      {
+        "title": "칸 3",
+        "desc": "설명을 입력해 보세요.",
+        "icon": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      },
+      {
+        "title": "칸 4",
+        "desc": "설명을 입력해 보세요.",
+        "icon": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        }
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type16"
+    ]
+  }
+}

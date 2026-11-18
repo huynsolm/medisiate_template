@@ -1,0 +1,61 @@
+{
+  "id": "s1",
+  "type": "type08",
+  "variant": "default",
+  "modifiers": {
+    "background": {
+      "kind": "color",
+      "value": "#f1e6e1",
+      "token": "bg-color-3"
+    }
+  },
+  "data": {
+    "eyebrow": "성장치료를",
+    "heading": "목록형 컨텐츠",
+    "image": {
+      "pc": {
+        "src": "./images/temp/type07_img.jpg",
+        "alt": "",
+        "kind": "relative"
+      },
+      "mo": {
+        "src": "./images/temp/type07_img_m.jpg",
+        "alt": "",
+        "kind": "relative"
+      }
+    },
+    "items": [
+      {
+        "text": "고혈압"
+      },
+      {
+        "text": "당뇨"
+      },
+      {
+        "text": "천명"
+      },
+      {
+        "text": "호흡곤란"
+      },
+      {
+        "text": "호흡곤란"
+      },
+      {
+        "text": "가슴 답답함"
+      },
+      {
+        "text": "기침"
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type08",
+      "type-bg",
+      "bg-color-3"
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "id": "s1",
+  "type": "type24",
+  "variant": "default",
+  "modifiers": {
+    "background": {
+      "kind": "color",
+      "value": "#f4f4f4",
+      "token": "bg-color-2"
+    }
+  },
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "image": {
+      "pc": {
+        "src": "/images/cms-sample.svg",
+        "alt": "",
+        "kind": "relative"
+      },
+      "mo": {
+        "src": "/images/cms-sample-m.svg",
+        "alt": "",
+        "kind": "relative"
+      }
+    },
+    "items": [
+      {
+        "title": "항목 1 제목",
+        "desc": "설명을 입력해 보세요."
+      },
+      {
+        "title": "항목 2 제목",
+        "desc": "설명을 입력해 보세요."
+      },
+      {
+        "title": "항목 3 제목",
+        "desc": "설명을 입력해 보세요."
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type24",
+      "type-bg",
+      "bg-color-2"
+    ]
+  }
+}

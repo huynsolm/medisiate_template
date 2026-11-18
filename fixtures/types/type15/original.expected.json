@@ -1,0 +1,80 @@
+{
+  "id": "s1",
+  "type": "type15",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "items": [
+      {
+        "title": "칸 1",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": [
+          {
+            "text": "글머리 1"
+          },
+          {
+            "text": "글머리 2"
+          }
+        ]
+      },
+      {
+        "title": "칸 2",
+        "desc": "글머리가 없으면 이 문단이 보여요.",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": []
+      },
+      {
+        "title": "칸 3",
+        "image": {
+          "pc": {
+            "src": "/images/cms-sample.svg",
+            "alt": "",
+            "kind": "relative"
+          },
+          "mo": {
+            "src": "/images/cms-sample-m.svg",
+            "alt": "",
+            "kind": "relative"
+          }
+        },
+        "subitems": [
+          {
+            "text": "글머리 1"
+          }
+        ]
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type15"
+    ]
+  }
+}

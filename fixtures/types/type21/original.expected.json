@@ -1,0 +1,44 @@
+{
+  "id": "s1",
+  "type": "type21",
+  "variant": "default",
+  "modifiers": {},
+  "data": {
+    "eyebrow": "작은 제목",
+    "heading": "제목을 입력해 보세요",
+    "image": {
+      "pc": {
+        "src": "/images/cms-sample.svg",
+        "alt": "",
+        "kind": "relative"
+      },
+      "mo": {
+        "src": "/images/cms-sample-m.svg",
+        "alt": "",
+        "kind": "relative"
+      }
+    },
+    "items": [
+      {
+        "text": "목록 1"
+      },
+      {
+        "text": "목록 2"
+      },
+      {
+        "text": "목록 3"
+      },
+      {
+        "text": "목록 4"
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type21"
+    ]
+  }
+}

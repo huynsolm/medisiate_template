@@ -91,6 +91,11 @@
 
 주의: `data-migration-bg="true"`는 배경 이미지 URL을 설정하지 않는다. 렌더러가 `background-image`와 `--bg-img-width/height` 값을 별도로 제공해야 한다.
 
+주의 (2026-11-14 브라우저 확인): `data-bg-scope="desktop"`은 **인라인 배경과 함께 쓸 수 없다.** 기본 규칙 `background: none !important`(2658행)가 1024px 이상의 `background: initial`(important 아님)보다 항상 이기기 때문이다. 인라인에 `!important`를 붙이면 반대로 모바일에서도 보인다. 그래서 렌더러는 PC/MO 배경이 다를 때 다음처럼 출력한다(`packages/core/src/helpers/background.ts`, `tests/visual/background.test.ts`).
+
+- 섹션: 모바일 이미지 인라인 + `data-migration-bg="true" data-bg-scope="mobile"` + `position: relative; isolation: isolate`
+- 섹션 첫 자식: `<div class="common-display-pc" aria-hidden="true" style="position: absolute; inset: 0; z-index: -1; background-image: …">` (PC 공개 화면에서만 보임)
+
 ## 5. P1·P2 최소 HTML
 
 아래 예시는 선택자를 매치시키는 최소 골격이다. 콘텐츠 의미와 접근성 속성은 1단계 타입 구현에서 보강한다.

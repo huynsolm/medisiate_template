@@ -1,0 +1,44 @@
+{
+  "id": "s1",
+  "type": "type30",
+  "variant": "default",
+  "modifiers": {
+    "background": {
+      "kind": "color",
+      "value": "#f9f3ec",
+      "token": "type-bg"
+    }
+  },
+  "data": {
+    "eyebrow": "대학병원급 골밀도 의료장비 도입",
+    "heading": "QUANTUM",
+    "blocks": [
+      {
+        "image": {
+          "pc": {
+            "src": "https://fxfile.drline.net/local/13252/cms/painClinic_03_img.jpg",
+            "alt": "",
+            "kind": "https"
+          },
+          "mo": {
+            "src": "https://fxfile.drline.net/local/13252/cms/painClinic_03_img_m.jpg",
+            "alt": "",
+            "kind": "https"
+          }
+        },
+        "brand": "QUANTUM",
+        "desc": "최신기술Smart FAN BEAM 방식<br>가장 신규 론칭 된 장비로 측정속도가 빠르며, 양쪽 베드의 날개가 접혀 공간활용 가능<br>골밀도, 체지방검사, 근육량, 미래골절예측 진단가능<br>두 부위 동시스캔 가능 (1분 이내)",
+        "steps": []
+      }
+    ]
+  },
+  "source": {
+    "file": "p2.html",
+    "index": 1,
+    "classList": [
+      "cms",
+      "type30",
+      "type-bg"
+    ]
+  }
+}
