@@ -342,3 +342,9 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 - 새 테스트 7개 중 6개는 수정을 되돌리면 실패(PC 전용 문단은 글 순서 검사가 이미 잡고 있었다).
 - `npm test` 982 passed, `npm run test:browser` 197 passed, lint·typecheck 오류 없음.
 - 703페이지: success 356 / partial 333 / failed 14, 블록 순서 294, 원본 보존 50개(변화 없음).
+
+## type10 설명 덩어리 재검수(`f327a06`) 지적 반영
+
+### I-1. 설명 상자 자체나 조상이 숨으면 놓쳐 빈 글머리가 나타남
+- 수정(`readTextParts`): 상자 안 요소뿐 아니라 **상자 자신과 조상까지 합친 표시**(`visibilityOf(box)`)가 모든 화면에서 보이지 않으면 읽지 않는다.
+- 검증: 새 테스트 3개(상자 숨김, 상자 PC 전용, 조상 숨김)는 수정을 되돌리면 실패. `npm test` 985 passed, `npm run test:browser` 197 passed, lint·typecheck 오류 없음, 703페이지 success 356 / partial 333 / failed 14, 블록 순서 294, 원본 보존 50개(변화 없음).

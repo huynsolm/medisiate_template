@@ -1,6 +1,6 @@
 import type { Diagnostic, ImagePair, SectionModifiers } from '../model/index.ts';
 import type { ParseResult } from '../types/definition.ts';
-import { duplicateReads, markReadInParts, ownVisibility, pairImages, richFrom, TEXT_BLOCKS, TEXT_INLINE, textStructureProblems, uncoveredText } from './common.ts';
+import { duplicateReads, markReadInParts, ownVisibility, pairImages, visibilityOf, richFrom, TEXT_BLOCKS, TEXT_INLINE, textStructureProblems, uncoveredText } from './common.ts';
 import { children, classesOf, descendants, hasClass, type DomElement, type SourceSection } from './dom.ts';
 
 /*
@@ -175,6 +175,8 @@ export interface TextPart { text?: string | undefined; bullets?: Array<{ text: s
 export function readTextParts(box: DomElement, skip: DomElement[] = []): TextPart[] | undefined {
   // 화면에 따라 숨는 문단·목록·항목은 글머리 목록으로 옮기면 숨김이 사라진다(빈 항목이면 글머리만 남는다).
   // 표시 조건을 담을 자리가 없으므로 읽지 않는다 (검수 I-2)
+  // 상자 자신과 조상(항목·목록 등)의 숨김도 본다: 상자째 숨어도 덩어리로 옮기면 빈 글머리가 나타난다 (재검수 I-1)
+  if (Object.values(visibilityOf(box)).some((v) => v !== true)) return undefined;
   if (descendants(box).some((d) => Object.values(ownVisibility(d) ?? {}).some((v) => v !== true))) return undefined;
   const parts: TextPart[] = [];
   for (const node of box.childNodes as Array<{ nodeName: string; value?: string }>) {

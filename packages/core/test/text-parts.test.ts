@@ -71,3 +71,18 @@ describe('type10 description parts review fixes', () => {
     expect(r.html).toContain('counter-reset: mig-counter-sub 3;');
   });
 });
+
+describe('type10 description parts re-review: hidden box or ancestor', () => {
+  const t10 = (li: string) => `<section class="cms type10"><div class="cms-inner"><div class="cms-header"><p class="cms-title">TITLE</p></div><div class="cms-list-wrap"><ol class="cms-figure-list"><li class="cms-list-item">${li}</li></ol></div></div></section>`;
+  it.each([
+    ['the box hidden on every screen', '<div class="cms-description-box d-none"><ul><li></li></ul></div>'],
+    ['the box shown on PC only', '<div class="cms-description-box d-none d-lg-block"><ul><li></li></ul></div>'],
+    ['an ancestor hidden', '<div class="d-none"><div class="cms-description-box"><ul><li></li></ul></div></div>'],
+  ])('%s is not read as plain parts (no stray bullet)', (_, li) => {
+    const r = convert(t10(li));
+    const s = r.page.sections[0]!;
+    const parts = s.type === 'type10' ? (s.data as { items: Array<{ parts: unknown[] }> }).items[0]!.parts : [];
+    expect(parts).toEqual([]);
+    expect(r.html).not.toContain('list-style: disc');
+  });
+});
