@@ -10,6 +10,7 @@ import { childNodes, children, descendants, hasClass, isElement, plainText, attr
 import { finish } from '../parse/original.ts';
 import { imagePairSchema } from '../schema/page.ts';
 import type { TypeDefinition } from './definition.ts';
+import { LIST_RESET } from './preset.ts';
 import { colWidthsOf, readTable, renderTable, rowSchema, widthSchema, withoutKeptColWidths } from './type26.ts';
 
 /*
@@ -229,8 +230,10 @@ function renderBlocks(blocks: Block[], white: boolean, ctx: Parameters<TypeDefin
       // 카운터 시작값(start - 1)을 함께 준다 (검수 I-1)
       // 중첩 번호 목록은 단계마다 다른 카운터를 그리므로 그 단계의 카운터에 준다 (재검수 I-1)
       const level = b.ordered ? chain + 1 : 0;
-      const counter = b.ordered && b.start !== undefined ? { counterReset: `${COUNTERS[Math.min(level, COUNTERS.length) - 1]} ${b.start - 1}` } : undefined;
-      out.push(h(b.ordered ? 'ol' : 'ul', { class: `mig-list ${b.ordered ? 'type-ordered' : 'type-bullet'}${display(b)}`, start: b.start, style: counter },
+      const counter = b.ordered && b.start !== undefined ? { counterReset: `${COUNTERS[Math.min(level, COUNTERS.length) - 1]} ${b.start - 1}` } : {};
+      // 호스트는 글머리·번호를 ::before로 그리고 ul/ol을 초기화하지 않는다. 기본 marker가 함께 보이지 않게 지운다
+      // (참조 샘플과 같은 방식: list-style none, padding-left 0. 검수 M-1)
+      out.push(h(b.ordered ? 'ol' : 'ul', { class: `mig-list ${b.ordered ? 'type-ordered' : 'type-bullet'}${display(b)}`, start: b.start, style: { ...LIST_RESET, ...counter } },
         (b.items ?? []).map((item) => h('li', { class: `mig-item${item.only ? ` common-display-${item.only}` : ''}` }, renderBlocks(item.blocks, white, ctx, level)))));
     } else if (b.kind === 'table') {
       const table = renderTable({ caption: b.caption ?? '', captionVisible: b.captionVisible ?? false, colWidths: b.colWidths ?? [], head: b.head ?? [], body: b.body ?? [] });

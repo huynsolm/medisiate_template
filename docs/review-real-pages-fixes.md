@@ -364,3 +364,10 @@ I-1 회귀를 지난번에 못 본 이유: 해당 파일이 원래 partial이라
 ### I-1. finish()를 쓰지 않는 type01(·type00)이 새 공통 검사를 우회
 - 수정(`convert-document.ts` `attempt`, `attemptWithNotes`): 읽지 않은 원본 도구 밖 목록 항목 검사(`unreadListItems`)를 **변환기가 모든 시도마다** parse 직후 한 번 더 한다. 타입이 `finish()`를 쓰는지와 무관하게 적용된다(적힌 타입·설명 분리·재분류·블록 순서 모두).
 - 검증: 새 테스트 2개(type01·type00의 보이는 빈 글머리)는 수정을 되돌리면 실패. `npm test` 992 passed, `npm run test:browser` 197 passed, lint·typecheck 오류 없음, 703페이지 success 356 / partial 333 / failed 14, 블록 순서 294, 원본 보존 50개(변화 없음).
+
+## 목록 항목 검사 재검수(`c8a3711`) Minor 반영
+
+### M-1. 블록 순서 목록에서 기본 글머리와 호스트 장식이 함께 보임
+- 원인: 호스트는 일반 모드 목록의 글머리·번호를 `li.mig-item::before`로 그리지만 ul/ol의 기본 marker를 지우지 않는다.
+- 수정(`types/blocks.ts`): 블록 순서 목록에 참조 샘플과 같은 초기화(`list-style: none; padding-left: 0; margin: 0`)를 인라인으로 준다. 시작 번호 카운터 값은 그대로 함께 둔다.
+- 검증: 브라우저 검사에 목록의 계산된 `list-style-type`이 모두 `none`인지 추가(수정을 되돌리면 실패). 기존 출력 기대값 4곳을 새 스타일로 고쳤다. `npm test` 992 passed, `npm run test:browser` 197 passed, lint·typecheck 오류 없음, 703페이지 결과 변화 없음.

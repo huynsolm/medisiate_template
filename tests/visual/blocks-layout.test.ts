@@ -56,6 +56,8 @@ describe.skipIf(!pw)('blocks (general mode) on the host css', () => {
         nestedReset: getComputedStyle(nested).counterReset,
         nestedDraws: getComputedStyle(nested.children[0]!, '::before').content,
         hiddenEmpty: visible(lists[4]!),
+        // 기본 marker가 호스트 ::before와 함께 보이지 않아야 한다 (검수 M-1)
+        markers: Array.from(document.querySelectorAll('.mig-list')).map((l) => getComputedStyle(l).listStyleType),
       };
     });
     await page.close();
@@ -64,6 +66,7 @@ describe.skipIf(!pw)('blocks (general mode) on the host css', () => {
     expect(m.nestedReset).toBe('mig-counter-sub 3');
     expect(m.nestedDraws).toContain('counter(mig-counter-sub');
     expect(m.hiddenEmpty).toBe(1);
+    expect(new Set(m.markers)).toEqual(new Set(['none']));
   });
 
   afterAll(async () => {

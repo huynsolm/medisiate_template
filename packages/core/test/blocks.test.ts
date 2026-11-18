@@ -45,8 +45,8 @@ describe('blocks: the last resort keeps every text and image in the original ord
     const list = data(r).blocks[0]!;
     expect(list).toMatchObject({ kind: 'list', ordered: true, start: 3 });
     expect(kinds(list.items![0]!.blocks)).toEqual(['title', 'text', 'list']);
-    expect(r.html).toContain('<ol class="mig-list type-ordered" start="3" style="counter-reset: mig-counter 2;">');
-    expect(flat(r.html)).toContain('<ul class="mig-list type-bullet"><li class="mig-item"><p class="mig-desc">하위 1</p></li>');
+    expect(r.html).toContain('<ol class="mig-list type-ordered" start="3" style="list-style: none; padding-left: 0; margin: 0; counter-reset: mig-counter 2;">');
+    expect(flat(r.html)).toContain('<ul class="mig-list type-bullet" style="list-style: none; padding-left: 0; margin: 0;"><li class="mig-item"><p class="mig-desc">하위 1</p></li>');
   });
 
   it('tables keep head/body rows, merged cells and column widths', () => {
@@ -95,7 +95,7 @@ describe('blocks review fixes: numbering and list item display', () => {
   it('I-1 the start number moves into the host counter (the host draws counter(mig-counter), not the native marker)', () => {
     const r = convert(section('type01', '<ol start="3"><li>FIRST</li><li>SECOND</li></ol>'));
     expect(r.page.sections[0]!.type).toBe('blocks');
-    expect(r.html).toContain('<ol class="mig-list type-ordered" start="3" style="counter-reset: mig-counter 2;">');
+    expect(r.html).toContain('<ol class="mig-list type-ordered" start="3" style="list-style: none; padding-left: 0; margin: 0; counter-reset: mig-counter 2;">');
   });
 
   it.each([
@@ -126,14 +126,14 @@ describe('blocks review fixes: numbering and list item display', () => {
 describe('blocks re-review: nested counters and items hidden on every screen', () => {
   it('I-1 a nested ordered list starts its own host counter level (mig-counter-sub, then -sub-sub)', () => {
     const r = convert(section('type01', '<ol><li><p>OUTER</p><ol start="4"><li>INNER FIRST</li><li>INNER SECOND</li></ol></li></ol>'));
-    expect(r.html).toContain('<ol class="mig-list type-ordered" start="4" style="counter-reset: mig-counter-sub 3;">');
+    expect(r.html).toContain('<ol class="mig-list type-ordered" start="4" style="list-style: none; padding-left: 0; margin: 0; counter-reset: mig-counter-sub 3;">');
     const third = convert(section('type01', '<ol><li>A<ol><li>B<ol start="2"><li>C</li></ol></li></ol></li></ol>'));
-    expect(third.html).toContain('style="counter-reset: mig-counter-sub-sub 1;"');
+    expect(third.html).toContain('style="list-style: none; padding-left: 0; margin: 0; counter-reset: mig-counter-sub-sub 1;"');
   });
 
   it('I-1 an ordered list inside a bullet item is a first-level counter again (the host chain is ol > li > ol only)', () => {
     const r = convert(section('type01', '<ol><li>A<ul><li>B<ol start="5"><li>C</li></ol></li></ul></li></ol>'));
-    expect(r.html).toContain('style="counter-reset: mig-counter 4;"');
+    expect(r.html).toContain('style="list-style: none; padding-left: 0; margin: 0; counter-reset: mig-counter 4;"');
   });
 
   it('I-2 an empty item hidden on every screen is not moved (no number, the next item stays 1)', () => {
