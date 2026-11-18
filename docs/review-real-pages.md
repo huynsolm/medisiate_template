@@ -1,3 +1,90 @@
+# 변환기 공통 미읽기 목록 검사 재검수 — 465046c
+
+- 검수일: 2026-11-18 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `465046c`, 범위: `4e1c0bf..465046c`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장의 attempt/attemptWithNotes 공통 검사.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**이전 Important I-1은 해결됐다. 이번 검사 변경에서 추가 Critical·Important를 확인하지 못했다.** 기존 blocks 출력에서 기본 글머리와 호스트 장식이 중복되는 시각적 문제를 후속 Minor 1건으로 구분한다. 해당 렌더링은 이번 변경 전부터 존재하며 공통 검사 적용 실패가 아니다.
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 0 | 이전 type01 검사 누락 해결, 추가 확정 항목 없음 |
+| Minor | 1 | M-1 blocks의 기본 글머리·호스트 장식 중복(변경 범위 밖 기존 렌더링) |
+
+## 이전 재현 입력 및 적용 범위 — 직접 실행
+
+이전 문서의 정확한 type01 입력을 다시 사용했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type01"><div class="cms-inner">
+    <div class="cms-description-box">
+      <p class="cms-description">BODY</p>
+      <ul class=""><li></li></ul>
+    </div>
+  </div></section>
+</div>
+```
+
+| 입력·검사 | 실제 결과 / 기대 결과 |
+|---|---|
+| 위 type01 입력 | blocks·partial·fallback 0. BODY와 빈 목록 항목을 보존 / 미읽기 항목을 조용히 삭제하지 않음 |
+| ul이 d-none d-lg-block인 이전 변형 | blocks의 list.only=pc. 1100px에서 항목 표시, 360px에서 숨김 / 기대 충족 |
+| ul이 d-none인 변형 | type01·success, 숨긴 빈 목록 생략 / 모든 화면에서 숨은 항목을 불필요하게 거부하지 않음 |
+| 같은 type23 대조 입력 | 일반/PC 전용은 blocks, 완전 숨김은 type23. 기존 finish 사용자와 처리 일치 |
+| type00의 보이는 빈 목록 | 추가된 typed 변환 테스트에서 fallback 확인 / 별도 파서 적용 범위 포함 |
+| 이전 type10 PC·모바일 전용 빈 상자 | blocks로 넘어가 list.only=pc/mo 유지 / 기존 수정 유지 |
+
+Chromium 1100/360px에서 원본·출력 목록과 항목의 실제 표시 여부를 측정했다. 360px 출력 캡처도 직접 열어, 이전에 누락되던 항목이 blocks에 남는 것을 확인했다. 글머리 장식의 모양은 아래 별도 Minor로 기록했다.
+
+## 설명 분리 재시도 — 직접 실행과 정적 판독
+
+- **직접 실행:** 정상 type09 앞뒤 설명은 여전히 notes로 변환됐다. 안전한 링크·strong·문단 순서, 위험한 링크·버린 style의 warn 진단도 유지됐다.
+- **직접 실행, 제어 실험:** finish를 사용하지 않고 빈 목록을 무시하도록 만든 검증용 type09 파서로, 머리글·앞 설명 상자·빈 ul/li 입력을 변환했다. parse는 두 번 호출됐고 두 번째에는 설명 상자가 실제로 분리되어 있었다. 결과는 미읽기 항목 1개 사유의 fallback이었으며 설명 분리 성공으로 통과하지 않았다. 원본 직렬화도 복원됐다. 이는 실제 원본에서 같은 파서 오류가 발생했다는 주장이 아니라 attemptWithNotes 경로의 별도 검증이다.
+- **정적 판독:** attempt는 타입 parse가 명시적으로 실패하지 않은 경우 unreadListItems를 확인한 뒤 섹션 생성·순서 검사를 한다. 설명 분리 경로도 finally로 원본 DOM을 복원한 뒤 미읽기 항목을 확인한다. 재분류와 blocks 시도는 기존 attempt를 사용하므로 동일 검사를 받는다.
+- **정적 판독:** readAsText/readInParts는 duplicateReads가 지우는 readCount와 별개라 finish 이후 재검사에도 읽기 기록이 남는다. 각 시도는 resetReads를 호출하므로 이전 시도의 읽기 기록이 다음 시도를 무조건 통과시키지 않는다.
+
+정상 문단·글머리 parts, 중첩/이미지/표/떠 있는 글/늦은 소제목/li 밖 글, 번호 및 숨김 입력도 이전과 동일한 입력으로 재실행했다. 검사한 입력에서 새 공통 검사에 의한 추가 손실이나 정상 구조의 거부는 확인하지 못했다. 편집기 parts 수정·이동·삭제·JSON 저장·재불러오기에서도 배열 순서·링크·서식과 HTML이 유지됐다.
+
+## Minor — 후속 관찰, 이번 변경의 회귀 아님
+
+### M-1. blocks의 글머리 하나에 기본 marker와 호스트 ::before가 함께 보임
+
+**위치:** `packages/core/src/types/blocks.ts:233`~`:234`의 ul.mig-list.type-bullet 출력; `reference/host-style.css:5295`~`:5305`의 li.mig-item::before 원형 장식.
+
+**재현 — 직접 실행:** 위 type01 최소 입력을 현재 전체 변환기로 변환하고, 생성 HTML에 저장소 host-style.css를 적용해 Chromium 360px에서 연다.
+
+**실제:** 데이터와 DOM의 항목은 1개지만, 화면에서는 **기본 검정 글머리와 파란 원형 장식**이 나란히 보인다. DOM/CSS 측정에서 ul의 list-style-type=disc·li의 display=list-item이 남아 있고, 같은 li에 호스트 ::before 장식이 적용된다. 360px 캡처를 직접 열어 확인했다. 새 검사가 빈 항목을 누락하지 않고 blocks로 보내면서 기존 렌더링 표현을 관찰한 것이다.
+
+**기대:** 목록 항목 하나의 글머리 장식이 두 체계로 중복 표시되지 않아야 한다. 호스트 장식을 사용할 때 기본 marker가 함께 남지 않도록 렌더링 계약을 맞출 필요가 있다. 항목 데이터·화면별 표시 자체는 유지되므로 Minor로 분류한다.
+
+**기준 버전 대조 — 직접 실행:** 4e1c0bf에서 같은 구조의 원문 타입을 type99로 바꿔 blocks 경로를 선택했다. 그때 생성한 HTML은 현재 type01 입력의 blocks HTML과 byte 단위로 동일했다. 이전 type01 자체가 blocks로 갔다는 뜻은 아니며, 중복 장식이 이번 가드 변경으로 새로 만들어진 렌더링이 아님을 구분하는 제어 입력이다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 38개 파일, 992개 통과 |
+| `npm run test:browser` | 5개 파일, 197개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 356 / partial 333 / failed 14 |
+| 기준 4e1c0bf와 703페이지 대조 | 페이지별 상태·섹션 타입 배열 변화 0개, blocks 294 → 294, fallback 50 → 50 |
+| 추가 직접 검증 | type01/type23 일반·완전 숨김·PC 전용 비교, type10 표시·번호·지원 밖 구조, notes 재시도 제어 실험, 1100/360px DOM/CSS·캡처, 편집기 저장·재불러오기 |
+
+추가 입력은 실제 703페이지의 결함으로 집계하지 않는다. 원본 비교에는 Bootstrap 4.6.2와 원본 cms.css, 출력에는 저장소 host-style.css를 적용했다. 원본 배포 사이트의 Bootstrap 버전까지 확정한 검사는 아니다. 추가 스크립트·JSON·캡처는 `/tmp/unread-list-fix-review/`에만 두었으며 커밋하지 않는다.
+
+## 이전 검수 기록
+
+아래는 이전 4e1c0bf 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (4e1c0bf)</summary>
+
 # 미읽기 목록 공통 손실 검사 재검수 — 533f825
 
 - 검수일: 2026-11-18 (KST).
@@ -2987,6 +3074,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
