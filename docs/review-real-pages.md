@@ -1,3 +1,82 @@
+# 블록 순서 목록 marker 초기화 재검수 — b4ab7b1
+
+- 검수일: 2026-11-18 (KST).
+- 저장소·브랜치: `huynsolm/medisiate_template`, `claude/fervent-volta-ilc7hk`.
+- 대상: `b4ab7b1`, 범위: `c8a3711..b4ab7b1`.
+- 기준: `docs/review-real-pages-fixes.md` 마지막 장의 목록 기본 marker 중복 수정.
+- 실행 전 `cp -r reference/cms-original/. cms/`로 로컬 cms/를 준비했다. cms/는 커밋하지 않는다. 코드·테스트·원본 자료는 수정하지 않았으며 이번 변경은 이 문서뿐이다.
+
+## 판정
+
+**이전 Minor M-1은 해결됐다. 이번 범위에서 추가 수정이 필요한 결함을 확인하지 못했다.**
+
+| 등급 | 현재 건수 | 내용 |
+|---|---:|---|
+| Critical | 0 | 확정 항목 없음 |
+| Important | 0 | 확정 항목 없음 |
+| Minor | 0 | 이전 기본 marker·호스트 장식 중복 해결, 추가 확정 항목 없음 |
+
+## 이전 재현 입력 — 직접 실행
+
+이전 문서의 정확한 type01 입력을 전체 변환기로 다시 실행했다.
+
+```html
+<div class="cms-container">
+  <section class="cms type01"><div class="cms-inner">
+    <div class="cms-description-box">
+      <p class="cms-description">BODY</p>
+      <ul class=""><li></li></ul>
+    </div>
+  </div></section>
+</div>
+```
+
+**실제:** blocks·partial로 변환되며 BODY와 빈 목록 항목은 유지된다. 출력 ul.mig-list.type-bullet에 list-style:none·padding-left:0·margin:0이 있다. Chromium 1100/360px에서 계산된 list-style-type=none을 확인했다. 360px 전체 뷰포트 캡처를 직접 열어 **검정 기본 글머리는 없어지고 파란 호스트 장식 하나만 남는 것**을 확인했다. 빈 항목을 삭제해서 중복을 숨긴 것이 아니다.
+
+**기대 결과 충족:** 데이터·항목은 유지하면서 두 marker 체계의 중복을 제거한다. 호스트 ::before의 원형 장식과 기본 marker를 동시에 그리던 이전 Minor는 재현되지 않았다.
+
+## 번호·표시 회귀 — 직접 실행
+
+| 입력 | 실제 결과 |
+|---|---|
+| 중첩 ol start=4 | 안쪽 counter-reset=mig-counter-sub 3, increment=mig-counter-sub 1, ::before는 해당 카운터 사용 |
+| 연속 3단계 ol start=5 | 3단계 counter-reset=mig-counter-sub-sub 4, 해당 단계 lower-roman 카운터 사용 |
+| ul 안의 ol start=4 | 번호 단계가 다시 1단계, counter-reset=mig-counter 3 |
+| ol → ul → ol start=4 | 안쪽 번호 역시 mig-counter 3 유지 |
+| 위 번호·혼합 목록 전체 | 1100/360px에서 모든 .mig-list의 list-style-type=none, padding-left=0px, margin=0px |
+| PC 전용 목록·빈 항목 | 1100px 표시·360px 숨김 유지. 기존 list.only=pc 보존 |
+| 모바일 전용 상자의 목록 | list.only=mo 유지. 기존 표시 조건 보존 |
+| 완전 숨김 목록 | 이전처럼 안전하게 제외되고 불필요한 항목을 만들지 않음 |
+
+번호의 각 단계·시작 순번과 CSS 생성 방식이 유지되는지 DOM/CSS로 측정했다. 프로젝트 브라우저 검사에서도 루트 start=3의 mig-counter 2, 중첩 시작값과 숨김 항목 수가 통과했다. 초기화가 실제 counter-reset을 덮어쓰지 않았다.
+
+## 기타 회귀와 정적 판독
+
+- **직접 실행:** 정상 type10 parts, 미읽기 type01/type23 입력, 이전 번호·숨김·지원 밖 구조 입력을 재실행했다. 이번 초기화 때문에 변환 경로·모델의 내용이 달라지는 추가 사례를 확인하지 못했다.
+- **직접 실행:** 편집기 정상 parts의 문단·글머리 수정·이동·삭제·JSON 저장·재불러오기에서 배열 순서·링크·서식과 재불러오기 전후 HTML이 유지됐다.
+- **정적 판독:** `packages/core/src/types/blocks.ts:231`~`:236`은 ul/ol 모두에 LIST_RESET을 적용하고 counterReset을 뒤에서 합친다. 빈 counter 객체를 사용해 시작값이 없는 목록에도 초기화가 들어간다. 각 재귀 단계의 목록마다 동일하게 적용된다.
+- **정적 판독:** 이 변경은 blocks 렌더러에 한정된다. mig-list를 쓰지 않는 type10 parts의 일반 글머리 ul 출력 규칙이나 파서·손실 검사에는 변경이 없다.
+
+## 실행 검증
+
+| 검증 | 결과 |
+|---|---|
+| `npm test` | 38개 파일, 992개 통과 |
+| `npm run test:browser` | 5개 파일, 197개 통과 |
+| `npm run lint` / `npm run typecheck` | 오류 없음 |
+| `npm run convert -- --all` | 703페이지: success 356 / partial 333 / failed 14 |
+| 기준 c8a3711과 703페이지 대조 | 페이지별 상태·섹션 타입 배열 변화 0개, blocks 294 → 294, fallback 50 → 50 |
+| 추가 직접 검증 | 이전 중복 재현 입력, 2·3단계/글머리 혼합 번호 카운터, PC·모바일 표시, 1100/360px DOM/CSS·전체 뷰포트 캡처, 편집기 저장·재불러오기 |
+
+추가 스크립트·JSON·캡처는 `/tmp/list-reset-review/`에만 두었으며 커밋하지 않는다. 화면 확인에는 저장소 host-style.css를 적용했다. 실제 703페이지 전체의 원본 대비 시각 비교를 완료했다는 뜻은 아니다.
+
+## 이전 검수 기록
+
+아래는 이전 c8a3711 검수 문서 원문이다. 당시 판정이며 현재 유효한 결함 수는 위 표를 따른다.
+
+<details>
+<summary>이전 검수 문서 원문 (c8a3711)</summary>
+
 # 변환기 공통 미읽기 목록 검사 재검수 — 465046c
 
 - 검수일: 2026-11-18 (KST).
@@ -3074,6 +3153,8 @@ type29와 type15는 코어 및 실제 Chromium에서 확인했다. type15는 예
 - 복구된 환경의 기본 npm 캐시 경로를 사용할 수 없어 npm ci에 /tmp/real-npm-cache를 지정했다. 설치 성공 후의 테스트 결과이며 제품 결함에 포함하지 않았다.
 
 **최종 판정: 수정 후 재확인 필요.**
+
+</details>
 
 </details>
 
